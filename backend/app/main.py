@@ -7,7 +7,8 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.responses import Response
 
 from app.config import ADMIN_PASSWORD_HASH, CORS_ORIGINS, SECRET_KEY
 from app.database import Base, SessionLocal, engine
@@ -89,6 +90,26 @@ class _ImmutableStaticFiles(StaticFiles):
         return response
 
 
+class _SPAStaticFiles(StaticFiles):
+    """Static files with a fallback to index.html for client-side routes.
+
+    Deep links like /booking have no file behind them, so plain StaticFiles
+    would 404 them — hand back the SPA shell instead. /api/* is excluded
+    because those misses are real 404s, not SPA routes.
+
+    Serving through StaticFiles also keeps path normalisation and the
+    containment check inside the library instead of reimplementing them.
+    """
+
+    async def get_response(self, path: str, scope) -> Response:
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code != 404 or scope["path"].startswith("/api/"):
+                raise
+            return await super().get_response("index.html", scope)
+
+
 # ── Serve frontend static files ──
 _INDEX_HTML = FRONTEND_DIST / "index.html"
 
@@ -100,41 +121,8 @@ if _INDEX_HTML.is_file():
     if _ASSETS_DIR.is_dir():
         app.mount("/assets", _ImmutableStaticFiles(directory=str(_ASSETS_DIR)), name="assets")
 
-    _DIST_ROOT = FRONTEND_DIST.resolve()
-
-    def _resolve_inside_dist(rel_path: str) -> Path | None:
-        """Resolve a request path inside FRONTEND_DIST, or None if it escapes.
-
-        Without the containment check, '/../../etc/passwd' walks straight out
-        of the bundle. ``resolve()`` also raises on odd input (null byte, bad
-        symlink, ...), so treat those as "not found" instead of a 500.
-        """
-        try:
-            candidate = (FRONTEND_DIST / rel_path).resolve()
-        except (OSError, ValueError):
-            return None
-        if not candidate.is_relative_to(_DIST_ROOT):
-            return None
-        return candidate if candidate.is_file() else None
-
-    @app.get("/{full_path:path}", include_in_schema=False)
-    async def serve_frontend(full_path: str):
-        # Only block true /api/* paths — everything else is SPA
-        if full_path.startswith("api/"):
-            from fastapi.responses import JSONResponse
-            return JSONResponse({"detail": "Not Found"}, status_code=404)
-
-        file_path = _resolve_inside_dist(full_path)
-        if file_path is None:
-            # Unknown path or an attempted escape: hand back the SPA shell.
-            return FileResponse(str(_INDEX_HTML))
-
-        headers = {}
-        # Vite emits content-hashed filenames under /assets, so they are safe
-        # to cache forever.
-        if full_path.startswith("assets/"):
-            headers["Cache-Control"] = "public, max-age=31536000, immutable"
-        return FileResponse(str(file_path), headers=headers)
+    # Registered after the /assets mount and the API routers so those win.
+    app.mount("/", _SPAStaticFiles(directory=str(FRONTEND_DIST), html=True), name="spa")
 
     logger.info("Frontend static files mounted from %s", FRONTEND_DIST)
 else:
