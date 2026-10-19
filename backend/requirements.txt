@@ -7,3 +7,6 @@ python-jose[cryptography]==3.5.0
 bcrypt==5.0.0
 python-dotenv==1.2.2
 alembic==1.18.4
+# crud.py dùng zoneinfo("Asia/Ho_Chi_Minh"); Windows không có tzdata hệ thống nên
+# thiếu gói này sẽ crash lúc import ở máy dev Windows (Linux/serverless có sẵn).
+tzdata==2026.5

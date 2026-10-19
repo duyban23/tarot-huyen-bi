@@ -35,10 +35,8 @@ async def lifespan(app: FastAPI):
             "See backend/.env.example"
         )
 
-    # Schema + seed are NOT idempotent-once-only work: running them on every
-    # Vercel cold start costs 2 blocking DB round-trips (DDL reflection + a
-    # full SELECT on services) before the first request can be served.
-    # Local dev still gets them automatically; production uses Alembic.
+    # create_all chỉ chạy khi được bật rõ ràng (local dev). Trên Vercel schema
+    # do Alembic quản lý, và DDL reflection tốn thời gian ở mỗi cold start.
     if os.getenv("RUN_STARTUP_TASKS", "1" if not os.getenv("VERCEL") else "0") == "1":
         try:
             Base.metadata.create_all(bind=engine)
@@ -49,13 +47,19 @@ async def lifespan(app: FastAPI):
             logger.exception(
                 "Database create_all failed — check DATABASE_URL and DB availability"
             )
-        db = SessionLocal()
-        try:
-            seed_services(db)
-        except Exception:
-            logger.exception("seed_services failed — skipping")
-        finally:
-            db.close()
+
+    # seed chạy CẢ trên Vercel: đây là cách duy nhất giữ menu trong code khớp DB
+    # production. Nếu bỏ, DB cũ vẫn còn bộ tên cũ → link `/booking?service=<tên
+    # mới>` không khớp service nào, trang đặt lịch không nhảy sang bước chọn giờ.
+    # seed idempotent (1 SELECT + chỉ insert phần thiếu / tắt phần bỏ), chi phí
+    # thấp hơn hẳn create_all nên chấp nhận được ở cold start.
+    db = SessionLocal()
+    try:
+        seed_services(db)
+    except Exception:
+        logger.exception("seed_services failed — skipping")
+    finally:
+        db.close()
     yield
 
 

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { createBooking, getServices } from "../api/client";
 import type { Booking, MeetingMethod, Service } from "../api/types";
+import { fold } from "../data/serviceCatalog";
 import BookingForm from "../components/BookingForm";
 import Calendar from "../components/Calendar";
 import ConfirmationScreen from "../components/ConfirmationScreen";
@@ -29,12 +30,21 @@ export default function BookingPage() {
     getServices()
       .then((list) => {
         setServices(list);
-        // Preselect khi đi từ trang Services (?service=<tên>)
-        const wanted = searchParams.get("service")?.trim().toLowerCase();
+        // Preselect khi đi từ trang Services / homepage (?service=<tên>).
+        // DB do admin quản lý nên tên có thể lệch dấu/hoa-thường/khoảng trắng →
+        // so khớp theo dạng đã "fold" (bỏ dấu) rồi mới tới khớp lỏng.
+        const wanted = fold(searchParams.get("service")?.trim() ?? "");
         if (wanted) {
-          const match = list.find(
-            (s) => s.name.trim().toLowerCase() === wanted
-          );
+          const match =
+            list.find((s) => fold(s.name.trim()) === wanted) ??
+            list.find((s) => {
+              const n = fold(s.name.trim());
+              return n.startsWith(wanted) || wanted.startsWith(n);
+            }) ??
+            list.find((s) => {
+              const n = fold(s.name.trim());
+              return n.includes(wanted) || wanted.includes(n);
+            });
           if (match) {
             setSelectedService(match);
             setStep(1);

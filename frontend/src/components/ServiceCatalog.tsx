@@ -47,14 +47,25 @@ export default function ServiceCatalog(props: Props) {
   const groups = useMemo<Group[]>(() => {
     const list: Group[] = CATEGORIES.map((cat) => ({
       cat,
-      rows: cat.items.map((item) => ({ item, service: byName.get(fold(item.name)) })),
+      rows: cat.items
+        .map((item) => ({ item, service: byName.get(fold(item.name)) }))
+        // Chế độ chọn (ở /booking): chỉ hiện mục có service thật trong DB.
+        // Mục không khớp DB mà render thành <Link to="/booking?service=...">
+        // sẽ trỏ về đúng trang hiện tại → bấm không có gì xảy ra.
+        .filter((row) => props.mode !== "pick" || row.service),
     }));
 
     // /booking lấy dịch vụ từ DB: dịch vụ nào admin thêm tay mà bảng giá chưa
     // có thì vẫn phải đặt lịch được → gom vào nhóm cuối.
     if (props.mode === "pick" && props.services.length > 0) {
       const known = new Set(CATEGORIES.flatMap((c) => c.items.map((i) => fold(i.name))));
-      const extra = props.services.filter((s) => !known.has(fold(s.name.trim())));
+      const seen = new Set<string>();
+      const extra = props.services.filter((s) => {
+        const key = fold(s.name.trim());
+        if (known.has(key) || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
       if (extra.length > 0) {
         list.push({
           cat: {
