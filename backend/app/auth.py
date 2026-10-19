@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
 
 from app.config import ADMIN_PASSWORD_HASH, ADMIN_USERNAME, SECRET_KEY
 
@@ -46,5 +46,5 @@ def verify_token(
         if username != ADMIN_USERNAME:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
         return username
-    except JWTError:
+    except jwt.PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")

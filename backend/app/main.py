@@ -100,16 +100,20 @@ if _INDEX_HTML.is_file():
     if _ASSETS_DIR.is_dir():
         app.mount("/assets", _ImmutableStaticFiles(directory=str(_ASSETS_DIR)), name="assets")
 
+    _DIST_ROOT = FRONTEND_DIST.resolve()
+
     def _resolve_inside_dist(rel_path: str) -> Path | None:
         """Resolve a request path inside FRONTEND_DIST, or None if it escapes.
 
         Without the containment check, '/../../etc/passwd' walks straight out
-        of the bundle.
+        of the bundle. ``resolve()`` also raises on odd input (null byte, bad
+        symlink, ...), so treat those as "not found" instead of a 500.
         """
-        candidate = (FRONTEND_DIST / rel_path).resolve()
         try:
-            candidate.relative_to(FRONTEND_DIST.resolve())
-        except ValueError:
+            candidate = (FRONTEND_DIST / rel_path).resolve()
+        except (OSError, ValueError):
+            return None
+        if not candidate.is_relative_to(_DIST_ROOT):
             return None
         return candidate if candidate.is_file() else None
 
