@@ -1,36 +1,11 @@
 import BrandLogo from "../components/BrandLogo";
 import MoodPicker from "../components/MoodPicker";
 import SparkleButton from "../components/SparkleButton";
-import { Icon } from "../components/icons";
 
 const FEES = [
   { label: "Xem gấp sau 12h đêm", value: "+50k" },
   { label: "Trả thẻ điện thoại", value: "+20k" },
   { label: "HSSV", value: "−50k" },
-];
-
-/** 4 việc tiệm làm được — rút từ phần giới thiệu, mỗi mục 1 dòng cho gọn. */
-const VALUES = [
-  {
-    icon: "heartbeat",
-    title: "Chữa lành & lời khuyên tâm lý",
-    desc: "Gỡ gốc rễ lo âu, bế tắc",
-  },
-  {
-    icon: "time",
-    title: "Dự đoán & định hướng tương lai gần",
-    desc: "Tình cảm · sự nghiệp · tài chính",
-  },
-  {
-    icon: "crystal",
-    title: "Khám phá bản thân toàn diện",
-    desc: "Tử vi, chiêm tinh, bản đồ sao, thần số học",
-  },
-  {
-    icon: "home",
-    title: "Kiến tạo tương lai bền vững",
-    desc: "Phong thủy không gian sống & làm việc",
-  },
 ];
 
 export default function ServicesPage() {
@@ -63,31 +38,11 @@ export default function ServicesPage() {
           <MoodPicker />
         </section>
 
-        {/* Vạch ngăn: tách vùng "chạm chọn" ở trên với vùng đọc ở dưới */}
+        {/* Vạch ngăn: tách vùng "chạm chọn" ở trên với phần lưu ý phía dưới */}
         <div className="section-divider my-8" />
 
-        {/* ── Chúng tôi giúp bạn (gọn 1 dòng/mục) ── */}
-        <section className="mb-8">
-          <h2 className="font-body text-candle-gold/90 text-xs tracking-widest uppercase text-center mb-4">
-            ✦ Chúng tôi giúp bạn ✦
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2.5">
-            {VALUES.map((v) => (
-              <div key={v.title} className="flex items-center gap-2.5">
-                <span className="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg bg-candle-gold/15 border border-candle-gold/40">
-                  <Icon name={v.icon} className="w-4 h-4" />
-                </span>
-                <div className="min-w-0">
-                  <h3 className="font-display text-[15px] leading-snug text-mist">{v.title}</h3>
-                  <p className="font-body text-lilac/70 text-[13px] leading-snug">{v.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* ── Lưu ý phụ phí ── */}
-        <section className="mt-8 glow-box bg-candle-gold/5 rounded-2xl p-4">
+        <section className="glow-box bg-candle-gold/5 rounded-2xl p-4">
           <p className="font-body text-candle-gold text-xs tracking-widest uppercase text-center mb-3">
             ✦ Lưu ý ✦
           </p>

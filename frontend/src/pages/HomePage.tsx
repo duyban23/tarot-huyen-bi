@@ -393,6 +393,34 @@ export default function HomePage() {
         </div>
       </Reveal>
 
+      {/* ─── CTA ─── */}
+      <Reveal className="py-16 md:py-24" delay={150}>
+        <div className="text-center px-4">
+          <h2 className="font-display text-2xl md:text-4xl text-mist mb-4">
+            Đêm nay, đừng ôm nỗi lo một mình
+          </h2>
+          <p className="font-body text-lilac italic mb-8 max-w-md mx-auto">
+            Đặt một buổi xem — để có người lắng nghe, để lòng được sáng rõ và bình yên trở lại.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <SparkleButton
+              as="link"
+              href="/booking"
+              className="px-8 py-3 rounded-xl font-display text-sm tracking-widest uppercase bg-arcane text-mist hover:bg-arcane/80 transition-all shadow-lg shadow-arcane/25 btn-glow"
+            >
+              ✨ Đặt lịch ngay
+            </SparkleButton>
+            <SparkleButton
+              as="link"
+              href="/services"
+              className="px-8 py-3 rounded-xl font-display text-sm tracking-widest uppercase border border-velvet text-lilac hover:border-arcane/50 hover:text-mist transition-all"
+            >
+              Xem bảng giá
+            </SparkleButton>
+          </div>
+        </div>
+      </Reveal>
+
       {/* ─── Section divider ─── */}
       <div className="section-divider my-4" />
 
@@ -531,106 +559,26 @@ export default function HomePage() {
       {/* ─── Section divider ─── */}
       <div className="section-divider my-4" />
 
-      {/* ─── CTA ─── */}
-      <Reveal className="py-16 md:py-24" delay={150}>
-        <div className="text-center px-4">
-          <h2 className="font-display text-2xl md:text-4xl text-mist mb-4">
-            Đêm nay, đừng ôm nỗi lo một mình
-          </h2>
-          <p className="font-body text-lilac italic mb-8 max-w-md mx-auto">
-            Đặt một buổi xem — để có người lắng nghe, để lòng được sáng rõ và bình yên trở lại.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <SparkleButton
-              as="link"
-              href="/booking"
-              className="px-8 py-3 rounded-xl font-display text-sm tracking-widest uppercase bg-arcane text-mist hover:bg-arcane/80 transition-all shadow-lg shadow-arcane/25 btn-glow"
-            >
-              ✨ Đặt lịch ngay
-            </SparkleButton>
-            <SparkleButton
-              as="link"
-              href="/services"
-              className="px-8 py-3 rounded-xl font-display text-sm tracking-widest uppercase border border-velvet text-lilac hover:border-arcane/50 hover:text-mist transition-all"
-            >
-              Xem bảng giá
-            </SparkleButton>
-          </div>
-        </div>
-      </Reveal>
-
-      {/* ─── Section divider ─── */}
-      <div className="section-divider my-4" />
-
-      {/* ─── Câu chuyện của My ─── */}
-      <Reveal className="py-16 md:py-24" amount={0.15}>
-        <div className="max-w-3xl mx-auto px-4">
-          <p className="font-body text-candle-gold text-sm tracking-widest uppercase text-center mb-2">
+      {/* ─── Câu chuyện của My (bản ngắn — dẫn sang trang giới thiệu) ─── */}
+      <Reveal className="py-12 md:py-16" amount={0.15}>
+        <div className="max-w-2xl mx-auto px-4 text-center">
+          <p className="font-body text-candle-gold text-sm tracking-widest uppercase mb-2">
             ✦ Câu chuyện của My ✦
           </p>
-          <h2 className="font-display text-2xl md:text-4xl text-mist text-center mb-10 leading-tight">
+          <h2 className="font-display text-2xl md:text-3xl text-mist mb-6 leading-tight">
             Cô gái từng vỡ vụn,<br />nay là nơi bình yên của hàng trăm người
           </h2>
-
-          <div className="bg-velvet/40 border border-velvet rounded-2xl p-6 md:p-10 space-y-5 font-body text-lilac leading-relaxed">
-            <p>
-              My đã từng mở một quán cà phê tổ hợp giải trí cho giới trẻ ở Hà Nội —
-              mang theo cả thanh xuân và niềm tin rằng chỉ cần hết mình thì giấc mơ nào
-              cũng thành. Rồi nó thất bại. Sạch trơn.
-            </p>
-            <p>
-              Sau lần kiệt sức đó, My rơi vào trầm cảm và lui về ở ẩn suốt một năm.
-              Một năm không muốn gặp ai, không muốn bắt đầu lại điều gì.
-            </p>
-            <p>
-              My đã từng không hạnh phúc. Đã từng cho đi rất nhiều, yêu hết mình
-              rồi đau đến nghẹt thở. Đã từng bị phản bội, bị lừa dối bởi chính
-              những người mình tin nhất.
-            </p>
-            <p>
-              My đã từng béo, từng xấu, từng bị bạo lực học đường, từng bị tẩy chay
-              và kỳ thị chỉ vì mình khác biệt. Đã từng soi gương mà không nhận ra
-              người trong đó là ai.
-            </p>
-            <p className="font-display text-lg md:text-xl text-mist leading-relaxed">
-              Vậy làm sao My vượt qua — để trở thành cô gái luôn tràn trề năng lượng
-              mà hôm nay ai cũng muốn ở cạnh?
-            </p>
-            <p>
-              Không có phép màu nào cả. Chỉ là một ngày, My học cách ngồi lại và ôm lấy
-              chính mình — ôm cả những mảnh vỡ, những vết thương, những phiên bản
-              từng bị chê cười. My học Tarot, học Tea Leaf, học chữa lành — không phải
-              để đoán số phận, mà để hiểu lòng người, bắt đầu từ lòng mình.
-            </p>
-            <p className="text-candle-gold/90">
-              Và hôm nay, My ở đây — để làm cho bạn điều mà năm đó My từng ước có ai đó
-              làm cho mình: lắng nghe, không phán xét, và cùng bạn tìm lại ánh sáng.
-            </p>
-          </div>
-
-          {/* Flex — My hôm nay */}
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              { icon: "trophy", top: "10+ năm", bottom: "kinh nghiệm Tarot · Tea Leaf" },
-              { icon: "heart", top: "500+", bottom: "khách hàng đã được lắng nghe" },
-              { icon: "news", top: "Báo chí", bottom: "Dân Việt · Inhat · Toplist đưa tin" },
-            ].map((f) => (
-              <div key={f.top} className="glow-box rounded-xl bg-candle-gold/5 px-4 py-4 text-center">
-                <span className="block mb-1.5 text-candle-gold"><Icon name={f.icon} className="w-7 h-7 mx-auto" /></span>
-                <p className="font-display text-lg font-bold text-candle-gold">{f.top}</p>
-                <p className="font-body text-lilac/80 text-sm mt-0.5">{f.bottom}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-8">
-            <Link
-              to="/about"
-              className="font-body text-lilac hover:text-mist underline underline-offset-4 decoration-arcane/30 transition-all"
-            >
-              Hiểu thêm về My →
-            </Link>
-          </div>
+          <p className="font-body text-lilac leading-relaxed mb-6">
+            My từng mở một quán cà phê ở Hà Nội, rồi thất bại và ở ẩn suốt một năm.
+            My học Tarot, Tea Leaf và chữa lành — không phải để đoán số phận, mà để
+            hiểu lòng người, bắt đầu từ lòng mình.
+          </p>
+          <Link
+            to="/about"
+            className="font-body text-candle-gold hover:text-mist underline underline-offset-4 decoration-arcane/30 transition-all"
+          >
+            Đọc câu chuyện đầy đủ →
+          </Link>
         </div>
       </Reveal>
 

@@ -6,8 +6,8 @@ import { Icon } from "./icons";
 /**
  * "Tìm một nơi để lòng được nhẹ hơn" — thay 6 ô dịch vụ cũ bằng 3 ô lật thẻ.
  *
- * Luồng: 3 ô (Tư vấn · Huyền học · Đào tạo) → lật thẻ ra các nhánh
- * (vd Huyền học → Khám phá bản thân / Dự đoán tương lai / …) → bấm nhánh
+ * Luồng: 3 ô (Xem theo thời gian · Xem theo các loại bài · Đào tạo) → lật thẻ ra
+ * các nhánh (vd Xem theo các loại bài → Tarot / Combo / Tea Leaf / …) → bấm nhánh
  * thì các dịch vụ chi tiết hiện ra ở khung bên dưới.
  *
  * `service` phải khớp từng chữ với tên service trong DB (backend/app/seed.py)
@@ -45,10 +45,10 @@ type JourneyBox = {
 
 const JOURNEY: JourneyBox[] = [
   {
-    id: "tu-van",
+    id: "thoi-gian",
     icon: "heart",
-    title: "Tư vấn tâm lý · Tình cảm",
-    desc: "Ngồi lại cùng Reader 1–2 tiếng. Mọi loại bài đều có thể được dùng — miễn là bạn được nhẹ lòng.",
+    title: "Xem theo thời gian",
+    desc: "Trong 1–2 tiếng đó các bạn sẽ được trò chuyện chuyên sâu với chuyên gia, Reader sẽ dùng tất cả các loại bài để giải đáp hết thắc mắc của bạn, cặn kẽ, lắng nghe tâm sự và giải quyết vấn đề cho bạn.",
     preview: ["Online", "Offline", "Trọn 1–2 tiếng"],
     branches: [
       {
@@ -58,14 +58,14 @@ const JOURNEY: JourneyBox[] = [
         items: [
           {
             label: "Xem Online 1 tiếng",
-            note: "Gọi video 60 phút, hỏi đáp trực tiếp",
-            price: "500k /tiếng",
+            note: "Gọi video, trò chuyện chuyên sâu trong 1 tiếng",
+            price: "500.000 /tiếng",
             service: "Xem Online 1 tiếng",
           },
           {
             label: "Xem Online 2 tiếng",
-            note: "Gọi video 2 tiếng, đi sâu mọi chuyện",
-            price: "900k /2 tiếng",
+            note: "Gọi video, trò chuyện chuyên sâu trong 2 tiếng",
+            price: "900.000 /2 tiếng",
             service: "Xem Online 2 tiếng",
           },
         ],
@@ -77,14 +77,14 @@ const JOURNEY: JourneyBox[] = [
         items: [
           {
             label: "Xem Offline 1 tiếng",
-            note: "Gặp trực tiếp tại tiệm trong 60 phút",
-            price: "800k /tiếng",
+            note: "Gặp trực tiếp tại tiệm trong 1 tiếng",
+            price: "800.000 /tiếng",
             service: "Xem Offline 1 tiếng",
           },
           {
             label: "Xem Offline 2 tiếng",
-            note: "Gặp trực tiếp, gỡ rối trọn vẹn",
-            price: "1tr5 /2 tiếng",
+            note: "Gặp trực tiếp tại tiệm trong 2 tiếng",
+            price: "1.500.000 /2 tiếng",
             service: "Xem Offline 2 tiếng",
           },
         ],
@@ -92,148 +92,239 @@ const JOURNEY: JourneyBox[] = [
     ],
   },
   {
-    id: "huyen-hoc",
+    id: "cac-loai-bai",
     icon: "moon",
-    title: "Huyền học · Tâm linh",
-    desc: "Bốn lối vào: hiểu chính mình, nhìn về phía trước, xin một lời khuyên — hoặc xem hai người hợp nhau đến đâu.",
-    preview: ["Khám phá bản thân", "Dự đoán tương lai", "Lời khuyên", "Xem đôi"],
+    title: "Xem theo các loại bài",
+    desc: "Tarot, Haletu, Oracle, Lenormand, Tea Leaf, combo và các gói dịch vụ khác — từ trải bài cơ bản 1 câu hỏi tới full mọi vấn đề, chọn theo đúng loại bài bạn muốn xem.",
+    preview: ["Tarot", "Bài khác", "Combo", "Dịch vụ khác", "Tea Leaf"],
     branches: [
       {
-        icon: "🔍",
-        name: "Khám phá bản thân",
-        hint: "Hiểu mình trước tiên",
+        icon: "🃏",
+        name: "Tarot",
+        hint: "Từ 1 câu hỏi tới full",
         items: [
           {
-            label: "Tarot",
-            note: "Trải bài để soi rõ chính mình, từ 1 câu hỏi tới full mọi vấn đề",
+            label: "Trải bài cơ bản (1 câu hỏi)",
+            note: "Tương ứng với 1 câu hỏi",
             price: "200.000",
             service: "Tarot cơ bản 1 câu hỏi",
           },
           {
-            label: "Bản đồ sao cá nhân",
-            note: "Lá số chiêm tinh chi tiết về bạn",
-            price: "1.000.000",
-            service: "Bản đồ sao cá nhân",
-          },
-          {
-            label: "Tử Vi cá nhân",
-            note: "Lá số tử vi trọn đời",
-            price: "800.000",
-            service: "Tử vi cá nhân",
-          },
-          {
-            label: "Thần số học tiềm năng",
-            note: "Tặng bản thần số học 125 trang",
-            price: "800.000",
-            service: "Thần số học",
-          },
-        ],
-      },
-      {
-        icon: "⏳",
-        name: "Dự đoán tương lai",
-        hint: "Vài tuần tới cả năm",
-        items: [
-          {
-            label: "Tea Leaf",
-            note: "Lá trà thì thầm chuyện tuần này tới 12 tháng",
-            price: "250.000",
-            service: "Tea Leaf 3 tháng full",
-          },
-          {
-            label: "Oracle",
-            note: "Mốc thời gian chính xác cho câu hỏi của bạn",
+            label: "Trải bài Tarot chuyên sâu 1 chuyện",
+            note: "Tình cảm, công việc, học hành, tiền tài,…",
             price: "300.000",
-            service: "Tín hiệu vũ trụ 30'",
+            service: "Tarot chuyên sâu 1 chuyện",
           },
           {
-            label: "Lenormand",
-            note: "Kể trọn một câu chuyện quá khứ – hiện tại – tương lai",
-            price: "250.000",
-            service: "Lenormand vận mệnh",
+            label: "Trải bài Tarot full mọi vấn đề",
+            note: "Không gợi ý câu hỏi — người xem đặt câu hỏi, Reader trả lời",
+            price: "300.000",
+            service: "Tarot full mọi vấn đề",
           },
           {
-            label: "Kinh Dịch",
-            note: "Gieo quẻ cho đúng việc bạn đang hỏi",
-            price: "Liên hệ",
+            label: "Tarot chuyên sâu + tư vấn 30 phút",
+            note: "Gợi ý full câu hỏi + tư vấn trong vòng 30 phút",
+            price: "350.000",
+            service: "Tarot chuyên sâu + tư vấn 30'",
           },
           {
-            label: "The Lover",
-            note: "Tình duyên 1–3 tháng tới",
-            price: "200.000",
-            service: "Bài The Lover",
-          },
-          {
-            label: "Tử Vi vận hạn",
-            note: "Vận hạn theo năm của bạn",
-            price: "Liên hệ",
-          },
-          {
-            label: "Bản đồ sao vận hạn",
-            note: "Thời điểm thuận – nghịch trong thời gian tới",
-            price: "800.000",
-            service: "Bản đồ sao vận hạn",
-          },
-          {
-            label: "Thần số học",
-            note: "Mốc đường đời, chu kỳ cuộc đời",
-            price: "800.000",
-            service: "Thần số học",
-          },
-          {
-            label: "Tarot",
-            note: "Cho khoảng thời gian ngắn — trả lời ngay điều đang bận lòng",
-            price: "200.000",
-            service: "Tarot cơ bản 1 câu hỏi",
+            label: "Xem full Tarot",
+            note: "Không giới hạn thời gian, được gợi ý câu hỏi",
+            price: "450.000/người",
+            service: "Xem full Tarot",
           },
         ],
       },
       {
-        icon: "🕯️",
-        name: "Lời khuyên",
-        hint: "Chỉ nói bạn nên làm gì",
+        icon: "🎴",
+        name: "Các loại bài khác",
+        hint: "Haletu, Oracle, Lenormand…",
         items: [
           {
-            label: "Haletu",
-            note: "Lời khuyên cho tình cảm và cuộc sống, 30 phút",
+            label: "Trải bài xin lời khuyên Haletu",
+            note: "Kèm tư vấn tình cảm từ kinh nghiệm/góc nhìn/ý kiến cá nhân của Reader trong vòng 30'",
             price: "300.000",
             service: "Haletu xin lời khuyên 30'",
           },
           {
-            label: "The Heart",
-            note: "Chỉ dẫn tình cảm trong 30 phút",
+            label: "Bài tín hiệu vũ trụ",
+            note: "Lời khuyên tình cảm/cuộc sống trong vòng 30'",
             price: "300.000",
-            service: "Bài The Heart 3 lá",
+            service: "Tín hiệu vũ trụ 30'",
           },
           {
-            label: "Tarot",
-            note: "Lời khuyên chuẩn nhất khi lòng đã mỏi",
+            label: "Lenormand dự đoán vận mệnh",
+            note: "Tiên đoán tương lai và nhìn lại quá khứ (trải bài xâu chuỗi 3–5 lá/1 câu hỏi)",
+            price: "250.000",
+            service: "Lenormand vận mệnh",
+          },
+          {
+            label: "Lenormand Grand Tableau 36 lá",
+            note: "Quá khứ – hiện tại – tác động – tương lai xa từ 1 tháng – 1 năm, thậm chí 2–3 năm (1–2 tiếng)",
+            price: "500.000",
+            service: "Grand Tableau 36 lá",
+          },
+          {
+            label: "Lenormand trải tổng quan",
+            note: "1 đối tượng hoặc 1 vụ việc cụ thể trong khoảng thời gian xác định (vài tháng hoặc vài năm)",
+            price: "300k–400k",
+            service: "Lenormand tổng quan",
+          },
+          {
+            label: "Trải bài kết hợp Oracle",
+            note: "Vừa đặt câu hỏi vừa có mốc thời gian cụ thể (kết hợp giữa Tarot và Trà)",
+            price: "100k /câu hỏi",
+            service: "Oracle kết hợp",
+          },
+          {
+            label: "Bài The Lover",
+            note: "Dự báo tình yêu 1–3 tháng tới, tín hiệu vũ trụ hoặc đưa ra chỉ dẫn về mặt tình cảm",
+            price: "200.000",
+            service: "Bài The Lover",
+          },
+          {
+            label: "Bài The Heart (trái tim)",
+            note: "Lời khuyên, chỉ dẫn tình cảm 3 lá trong 30'",
             price: "300.000",
-            service: "Tarot chuyên sâu 1 chuyện",
+            service: "Bài The Heart 3 lá",
           },
         ],
       },
       {
-        icon: "💞",
-        name: "Xem đôi",
-        hint: "Hợp nhau đến đâu",
+        icon: "💫",
+        name: "Combo",
+        hint: "Kết hợp nhiều loại bài",
         items: [
           {
+            label: "Trải bài VIP combo Tarot + Tea Leaf 6 tháng",
+            note: "Không giới hạn thời gian",
+            price: "700.000",
+            service: "Combo Tarot + Tea Leaf 6 tháng",
+          },
+          {
+            label: "Combo VIP Full Tarot + Trà 12 tháng",
+            note: "Tặng bài Haletu hoặc Oracle",
+            price: "1.000.000",
+            service: "Combo VIP Full Tarot + Trà 12 tháng",
+          },
+          {
+            label: "Combo Tarot + Lenormand",
+            note: "Được yêu thích nhất — sự kết hợp hoàn hảo tuyệt đối cho tất cả mọi khúc mắc",
+            price: "800.000",
+            service: "Combo Tarot + Lenormand",
+          },
+          {
+            label: "Combo tất cả mọi loại bài",
+            note: "Haletu, Oracle, Tarot, Tea Leaf, Lenormand,… xem về duy nhất 1 chuyện: tình yêu, công việc, tiền bạc, gia đình,…",
+            price: "650.000",
+            service: "Combo 1 chuyện all bài",
+          },
+          {
+            label: "Combo Pro",
+            note: "Full Tarot + Full Trà + Haletu + Oracle + Lenormand + tư vấn tình cảm + trị liệu tâm lý (trong vòng 3 tiếng, nếu thêm +450k/tiếng)",
+            price: "1.500.000",
+            service: "Combo Pro trị liệu",
+          },
+          {
+            label: "COMBO HOT NHẤT",
+            note: "Full toàn bộ tất cả mọi loại bài kèm theo dõi chữa lành vết thương tâm hồn, không giới hạn thời gian xem, gợi ý câu hỏi, kèm bảo hành xem lại và tư vấn tình cảm miễn phí trong vòng 1 tháng bất cứ khi nào cần",
+            price: "3.000.000",
+            service: "Combo HOT toàn diện",
+          },
+          {
+            label: "Vấn đề tâm linh đặc biệt",
+            note: "Người thứ 3, chết chóc, phá thai, sảy, những điều trái nhân văn, pháp luật, spell phù thuỷ… cần nhiều năng lượng, đối chọi và trả giá để đạt được mong muốn. Giá cả ib tuỳ vấn đề tâm linh khó cỡ nào.",
+            price: "IB",
+          },
+        ],
+      },
+      {
+        icon: "🔮",
+        name: "Dịch vụ khác",
+        hint: "Thần số học, bản đồ sao, tử vi",
+        items: [
+          {
+            label: "Đá phong thủy, trang sức stone…",
+            price: "LIÊN HỆ",
+          },
+          {
+            label: "Thần số học",
+            note: "Tặng tâm số học, gồm bản PDF 125 trang",
+            price: "800.000",
+            service: "Thần số học",
+          },
+          {
+            label: "Bản đồ sao vận hạn",
+            price: "800.000",
+            service: "Bản đồ sao vận hạn",
+          },
+          {
+            label: "Bản đồ sao cá nhân",
+            price: "1.000.000",
+            service: "Bản đồ sao cá nhân",
+          },
+          {
             label: "Bản đồ sao đôi",
-            note: "Soi độ hoà hợp giữa hai lá số",
             price: "1.500.000",
             service: "Bản đồ sao đôi",
           },
           {
-            label: "Tử Vi đôi",
-            note: "Đánh giá mức độ phù hợp",
+            label: "Lá số chiêm tinh",
+            price: "800.000",
+            service: "Lá số chiêm tinh",
+          },
+          {
+            label: "Tử vi cá nhân",
+            price: "800.000",
+            service: "Tử vi cá nhân",
+          },
+          {
+            label: "Tử vi xem đôi",
             price: "1.500.000",
             service: "Tử vi xem đôi",
           },
           {
-            label: "Tarot đôi",
-            note: "Trải bài cho cả hai người",
-            price: "Liên hệ",
+            label: "Dạy xem Tarot",
+            note: "Khóa cơ bản 5tr · Khóa nâng cao 10tr (phát triển bản thân, nữ tính, thiền, thay đổi và tái sinh)",
+            price: "Xem khóa học",
+            to: "/recruit",
+          },
+        ],
+      },
+      {
+        icon: "🍃",
+        name: "Tea Leaf",
+        hint: "Bài trà 3–12 tháng",
+        items: [
+          {
+            label: "Tea Leaf 3 tháng full",
+            note: "Xem bài tuần hoặc bài trà mốc thời gian gần (3 tháng full vấn đề)",
+            price: "250.000",
+            service: "Tea Leaf 3 tháng full",
+          },
+          {
+            label: "Tea Leaf 6 tháng 3 vấn đề",
+            note: "Trải bài Tea Leaf 6 tháng, 3 vấn đề",
+            price: "300.000",
+            service: "Tea Leaf 6 tháng 3 vấn đề",
+          },
+          {
+            label: "Tea Leaf 6 tháng full",
+            note: "Full vấn đề trong 6 tháng",
+            price: "400.000",
+            service: "Tea Leaf 6 tháng full",
+          },
+          {
+            label: "Bài trà full 12 tháng",
+            note: "12 tháng / 3 vấn đề",
+            price: "450.000",
+            service: "Bài trà full 12 tháng",
+          },
+          {
+            label: "Tea Leaf 12 tháng full",
+            note: "Full 6 vấn đề: tình cảm, tiền bạc, hôn nhân, thành công, hạnh phúc, may mắn, học hành, công việc",
+            price: "500.000",
+            service: "Tea Leaf 12 tháng full",
           },
         ],
       },
@@ -243,7 +334,7 @@ const JOURNEY: JourneyBox[] = [
     id: "khoa-hoc",
     icon: "book",
     title: "Đào tạo",
-    desc: "Từ người chưa biết gì về Tarot, tới Reader chuyên nghiệp — và một khóa để chữa lành chính mình.",
+    desc: "Từ người chưa biết gì về Tarot, tới Reader chuyên nghiệp — và một khóa để chữa lành chính mình, phát triển bản thân, nữ tính, thiền, thay đổi và tái sinh.",
     preview: ["Cơ bản", "Nâng cao", "Tái sinh"],
     branches: [
       {
@@ -396,7 +487,7 @@ export default function ServiceJourney() {
               className={`journey-card flip-card opacity-0 ${flipped ? "is-open" : ""}`}
               data-flipped={flipped}
             >
-              <div className="flip-card-inner h-full min-h-[200px] md:h-[440px] md:min-h-[440px]">
+              <div className="flip-card-inner h-[400px] md:h-[460px]">
                 {/* ── Mặt trước ── */}
                 <button
                   type="button"
@@ -410,8 +501,8 @@ export default function ServiceJourney() {
                 >
                   <span className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-candle-gold/80 to-transparent opacity-70 group-hover:opacity-100 transition-opacity" />
                   {/* Mặt trước: icon → tiêu đề → mô tả → chip xem trước.
-                      Mỗi khối có chiều cao cố định (min-h) nên 3 thẻ thẳng hàng
-                      với nhau từng dòng, nhìn cân đối thay vì lệch nhau. */}
+                      Mỗi khối có chiều cao cố định nên 3 thẻ thẳng hàng với
+                      nhau từng dòng và có cùng chiều cao trên mobile. */}
                   <div className="flex-1 flex flex-col justify-center">
                     <span className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-2xl bg-candle-gold/20 border-2 border-candle-gold/60 shadow-lg shadow-candle-gold/20 text-candle-gold group-hover:scale-110 group-hover:bg-candle-gold/35 group-hover:border-candle-gold transition-all">
                       <Icon name={box.icon} className="w-5 h-5 md:w-7 md:h-7" />
@@ -419,12 +510,14 @@ export default function ServiceJourney() {
                     <h3 className="font-display text-lg md:text-xl tracking-wider text-mist mt-3 md:mt-4 mb-1.5 md:mb-2 min-h-[3.5rem] group-hover:text-candle-gold transition-colors">
                       {box.title}
                     </h3>
-                    <p className="font-body text-lilac/85 text-sm md:text-base leading-snug md:leading-relaxed line-clamp-2 min-h-[2.4rem] md:line-clamp-3 md:min-h-[4.9rem]">
+                    <p className="font-body text-lilac/85 text-sm md:text-base leading-snug md:leading-relaxed min-h-[6.5rem] md:min-h-[13.5rem] lg:min-h-[10.5rem]">
                       {box.desc}
                     </p>
-                    {/* Chip xem trước: ẩn ở mobile (<sm) và ở md (3 cột hẹp nên
-                        chip rớt dòng lộn xộn) — hiện lại từ lg khi thẻ đủ rộng */}
-                    <div className="hidden sm:flex md:hidden lg:flex flex-wrap items-start content-start gap-1.5 mt-4 sm:min-h-[3.7rem] lg:min-h-[3.7rem]">
+                    {/* Chip xem trước: hiện ở mobile + lg; ẩn ở md vì 3 cột hẹp
+                        làm chip rớt dòng lộn xộn. Khung chip có chiều cao chừa
+                        sẵn và canh đáy để 3 thẻ luôn thẳng hàng, kể cả khi số
+                        chip khác nhau. */}
+                    <div className="flex md:hidden lg:flex flex-wrap items-start content-end gap-1.5 mt-4 min-h-[3.9rem] sm:min-h-[3.7rem] lg:min-h-[3.7rem]">
                       {box.preview.map((p) => (
                         <span
                           key={p}

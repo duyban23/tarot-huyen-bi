@@ -81,6 +81,53 @@ export default function AboutPage() {
           </p>
         </div>
 
+        {/* My story */}
+        <section className="mb-16">
+          <p className="font-body text-candle-gold text-sm tracking-widest uppercase text-center mb-2">
+            ✦ Câu chuyện của My ✦
+          </p>
+          <h2 className="font-display text-xl md:text-2xl text-mist text-center mb-8 leading-tight">
+            Cô gái từng vỡ vụn,
+            <br />
+            nay là nơi bình yên của hàng trăm người
+          </h2>
+          <div className="bg-velvet/40 border border-velvet rounded-xl p-6 md:p-8 space-y-4 font-body text-lilac leading-relaxed">
+            <p>
+              My đã từng mở một quán cà phê tổ hợp giải trí cho giới trẻ ở Hà Nội —
+              mang theo cả thanh xuân và niềm tin rằng chỉ cần hết mình thì giấc mơ nào
+              cũng thành. Rồi nó thất bại. Sạch trơn.
+            </p>
+            <p>
+              Sau lần kiệt sức đó, My rơi vào trầm cảm và lui về ở ẩn suốt một năm.
+              Một năm không muốn gặp ai, không muốn bắt đầu lại điều gì.
+            </p>
+            <p>
+              My đã từng không hạnh phúc. Đã từng cho đi rất nhiều, yêu hết mình
+              rồi đau đến nghẹt thở. Đã từng bị phản bội, bị lừa dối bởi chính
+              những người mình tin nhất.
+            </p>
+            <p>
+              My đã từng béo, từng xấu, từng bị bạo lực học đường, từng bị tẩy chay
+              và kỳ thị chỉ vì mình khác biệt. Đã từng soi gương mà không nhận ra
+              người trong đó là ai.
+            </p>
+            <p className="font-display text-lg md:text-xl text-mist leading-relaxed">
+              Vậy làm sao My vượt qua — để trở thành cô gái luôn tràn trề năng lượng
+              mà hôm nay ai cũng muốn ở cạnh?
+            </p>
+            <p>
+              Không có phép màu nào cả. Chỉ là một ngày, My học cách ngồi lại và ôm lấy
+              chính mình — ôm cả những mảnh vỡ, những vết thương, những phiên bản
+              từng bị chê cười. My học Tarot, học Tea Leaf, học chữa lành — không phải
+              để đoán số phận, mà để hiểu lòng người, bắt đầu từ lòng mình.
+            </p>
+            <p className="text-candle-gold/90">
+              Và hôm nay, My ở đây — để làm cho bạn điều mà năm đó My từng ước có ai đó
+              làm cho mình: lắng nghe, không phán xét, và cùng bạn tìm lại ánh sáng.
+            </p>
+          </div>
+        </section>
+
         {/* Story */}
         <section className="mb-16">
           <h2 className="font-display text-xl md:text-2xl text-mist text-center mb-6">
