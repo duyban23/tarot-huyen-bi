@@ -1,0 +1,12 @@
+# `COPY . .` otherwise bakes backend/.env (compose env_file) into the image.
+.venv
+.env
+.env.*
+!.env.example
+
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+*.db
+*.sqlite3
