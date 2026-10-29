@@ -15,7 +15,7 @@ const SPREAD: { left: string; top: string; rotate: number }[] = [
   { left: "82%", top: "66%", rotate: 8   },
 ];
 
-/* ── Card face HTML (RWS image) ── */
+/* ── Card face HTML (deck image) ── */
 function cardFrontHTML(img: string, alt: string): string {
   return `<div style="position:relative;width:100%;height:100%;border-radius:5px;overflow:hidden;
     box-shadow:0 0 0 1.5px #d4a843,0 0 12px rgba(212,168,67,0.15),0 6px 24px rgba(0,0,0,0.55)">
@@ -90,12 +90,12 @@ export default function FloatingTarotCards({ count = 6 }: { count?: number }) {
         const fallback: TarotCard[] = [];
         for (let i = 0; i < 22; i++) {
           const id = `m${i.toString().padStart(2, "0")}`;
-          fallback.push({ id, name: `Major ${i}`, nameVi: `Major ${i}`, img: `/images/cards/${id}.jpg`, arcana: "Major", suit: null, meaning: "" });
+          fallback.push({ id, name: `Major ${i}`, nameVi: `Major ${i}`, img: `/images/cards/${id}.webp`, arcana: "Major", suit: null, meaning: "" });
         }
         for (const s of ["c", "p", "s", "w"]) {
           for (let i = 1; i <= 14; i++) {
             const id = `${s}${i.toString().padStart(2, "0")}`;
-            fallback.push({ id, name: id, nameVi: id, img: `/images/cards/${id}.jpg`, arcana: "Minor", suit: s, meaning: "" });
+            fallback.push({ id, name: id, nameVi: id, img: `/images/cards/${id}.webp`, arcana: "Minor", suit: s, meaning: "" });
           }
         }
         poolRef.current = fallback;

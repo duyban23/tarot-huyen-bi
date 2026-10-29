@@ -1,9 +1,23 @@
 from datetime import date, datetime, time
+from zoneinfo import ZoneInfo
 
 from sqlalchemy.orm import Session, joinedload
 
 from app.config import SLOT_INTERVAL, WORK_END, WORK_START
-from app.models import Booking, BookingStatus, Service
+
+VN_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
+
+
+def _now_vn() -> datetime:
+    return datetime.now(VN_TZ)
+from app.models import (
+    ApplicationStatus,
+    Booking,
+    BookingStatus,
+    ContactMessage,
+    IdolApplication,
+    Service,
+)
 
 
 # ---------- Service ----------
@@ -92,7 +106,7 @@ def get_available_slots(
     )
 
     result: list[str] = []
-    now = datetime.now()
+    now = _now_vn().replace(tzinfo=None)
     for slot in _generate_slots():
         slot_dt = datetime.combine(target_date, slot)
         # skip past slots
@@ -151,5 +165,83 @@ def delete_booking(db: Session, booking_id: int) -> bool:
     if not booking:
         return False
     db.delete(booking)
+    db.commit()
+    return True
+
+
+# ---------- Idol applications ----------
+def create_idol_application(db: Session, data: dict) -> IdolApplication:
+    app = IdolApplication(**data)
+    db.add(app)
+    db.commit()
+    db.refresh(app)
+    return app
+
+
+def get_idol_applications(
+    db: Session, status_filter: str | None = None
+) -> list[IdolApplication]:
+    q = db.query(IdolApplication)
+    if status_filter:
+        q = q.filter(IdolApplication.status == status_filter)
+    return q.order_by(IdolApplication.created_at.desc()).all()
+
+
+def update_idol_application_status(
+    db: Session, application_id: int, status: str
+) -> IdolApplication | None:
+    app = db.query(IdolApplication).filter(IdolApplication.id == application_id).first()
+    if not app:
+        return None
+    app.status = ApplicationStatus(status)
+    db.commit()
+    db.refresh(app)
+    return app
+
+
+def delete_idol_application(db: Session, application_id: int) -> bool:
+    app = db.query(IdolApplication).filter(IdolApplication.id == application_id).first()
+    if not app:
+        return False
+    db.delete(app)
+    db.commit()
+    return True
+
+
+# ---------- Contact messages ----------
+def create_contact_message(db: Session, data: dict) -> ContactMessage:
+    msg = ContactMessage(**data)
+    db.add(msg)
+    db.commit()
+    db.refresh(msg)
+    return msg
+
+
+def get_contact_messages(
+    db: Session, unread_only: bool = False
+) -> list[ContactMessage]:
+    q = db.query(ContactMessage)
+    if unread_only:
+        q = q.filter(ContactMessage.is_read.is_(False))
+    return q.order_by(ContactMessage.created_at.desc()).all()
+
+
+def mark_contact_message_read(
+    db: Session, message_id: int
+) -> ContactMessage | None:
+    msg = db.query(ContactMessage).filter(ContactMessage.id == message_id).first()
+    if not msg:
+        return None
+    msg.is_read = True
+    db.commit()
+    db.refresh(msg)
+    return msg
+
+
+def delete_contact_message(db: Session, message_id: int) -> bool:
+    msg = db.query(ContactMessage).filter(ContactMessage.id == message_id).first()
+    if not msg:
+        return False
+    db.delete(msg)
     db.commit()
     return True

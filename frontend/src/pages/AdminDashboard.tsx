@@ -3,17 +3,24 @@ import { useNavigate } from "react-router-dom";
 import {
   clearOnUnauthorized,
   deleteAdminService,
+  deleteApplication,
+  deleteMessage,
+  getAdminApplications,
   getAdminBookings,
+  getAdminMessages,
   getAdminServices,
+  markMessageRead,
   setOnUnauthorized,
   updateAdminService,
+  updateApplicationStatus,
   updateBookingStatus,
   createAdminService,
   deleteBooking,
 } from "../api/client";
-import type { Booking, Service } from "../api/types";
+import type { Booking, ContactMessage, IdolApplication, Service } from "../api/types";
+import { MeetingMethodIcon } from "../components/MeetingMethod";
 
-type Tab = "bookings" | "services";
+type Tab = "bookings" | "services" | "applications" | "messages";
 
 function statusBtn(token: string, label: string, active?: boolean) {
   const colors: Record<string, string> = {
@@ -29,8 +36,11 @@ export default function AdminDashboard() {
   const [tab, setTab] = useState<Tab>("bookings");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [services, setServices] = useState<Service[]>([]);
+  const [applications, setApplications] = useState<IdolApplication[]>([]);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [statusFilter, setStatusFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [appFilter, setAppFilter] = useState("");
   const [error, setError] = useState("");
 
   // Service form state
@@ -54,6 +64,18 @@ export default function AdminDashboard() {
       .catch((e) => setError(e.message));
   }, []);
 
+  const loadApplications = useCallback(() => {
+    getAdminApplications(appFilter || undefined)
+      .then(setApplications)
+      .catch((e) => setError(e.message));
+  }, [appFilter]);
+
+  const loadMessages = useCallback(() => {
+    getAdminMessages()
+      .then(setMessages)
+      .catch((e) => setError(e.message));
+  }, []);
+
   useEffect(() => {
     const token = localStorage.getItem("admin_token");
     if (!token) {
@@ -63,12 +85,16 @@ export default function AdminDashboard() {
     setOnUnauthorized(() => navigate("/admin/login"));
     loadBookings();
     loadServices();
+    loadApplications();
+    loadMessages();
     return () => clearOnUnauthorized();
-  }, [loadBookings, loadServices, navigate]);
+  }, [loadBookings, loadServices, loadApplications, loadMessages, navigate]);
 
   useEffect(() => {
     if (tab === "services") loadServices();
-  }, [tab, loadServices]);
+    if (tab === "applications") loadApplications();
+    if (tab === "messages") loadMessages();
+  }, [tab, loadServices, loadApplications, loadMessages]);
 
   async function handleStatus(id: number, status: string) {
     try {
@@ -110,9 +136,21 @@ export default function AdminDashboard() {
   }
 
   async function handleSaveService() {
+    if (!svcName.trim()) {
+      setError("Tên dịch vụ không được để trống");
+      return;
+    }
+    if (!Number.isFinite(svcPrice) || svcPrice < 0) {
+      setError("Giá phải là số >= 0");
+      return;
+    }
+    if (!Number.isInteger(svcDuration) || svcDuration <= 0) {
+      setError("Thời lượng phải là số nguyên > 0 (phút)");
+      return;
+    }
     try {
       const data = {
-        name: svcName,
+        name: svcName.trim(),
         description: svcDesc,
         duration_minutes: svcDuration,
         price: svcPrice,
@@ -137,6 +175,70 @@ export default function AdminDashboard() {
       loadServices();
     } catch (e: any) {
       setError(e.message);
+    }
+  }
+
+  async function handleAppStatus(id: number, status: string) {
+    try {
+      await updateApplicationStatus(id, status);
+      loadApplications();
+    } catch (e: any) {
+      setError(e.message);
+    }
+  }
+
+  async function handleDeleteRegistration(id: number) {
+    if (!confirm("Xóa đơn đăng ký này?")) return;
+    try {
+      await deleteApplication(id);
+      loadApplications();
+    } catch (e: any) {
+      setError(e.message);
+    }
+  }
+
+  async function handleMarkMessageRead(id: number) {
+    try {
+      await markMessageRead(id);
+      loadMessages();
+    } catch (e: any) {
+      setError(e.message);
+    }
+  }
+
+  async function handleDeleteMessage(id: number) {
+    if (!confirm("Xóa tin nhắn này?")) return;
+    try {
+      await deleteMessage(id);
+      loadMessages();
+    } catch (e: any) {
+      setError(e.message);
+    }
+  }
+
+  function getAppStatusBadge(status: string) {
+    switch (status) {
+      case "accepted":
+        return "bg-arcane/20 text-arcane border-arcane/30";
+      case "contacted":
+        return "bg-candle-gold/20 text-candle-gold border-candle-gold/30";
+      case "rejected":
+        return "bg-arcane/10 text-lilac/50 border-arcane/20";
+      default:
+        return "bg-candle-gold/20 text-candle-gold border-candle-gold/30";
+    }
+  }
+
+  function getAppStatusLabel(status: string) {
+    switch (status) {
+      case "accepted":
+        return "Đã nhận";
+      case "contacted":
+        return "Đã liên hệ";
+      case "rejected":
+        return "Đã từ chối";
+      default:
+        return "Chờ xử lý";
     }
   }
 
@@ -199,6 +301,31 @@ export default function AdminDashboard() {
           >
             Dịch vụ
           </button>
+          <button
+            onClick={() => setTab("applications")}
+            className={`px-5 py-2.5 font-body text-sm tracking-wide uppercase transition-all ${
+              tab === "applications"
+                ? "text-mist border-b-2 border-arcane"
+                : "text-lilac/60 hover:text-lilac"
+            }`}
+          >
+            Đăng ký học
+          </button>
+          <button
+            onClick={() => setTab("messages")}
+            className={`px-5 py-2.5 font-body text-sm tracking-wide uppercase transition-all ${
+              tab === "messages"
+                ? "text-mist border-b-2 border-arcane"
+                : "text-lilac/60 hover:text-lilac"
+            }`}
+          >
+            Tin nhắn
+            {messages.some((m) => !m.is_read) && (
+              <span className="ml-1.5 inline-block min-w-5 px-1.5 py-0.5 rounded-full bg-candle-gold text-void text-xs font-body font-bold">
+                {messages.filter((m) => !m.is_read).length}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* ──── Bookings tab ──── */}
@@ -238,6 +365,7 @@ export default function AdminDashboard() {
                     <th scope="col" className="py-3 pr-2">Khách hàng</th>
                     <th scope="col" className="py-3 pr-2">SĐT</th>
                     <th scope="col" className="py-3 pr-2">Dịch vụ</th>
+                    <th scope="col" className="py-3 pr-2">Hình thức</th>
                     <th scope="col" className="py-3 pr-2">Ngày</th>
                     <th scope="col" className="py-3 pr-2">Giờ</th>
                     <th scope="col" className="py-3 pr-2">Trạng thái</th>
@@ -255,6 +383,15 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-3 pr-2 font-body text-lilac text-sm max-w-[120px] truncate">
                         {services.find((s) => s.id === b.service_id)?.name || `#${b.service_id}`}
+                      </td>
+                      <td className="py-3 pr-2">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-body font-semibold border border-arcane/40 text-lilac whitespace-nowrap">
+                          <MeetingMethodIcon
+                            method={b.meeting_method === "offline" ? "offline" : "online"}
+                            className="w-3.5 h-3.5"
+                          />
+                          {b.meeting_method === "offline" ? "Off" : "Onl"}
+                        </span>
                       </td>
                       <td className="py-3 pr-2 font-body text-lilac text-sm whitespace-nowrap">
                         {b.appointment_date}
@@ -307,7 +444,7 @@ export default function AdminDashboard() {
                   ))}
                   {bookings.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center font-body text-lilac/50 italic">
+                        <td colSpan={8} className="py-8 text-center font-body text-lilac/50 italic">
                         Chưa có lịch hẹn nào
                       </td>
                     </tr>
@@ -415,7 +552,7 @@ export default function AdminDashboard() {
                     <h4 className="font-display text-sm tracking-wider uppercase text-mist">
                       {svc.name}
                     </h4>
-                    <p className="font-body text-lilac text-sm mt-0.5 line-clamp-1">{svc.description}</p>
+                    <p className="font-body text-lilac text-sm mt-0.5 whitespace-pre-line">{svc.description}</p>
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 font-body text-xs text-lilac/60">
                       <span>{svc.duration_minutes} phút</span>
                       <span>{svc.price.toLocaleString("vi-VN")}₫</span>
@@ -444,6 +581,187 @@ export default function AdminDashboard() {
                 </p>
               )}
             </div>
+          </section>
+        )}
+
+        {/* ──── Đăng ký học tab ──── */}
+        {tab === "applications" && (
+          <section>
+            <div className="flex flex-wrap gap-3 mb-4">
+              <select
+                value={appFilter}
+                onChange={(e) => setAppFilter(e.target.value)}
+                className="bg-velvet/60 border border-velvet rounded-lg px-3 py-1.5 font-body text-mist text-sm focus:outline-none focus:border-arcane"
+              >
+                <option value="">Tất cả trạng thái</option>
+                <option value="pending">Chờ xử lý</option>
+                <option value="contacted">Đã liên hệ</option>
+                <option value="accepted">Đã nhận</option>
+                <option value="rejected">Đã từ chối</option>
+              </select>
+              <button
+                onClick={loadApplications}
+                className="px-3 py-1.5 rounded-lg font-body text-lilac border border-velvet hover:border-lilac/30 text-sm transition-all"
+              >
+                Lọc
+              </button>
+            </div>
+
+            {applications.length === 0 ? (
+              <p className="text-center font-body text-lilac/50 italic py-8">
+                Chưa có đơn đăng ký nào
+              </p>
+            ) : (
+              <div className="grid gap-4">
+                {applications.map((a) => (
+                  <div key={a.id} className="bg-velvet/60 border border-velvet rounded-xl p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-[220px]">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-display text-sm tracking-wider uppercase text-mist">
+                            {a.full_name}
+                          </h4>
+                          <span
+                            className={`px-2 py-0.5 rounded text-xs font-body font-semibold border ${getAppStatusBadge(a.status)}`}
+                          >
+                            {getAppStatusLabel(a.status)}
+                          </span>
+                        </div>
+                        <p className="font-body text-lilac text-sm mt-1">
+                          {a.phone}
+                          {a.email ? ` · ${a.email}` : ""}
+                        </p>
+                        <p className="font-body text-lilac/60 text-xs mt-0.5">
+                          {new Date(a.created_at).toLocaleString("vi-VN")}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 shrink-0">
+                        {a.status === "pending" && (
+                          <button
+                            onClick={() => handleAppStatus(a.id, "contacted")}
+                            className={statusBtn("confirm", "Đã liên hệ")}
+                          >
+                            ✓ Đã liên hệ
+                          </button>
+                        )}
+                        {a.status !== "accepted" && a.status !== "rejected" && (
+                          <>
+                            <button
+                              onClick={() => handleAppStatus(a.id, "accepted")}
+                              className={statusBtn("confirm", "Nhận")}
+                            >
+                              Nhận
+                            </button>
+                            <button
+                              onClick={() => handleAppStatus(a.id, "rejected")}
+                              className={statusBtn("cancel", "Từ chối")}
+                            >
+                              Từ chối
+                            </button>
+                          </>
+                        )}
+                        <button
+                          onClick={() => handleDeleteRegistration(a.id)}
+                          className={statusBtn("delete", "Xóa")}
+                        >
+                          Xóa
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-3 space-y-2 border-t border-velvet/50 pt-3">
+                      <div>
+                        <p className="font-body text-lilac/50 text-xs uppercase tracking-wide mb-0.5">
+                          Khóa học
+                        </p>
+                        <p className="font-body text-mist text-sm whitespace-pre-line">{a.reason}</p>
+                      </div>
+                      {a.experience && (
+                        <div>
+                          <p className="font-body text-lilac/50 text-xs uppercase tracking-wide mb-0.5">
+                            Lời nhắn
+                          </p>
+                          <p className="font-body text-lilac text-sm whitespace-pre-line">
+                            {a.experience}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ──── Tin nhắn tab ──── */}
+        {tab === "messages" && (
+          <section>
+            <div className="flex flex-wrap gap-3 mb-4">
+              <button
+                onClick={loadMessages}
+                className="px-3 py-1.5 rounded-lg font-body text-lilac border border-velvet hover:border-lilac/30 text-sm transition-all"
+              >
+                Tải lại
+              </button>
+            </div>
+
+            {messages.length === 0 ? (
+              <p className="text-center font-body text-lilac/50 italic py-8">
+                Chưa có tin nhắn nào
+              </p>
+            ) : (
+              <div className="grid gap-4">
+                {messages.map((m) => (
+                  <div
+                    key={m.id}
+                    className={`bg-velvet/60 border rounded-xl p-4 ${
+                      m.is_read ? "border-velvet" : "border-candle-gold/40"
+                    }`}
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-[220px]">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-display text-sm tracking-wider uppercase text-mist">
+                            {m.name}
+                          </h4>
+                          {!m.is_read && (
+                            <span className="px-2 py-0.5 rounded text-xs font-body font-semibold border bg-candle-gold/20 text-candle-gold border-candle-gold/30">
+                              Mới
+                            </span>
+                          )}
+                        </div>
+                        <p className="font-body text-lilac text-sm mt-1">
+                          {m.email}
+                          {m.phone ? ` · ${m.phone}` : ""}
+                        </p>
+                        <p className="font-body text-lilac/60 text-xs mt-0.5">
+                          {new Date(m.created_at).toLocaleString("vi-VN")}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 shrink-0">
+                        {!m.is_read && (
+                          <button
+                            onClick={() => handleMarkMessageRead(m.id)}
+                            className={statusBtn("confirm", "Đã đọc")}
+                          >
+                            ✓ Đã đọc
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteMessage(m.id)}
+                          className={statusBtn("delete", "Xóa")}
+                        >
+                          Xóa
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-3 border-t border-velvet/50 pt-3">
+                      <p className="font-body text-mist text-sm whitespace-pre-line">{m.message}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         )}
       </div>

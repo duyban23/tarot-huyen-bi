@@ -2,10 +2,10 @@
 
 /* ── Design tokens ── */
 @theme {
-  --color-void: #0d0812;
-  --color-velvet: #2a1830;
-  --color-arcane: #a07392;
-  --color-lilac: #cfa4ba;
+  --color-void: #1a1028;
+  --color-velvet: #3a2045;
+  --color-arcane: #b8849f;
+  --color-lilac: #dbb5cc;
   --color-candle-gold: #d4a843;
   --color-mist: #f0e8ed;
 
@@ -36,8 +36,8 @@
 }
 
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 12px rgba(160, 115, 146, 0.3), 0 0 30px rgba(160, 115, 146, 0.1); }
-  50% { box-shadow: 0 0 20px rgba(160, 115, 146, 0.5), 0 0 50px rgba(160, 115, 146, 0.2); }
+  0%, 100% { box-shadow: 0 0 12px rgba(184, 132, 159, 0.3), 0 0 30px rgba(184, 132, 159, 0.1); }
+  50% { box-shadow: 0 0 20px rgba(184, 132, 159, 0.5), 0 0 50px rgba(184, 132, 159, 0.2); }
 }
 
 @keyframes float {
@@ -53,6 +53,8 @@ html {
 body {
   margin: 0;
   font-family: var(--font-body);
+  font-size: 19px;
+  line-height: 1.7;
   background-color: var(--color-void);
   color: var(--color-mist);
   -webkit-font-smoothing: antialiased;
@@ -79,6 +81,136 @@ body {
   opacity: 0.25;
   margin: 0 auto;
   max-width: 240px;
+}
+
+/* ── Chỗ bấm được: thẻ & dòng ──
+   Khách chủ yếu xem trên điện thoại nên trạng thái chạm phải rõ: viền vàng
+   đậm hơn + quầng sáng, để biết chỗ nào bấm được và đang mở/đang chọn cái nào. */
+.tap-card {
+  border: 2px solid rgba(212, 168, 67, 0.6);
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(58, 32, 69, 0.82),
+    rgba(58, 32, 69, 0.55),
+    rgba(184, 132, 159, 0.16)
+  );
+  box-shadow: 0 0 26px -14px rgba(212, 168, 67, 0.7);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Đưa chuột / bàn phím vào là sáng lên */
+.tap-card:hover,
+.tap-card:focus-visible {
+  border-color: #ecc46a;
+  box-shadow: 0 0 44px -8px rgba(236, 196, 106, 0.85);
+}
+
+/* Đang mở: sáng nhất — thẻ ở /đào tạo và mặt sau thẻ lật ở trang chủ */
+.tap-card.is-open,
+.flip-face--back {
+  border-color: #f5cf7c;
+  box-shadow: 0 0 56px -6px rgba(245, 207, 124, 0.9);
+}
+
+/* Nền vàng nhạt — dùng cho thẻ giá / nút chọn bên trong khung vàng */
+.tap-card--gold {
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(212, 168, 67, 0.16),
+    rgba(184, 132, 159, 0.1)
+  );
+}
+
+/* Đang được chọn (vd khóa học khách vừa bấm đăng ký) */
+.tap-card.is-selected {
+  border-color: #f5cf7c;
+  background-image: linear-gradient(to bottom right, rgba(212, 168, 67, 0.42), rgba(184, 132, 159, 0.28));
+  box-shadow: 0 0 44px -8px rgba(245, 207, 124, 1);
+}
+
+.tap-row {
+  transition: border-color 0.25s, background-color 0.25s, box-shadow 0.25s;
+}
+
+.tap-row:hover,
+.tap-row:focus-visible {
+  border-color: rgba(212, 168, 67, 0.8);
+  background-color: rgba(184, 132, 159, 0.24);
+  box-shadow: 0 0 24px -12px rgba(236, 196, 106, 0.9);
+}
+
+/* Dòng đang mở (chương nhỏ bên trong thẻ khóa học) */
+.tap-row.is-open {
+  border-color: rgba(212, 168, 67, 0.6);
+  background-color: rgba(184, 132, 159, 0.14);
+}
+
+/* Dòng đang được chọn (bước chọn dịch vụ ở /booking) */
+.tap-row.is-selected {
+  border-color: #f5cf7c;
+  background-image: linear-gradient(to right, rgba(212, 168, 67, 0.32), rgba(184, 132, 159, 0.3));
+  box-shadow: 0 0 32px -10px rgba(245, 207, 124, 0.95);
+}
+
+/* ── Khung có viền sáng (khung không bấm được: ô lưu ý, ô tóm tắt...) ──
+   Lấy ĐÚNG một độ với thẻ ở trang /đào tạo (bên trên) để mọi trang nhìn như một. */
+.glow-box {
+  border: 2px solid rgba(212, 168, 67, 0.6);
+  box-shadow: 0 0 26px -14px rgba(212, 168, 67, 0.7);
+}
+
+/* ── Flip cards (HomePage — 3 ô "Tìm một nơi để lòng được nhẹ hơn") ── */
+.flip-card {
+  perspective: 1400px;
+}
+
+.flip-card-inner {
+  /* grid + cùng 1 ô: 2 mặt xếp lớp lên nhau, chiều cao = mặt cao nhất
+     (không cần height cố định → không bao giờ tràn/cụt chữ) */
+  display: grid;
+  /* 1fr = đúng bằng container: desktop đặt height cố định thì 2 mặt
+     không thể phình ra ngoài (nội dung dài thì cuộn bên trong) */
+  grid-template-rows: minmax(0, 1fr);
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.flip-card-inner > * {
+  grid-area: 1 / 1;
+}
+
+.flip-card[data-flipped="true"] .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* translateZ(0): giữ Safari render đúng 3D cho phần tử con (button) */
+  transform: translateZ(0);
+}
+
+.flip-face--back {
+  transform: rotateY(180deg) translateZ(0);
+}
+
+/* ── Danh sách dịch vụ cuộn trong thẻ (chỉ desktop) ── */
+.journey-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(184, 132, 159, 0.5) transparent;
+}
+
+.journey-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.journey-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.journey-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(184, 132, 159, 0.5);
+  border-radius: 9999px;
 }
 
 /* ── Glow CTA ── */

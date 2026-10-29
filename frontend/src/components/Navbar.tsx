@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import BrandLogo from "./BrandLogo";
 
 const NAV = [
   { path: "/", label: "Trang chủ" },
   { path: "/about", label: "Giới thiệu" },
   { path: "/services", label: "Dịch vụ" },
+  { path: "/recruit", label: "Đào tạo" },
   { path: "/booking", label: "Đặt lịch" },
   { path: "/contact", label: "Liên hệ" },
 ];
@@ -21,11 +23,7 @@ export default function Navbar() {
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <img
-            src="/images/logo-sm.png"
-            alt="Healing With My"
-            className="h-10 w-auto drop-shadow-[0_0_6px_rgba(212,168,67,0.25)]"
-          />
+          <BrandLogo size="bar" />
         </Link>
 
         {/* Desktop nav */}
@@ -34,7 +32,7 @@ export default function Navbar() {
             <Link
               key={n.path}
               to={n.path}
-              className={`font-body text-sm tracking-wide transition-colors ${
+              className={`font-body text-base tracking-wide transition-colors ${
                 loc.pathname === n.path
                   ? "text-arcane border-b border-arcane pb-0.5"
                   : "text-lilac/70 hover:text-mist"
@@ -48,7 +46,7 @@ export default function Navbar() {
         {/* Mobile hamburger */}
         <button
           onClick={() => setOpen(!open)}
-          className="md:hidden text-lilac p-2"
+          className="md:hidden text-lilac p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
           aria-label="Menu"
           aria-expanded={open}
         >

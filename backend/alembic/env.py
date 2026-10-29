@@ -1,20 +1,34 @@
 from logging.config import fileConfig
+import os
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
 
+# Load backend/.env so DATABASE_URL is available for migrations.
+# env.py lives in backend/alembic/, so .env is at parent.parent/.env
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
 # Add the parent directory to sys.path so we can import app
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.database import Base
-from app.models import Service, Booking  # noqa: F401 — ensure models are loaded
+from app.models import IdolApplication, Service, Booking, ContactMessage  # noqa: F401 — ensure models are loaded
 
 # this is the Alembic Config object
 config = context.config
+
+# Override sqlalchemy.url from env — never hardcode cloud credentials in alembic.ini.
+# Falls back to local docker Postgres when DATABASE_URL is unset.
+db_url = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg2://tarot_user:tarot_pass@localhost:5432/tarot_db",
+)
+config.set_main_option("sqlalchemy.url", db_url)
 
 # Interpret the config file for Python logging
 if config.config_file_name is not None:

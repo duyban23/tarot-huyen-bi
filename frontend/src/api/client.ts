@@ -1,4 +1,13 @@
-import type { Booking, BookingCreatePayload, Service, TokenResponse } from "./types";
+import type {
+  Booking,
+  BookingCreatePayload,
+  ContactMessage,
+  ContactMessagePayload,
+  IdolApplication,
+  IdolApplicationPayload,
+  Service,
+  TokenResponse,
+} from "./types";
 
 const BASE = import.meta.env.VITE_API_BASE || "";
 
@@ -23,8 +32,8 @@ export function clearOnUnauthorized() {
 
 async function api<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    headers: { "Content-Type": "application/json", ...(options?.headers as Record<string, string>) },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({ detail: res.statusText }));
@@ -58,6 +67,20 @@ export function getAvailability(service_id: number, date: string) {
 
 export function createBooking(data: BookingCreatePayload) {
   return api<Booking>("/api/bookings", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function createIdolApplication(data: IdolApplicationPayload) {
+  return api<IdolApplication>("/api/recruit", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function createContactMessage(data: ContactMessagePayload) {
+  return api<ContactMessage>("/api/contact", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -122,6 +145,51 @@ export function updateAdminService(id: number, data: Partial<Service>) {
 
 export function deleteAdminService(id: number) {
   return api<void>(`/api/admin/services/${id}`, {
+    method: "DELETE",
+    headers: authHeader(),
+  });
+}
+
+// Admin idol applications
+export function getAdminApplications(status?: string) {
+  const qs = status ? `?status=${encodeURIComponent(status)}` : "";
+  return api<IdolApplication[]>(`/api/admin/applications${qs}`, {
+    headers: authHeader(),
+  });
+}
+
+export function updateApplicationStatus(id: number, status: string) {
+  return api<IdolApplication>(`/api/admin/applications/${id}`, {
+    method: "PATCH",
+    headers: authHeader(),
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function deleteApplication(id: number) {
+  return api<void>(`/api/admin/applications/${id}`, {
+    method: "DELETE",
+    headers: authHeader(),
+  });
+}
+
+// Admin contact messages
+export function getAdminMessages(unreadOnly?: boolean) {
+  const qs = unreadOnly ? "?unread_only=true" : "";
+  return api<ContactMessage[]>(`/api/admin/messages${qs}`, {
+    headers: authHeader(),
+  });
+}
+
+export function markMessageRead(id: number) {
+  return api<ContactMessage>(`/api/admin/messages/${id}`, {
+    method: "PATCH",
+    headers: authHeader(),
+  });
+}
+
+export function deleteMessage(id: number) {
+  return api<void>(`/api/admin/messages/${id}`, {
     method: "DELETE",
     headers: authHeader(),
   });

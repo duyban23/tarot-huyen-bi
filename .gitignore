@@ -16,10 +16,15 @@ frontend/dist/
 *.sqlite3
 
 # ── Environment ──
+# Secrets live in Vercel project settings, never in the repo.
+# `vercel env pull` writes .env.production.local / .vercel/.env.*.local,
+# which the old explicit list did not cover.
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
+!.env.*.example
 backend/.env
+frontend/.env
 
 # ── OS ──
 .DS_Store
@@ -35,9 +40,13 @@ docker-compose.override.yml
 # ── Vercel ──
 .vercel/
 
+# `vercel build` generates these from requirements.txt. Do not commit them:
+# a root pyproject.toml would take precedence over requirements.txt on Vercel
+# and pin a different Python/dep set than the lambda actually ships.
+pyproject.toml
+uv.lock
+
 # ── Misc ──
 *.log
-nul
-
-.vercel
-.env*
+PLAN_NOTES.md
+scripts/.tmp-*/

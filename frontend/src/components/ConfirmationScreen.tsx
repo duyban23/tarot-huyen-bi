@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import anime from "animejs";
 import type { Booking } from "../api/types";
+import { MEETING_METHODS, MeetingMethodIcon } from "./MeetingMethod";
 
 interface Props {
   booking: Booking;
@@ -60,8 +61,20 @@ export default function ConfirmationScreen({ booking, serviceName }: Props) {
     });
   }, []);
 
-  const rows = [
+  const method: "online" | "offline" =
+    booking.meeting_method === "offline" ? "offline" : "online";
+
+  const rows: { label: string; value: ReactNode; gold?: boolean }[] = [
     { label: "Dịch vụ", value: serviceName },
+    {
+      label: "Hình thức",
+      value: (
+        <span className="inline-flex items-center gap-1.5">
+          <MeetingMethodIcon method={method} className="w-4 h-4 text-candle-gold" />
+          {MEETING_METHODS[method].label} — {MEETING_METHODS[method].detail}
+        </span>
+      ),
+    },
     { label: "Ngày", value: booking.appointment_date },
     { label: "Giờ", value: booking.appointment_time },
     { label: "Tên", value: booking.customer_name },
@@ -151,7 +164,7 @@ export default function ConfirmationScreen({ booking, serviceName }: Props) {
       </div>
 
       <p className="font-body text-lilac/60 text-sm italic mt-6">
-        Tôi sẽ liên hệ bạn trong thời gian sớm nhất để xác nhận lịch hẹn.
+        My sẽ liên hệ bạn trong thời gian sớm nhất để xác nhận lịch hẹn.
       </p>
     </div>
   );

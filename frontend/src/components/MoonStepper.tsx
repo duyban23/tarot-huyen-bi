@@ -60,7 +60,7 @@ export default function MoonStepper({ current }: { current: number }) {
   }, [current]);
 
   return (
-    <nav className="w-full max-w-lg mx-auto mb-10" aria-label="Đặt lịch tiến trình">
+    <nav className="w-full max-w-lg mx-auto mb-8 md:mb-10" aria-label="Đặt lịch tiến trình">
       {/* Progress bar */}
       <div className="relative h-1 bg-velvet rounded-full mb-6 overflow-hidden">
         <div
@@ -96,7 +96,7 @@ export default function MoonStepper({ current }: { current: number }) {
                 )}
               </div>
               <span
-                className={`text-sm font-body font-semibold tracking-wider uppercase ${
+                className={`text-[11px] md:text-sm font-body font-semibold tracking-wider uppercase text-center ${
                   isActive ? "text-mist" : "text-lilac/50"
                 }`}
               >

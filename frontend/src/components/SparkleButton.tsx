@@ -1,4 +1,5 @@
 import { useRef, useCallback } from "react";
+import { Link } from "react-router-dom";
 import anime from "animejs";
 
 interface SparkleButtonProps {
@@ -80,14 +81,14 @@ export default function SparkleButton({
 
   if (as === "link" && href) {
     return (
-      <a
+      <Link
         ref={btnRef as React.Ref<HTMLAnchorElement>}
-        href={href}
+        to={href}
         className={className}
         onMouseEnter={handleMouseEnter}
       >
         {children}
-      </a>
+      </Link>
     );
   }
 

@@ -1,11 +1,13 @@
 from datetime import date, datetime, time
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.crud import create_booking, get_available_slots
 from app.database import get_db
-from app.models import Booking, BookingStatus, Service
+from app.models import Booking, BookingStatus, MeetingMethod, Service
 from app.schemas import BookingCreate, BookingOut
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
@@ -45,7 +47,7 @@ def create_new_booking(body: BookingCreate, db: Session = Depends(get_db)):
     except (ValueError, TypeError):
         raise HTTPException(status_code=400, detail="Invalid time format")
 
-    now = datetime.now()
+    now = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(tzinfo=None)
     slot_dt = datetime.combine(appointment_date, appointment_time)
     if slot_dt <= now:
         raise HTTPException(status_code=400, detail="Cannot book in the past")
@@ -58,17 +60,28 @@ def create_new_booking(body: BookingCreate, db: Session = Depends(get_db)):
             detail="Time slot is no longer available. Please choose another time.",
         )
 
-    booking = create_booking(
-        db,
-        {
-            "service_id": body.service_id,
-            "customer_name": body.customer_name,
-            "customer_phone": body.customer_phone,
-            "customer_email": body.customer_email,
-            "appointment_date": appointment_date,
-            "appointment_time": appointment_time,
-            "note": body.note,
-            "status": BookingStatus.pending,
-        },
-    )
+    try:
+        booking = create_booking(
+            db,
+            {
+                "service_id": body.service_id,
+                "customer_name": body.customer_name,
+                "customer_phone": body.customer_phone,
+                "customer_email": body.customer_email,
+                "appointment_date": appointment_date,
+                "appointment_time": appointment_time,
+                "meeting_method": MeetingMethod(body.meeting_method),
+                "note": body.note,
+                "status": BookingStatus.pending,
+            },
+        )
+    except IntegrityError:
+        # Lost the race: another request booked this exact slot between our
+        # availability check and this insert. The partial unique index
+        # bookings_slot_uniq is the backstop. Same 409 as the app guard.
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Time slot was just taken. Please choose another time.",
+        )
     return booking

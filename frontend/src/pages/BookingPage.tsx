@@ -1,28 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { createBooking, getServices } from "../api/client";
-import type { Booking, Service } from "../api/types";
+import type { Booking, MeetingMethod, Service } from "../api/types";
+import { fold } from "../data/serviceCatalog";
 import BookingForm from "../components/BookingForm";
 import Calendar from "../components/Calendar";
 import ConfirmationScreen from "../components/ConfirmationScreen";
 import MoonStepper from "../components/MoonStepper";
-import ServiceCard from "../components/ServiceCard";
+import ServiceCatalog from "../components/ServiceCatalog";
 import TimeSlots from "../components/TimeSlots";
 
 const BRAND = {
   name: "Healing With My",
-  tagline: "Kết nối con người với năng lượng vũ trụ",
-  story:
-    "Healing With My ra đời từ niềm đam mê sâu sắc với huyền học và mong muốn kết nối con người với năng lượng vũ trụ. Tôi tin rằng mỗi người đều mang trong mình một hành trình độc đáo, và các lá bài chỉ là chiếc gương phản chiếu con đường đó.",
-  years: "3+ năm kinh nghiệm",
-  clients: "500+ khách hàng",
-  values: [
-    { icon: "🌙", title: "Chân thực", desc: "Đọc bài với trái tim thành thật, không phóng đại, không che giấu." },
-    { icon: "💜", title: "Đồng cảm", desc: "Mỗi buổi xem là một cuộc trò chuyện. Tôi lắng nghe và thấu hiểu." },
-    { icon: "✨", title: "Trao quyền", desc: "Bài đọc giúp bạn tự tin hơn với lựa chọn của mình, không phụ thuộc." },
-  ],
+  tagline: "Có những điều chẳng biết tỏ cùng ai — ở đây, bạn được lắng nghe",
 };
 
 export default function BookingPage() {
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState(0);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -34,11 +28,35 @@ export default function BookingPage() {
 
   useEffect(() => {
     getServices()
-      .then(setServices)
+      .then((list) => {
+        setServices(list);
+        // Preselect khi đi từ trang Services / homepage (?service=<tên>).
+        // DB do admin quản lý nên tên có thể lệch dấu/hoa-thường/khoảng trắng →
+        // so khớp theo dạng đã "fold" (bỏ dấu) rồi mới tới khớp lỏng.
+        const wanted = fold(searchParams.get("service")?.trim() ?? "");
+        if (wanted) {
+          const match =
+            list.find((s) => fold(s.name.trim()) === wanted) ??
+            list.find((s) => {
+              const n = fold(s.name.trim());
+              return n.startsWith(wanted) || wanted.startsWith(n);
+            }) ??
+            list.find((s) => {
+              const n = fold(s.name.trim());
+              return n.includes(wanted) || wanted.includes(n);
+            });
+          if (match) {
+            setSelectedService(match);
+            setStep(1);
+          }
+        }
+      })
       .catch((e) => setError(e.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSubmit(data: {
+    meeting_method: MeetingMethod;
     customer_name: string;
     customer_phone: string;
     customer_email?: string;
@@ -72,6 +90,16 @@ export default function BookingPage() {
     setError("");
   }
 
+  // Đoán hình thức xem từ tên dịch vụ (vd "Xem Offline 1 tiếng")
+  // để preselect đúng nút Online/Offline trong form.
+  const guessedMethod: MeetingMethod = useMemo(() => {
+    const name = selectedService?.name.toLowerCase() ?? "";
+    if (name.includes("offline") || name.includes("trực tiếp") || name.includes("tại tiệm")) {
+      return "offline";
+    }
+    return "online";
+  }, [selectedService]);
+
   function selectService(svc: Service) {
     setSelectedService(svc);
     setSelectedDate(null);
@@ -92,54 +120,18 @@ export default function BookingPage() {
             {BRAND.tagline}
           </p>
           <p className="font-body text-candle-gold/60 text-sm tracking-wide">
-            ✦ Tarot · Tea Leaf · Huyền học ✦
+            ✦ Reader · Healer · Coaching ✦
           </p>
         </div>
 
-        {/* ── Brand intro (only before booking starts) ── */}
+        {/* ── Trước khi chọn: 1 dòng dẫn ngắn (khối giới thiệu dài đã bỏ) ── */}
         {step === 0 && !selectedService && (
-          <section className="mb-10 animate-fade-in">
-            {/* Stats */}
-            <div className="flex justify-center gap-6 mb-8 text-center">
-              <div>
-                <p className="font-display text-2xl text-candle-gold">{BRAND.years.split("+")[0]}+</p>
-                <p className="font-body text-lilac/60 text-sm tracking-wide">năm kinh nghiệm</p>
-              </div>
-              <div className="w-px bg-velvet" />
-              <div>
-                <p className="font-display text-2xl text-candle-gold">{BRAND.clients.split("+")[0]}+</p>
-                <p className="font-body text-lilac/60 text-sm tracking-wide">khách hàng</p>
-              </div>
-            </div>
-
-            {/* Story */}
-            <div className="max-w-xl mx-auto text-center mb-8">
-              <p className="font-body text-lilac leading-relaxed italic">
-                {BRAND.story}
-              </p>
-            </div>
-
-            {/* Core values */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto mb-8">
-              {BRAND.values.map((v) => (
-                <div
-                  key={v.title}
-                  className="bg-velvet/40 rounded-xl p-4 text-center border border-velvet/50"
-                >
-                  <span className="text-2xl block mb-2">{v.icon}</span>
-                  <h3 className="font-display text-sm tracking-wider uppercase text-mist mb-1">
-                    {v.title}
-                  </h3>
-                  <p className="font-body text-lilac/70 text-sm">{v.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            <h2 className="font-display text-xl tracking-wider uppercase text-mist text-center">
-              Chọn dịch vụ
+          <section className="mb-4 text-center animate-fade-in">
+            <h2 className="font-display text-lg md:text-xl tracking-wider uppercase text-mist">
+              Chọn trải bài của bạn
             </h2>
-            <p className="font-body text-lilac/50 text-center text-sm italic mb-6">
-              Chọn một dịch vụ để bắt đầu hành trình của bạn
+            <p className="font-body text-lilac/70 italic text-sm mt-1">
+              Chạm một nhóm để mở, hoặc gõ vào ô tìm kiếm — chọn xong là sang bước chọn ngày giờ.
             </p>
           </section>
         )}
@@ -155,16 +147,12 @@ export default function BookingPage() {
             {error && !selectedService && (
               <p className="text-center font-body text-red-400 italic mb-4">{error}</p>
             )}
-            <div className="grid gap-4 md:grid-cols-2">
-              {services.map((svc) => (
-                <ServiceCard
-                  key={svc.id}
-                  service={svc}
-                  selected={selectedService?.id === svc.id}
-                  onSelect={() => selectService(svc)}
-                />
-              ))}
-            </div>
+            <ServiceCatalog
+              mode="pick"
+              services={services}
+              selectedId={selectedService?.id ?? null}
+              onSelect={selectService}
+            />
           </section>
         )}
 
@@ -197,14 +185,14 @@ export default function BookingPage() {
             <div className="flex justify-center gap-4 mt-8">
               <button
                 onClick={() => setStep(0)}
-                className="px-6 py-2 rounded-lg font-body text-lilac border border-velvet hover:border-lilac/30 transition-all"
+                className="px-6 min-h-[44px] rounded-lg font-body text-lilac border border-velvet hover:border-lilac/30 active:scale-[0.98] transition-all"
               >
                 Quay lại
               </button>
               <button
                 disabled={!selectedTime}
                 onClick={() => setStep(2)}
-                className="px-6 py-2 rounded-xl font-display text-sm tracking-widest uppercase bg-arcane text-mist hover:bg-arcane/80 disabled:opacity-50 transition-all"
+                className="px-6 min-h-[44px] rounded-xl font-display text-sm tracking-widest uppercase bg-arcane text-mist hover:bg-arcane/80 disabled:opacity-50 active:scale-[0.98] transition-all"
               >
                 Tiếp theo
               </button>
@@ -221,11 +209,45 @@ export default function BookingPage() {
             {error && (
               <p className="text-center font-body text-red-400 italic mb-4">{error}</p>
             )}
-            <BookingForm onSubmit={handleSubmit} loading={loading} />
+            {selectedService && (
+              <div className="max-w-md mx-auto mb-6 glow-box bg-velvet/40 rounded-xl p-4">
+                <p className="font-body text-candle-gold/70 text-xs tracking-widest uppercase mb-2">
+                  Dịch vụ đã chọn
+                </p>
+                <div className="flex justify-between items-center gap-3">
+                  <div className="min-w-0">
+                    <h3 className="font-display text-base tracking-wider uppercase text-mist">
+                      {selectedService.name}
+                    </h3>
+                    <p className="font-body text-lilac/70 text-sm mt-0.5">
+                      ⏱ {selectedService.duration_minutes} phút
+                      {selectedDate && selectedTime
+                        ? ` · ${selectedDate} lúc ${selectedTime}`
+                        : ""}
+                    </p>
+                  </div>
+                  <span className="font-display text-candle-gold font-semibold text-lg whitespace-nowrap shrink-0">
+                    {selectedService.price.toLocaleString("vi-VN")}₫
+                  </span>
+                </div>
+                <button
+                  onClick={() => setStep(0)}
+                  className="mt-2 font-body text-lilac/70 hover:text-candle-gold text-sm underline underline-offset-4 decoration-arcane/30 transition-all"
+                >
+                  Đổi dịch vụ
+                </button>
+              </div>
+            )}
+            <BookingForm
+              key={selectedService?.id ?? "none"}
+              initialMethod={guessedMethod}
+              onSubmit={handleSubmit}
+              loading={loading}
+            />
             <div className="text-center mt-4">
               <button
                 onClick={() => setStep(1)}
-                className="px-6 py-2 rounded-lg font-body text-lilac border border-velvet hover:border-lilac/30 transition-all"
+                className="px-6 min-h-[44px] rounded-lg font-body text-lilac border border-velvet hover:border-lilac/30 active:scale-[0.98] transition-all"
               >
                 Quay lại
               </button>

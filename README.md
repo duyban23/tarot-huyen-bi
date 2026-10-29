@@ -1,6 +1,6 @@
 # Tarot Huyền Bí 🔮 — Website đặt lịch Tarot
 
-Full-stack website đặt lịch hẹn bói Tarot với **Rider-Waite-Smith** 78 lá bài gốc, hiệu ứng 3D flip và floating animation.
+Full-stack website đặt lịch hẹn bói Tarot với **Sola Busca (1491)** 78 lá bài public-domain, hiệu ứng 3D flip và floating animation.
 
 - **Backend:** FastAPI + SQLAlchemy + PostgreSQL (NeonDB)
 - **Frontend:** React 18 + TypeScript + Vite + Tailwind v4 + animejs
@@ -10,7 +10,7 @@ Full-stack website đặt lịch hẹn bói Tarot với **Rider-Waite-Smith** 78
 
 | Tính năng | |
 |---|---|
-| 🃏 **78 lá RWS gốc** | 22 Major Arcana + 56 Minor Arcana, ảnh JPG 350×600 |
+| 🃏 **78 lá Sola Busca** | 22 Major Arcana + 56 Minor Arcana, ảnh JPG/WebP 640px |
 | 🔄 **Card flip 3D** | Click lật ngửa/úp, double-click đổi bài, auto-flip mỗi 10s |
 | 🎨 **Dark theme** | Bảng màu: void, velvet, arcane, lilac, candle-gold |
 | 🧭 **Multi-page** | Home, About, Services, Booking, Contact, Admin |
@@ -57,7 +57,7 @@ Sửa `backend/.env`:
 | `SECRET_KEY` | Khóa JWT — đổi thành chuỗi ngẫu nhiên |
 | `CORS_ORIGINS` | Origin được phép CORS |
 
-> Tạo hash: `python -c "from passlib.context import CryptContext; print(CryptContext(schemes=['bcrypt']).hash('mat-khau-cua-ban'))"`
+> Tạo hash: `python -c "import sys; sys.path.insert(0, 'backend'); from app.auth import hash_password; print(hash_password('mat-khau-cua-ban'))"`
 
 ### 3. Database
 
@@ -83,7 +83,7 @@ Mở **http://localhost:8000**
 
 ## 🃏 Tarot Cards
 
-78 lá **Rider-Waite-Smith** trong `frontend/public/images/cards/`:
+78 lá **Sola Busca (1491, public-domain)** trong `frontend/public/images/cards/` — tải bằng `scripts/download-sola-busca.py` (nguồn: mixvlad/TarotCards, gốc Wikimedia Commons):
 
 | Bộ | Số lượng | File |
 |---|---|---|
@@ -102,8 +102,10 @@ Dữ liệu (tên, ý nghĩa tiếng Việt): `frontend/public/data/tarot-cards.
 | Method | Path | Mô tả |
 |---|---|---|
 | GET | `/api/services` | Dịch vụ đang active |
-| GET | `/api/bookings/availability?service_id=&date_str=YYYY-MM-DD` | Khung giờ trống |
+| GET | `/api/bookings/availability?service_id=&date_str=YYYY-MM-DD` | Khung giờ trống (full-time 0-24, giờ VN) |
 | POST | `/api/bookings` | Tạo booking (race-condition guard → 409) |
+| POST | `/api/contact` | Gửi tin nhắn liên hệ |
+| POST | `/api/recruit` | Gửi đơn ứng tuyển idol |
 
 ### Admin (Bearer JWT)
 
@@ -117,6 +119,12 @@ Dữ liệu (tên, ý nghĩa tiếng Việt): `frontend/public/data/tarot-cards.
 | POST | `/api/admin/services` | Thêm dịch vụ |
 | PUT | `/api/admin/services/{id}` | Sửa dịch vụ |
 | DELETE | `/api/admin/services/{id}` | Xóa dịch vụ |
+| GET | `/api/admin/applications` | Danh sách đơn ứng tuyển |
+| PATCH | `/api/admin/applications/{id}` | Cập nhật trạng thái đơn |
+| DELETE | `/api/admin/applications/{id}` | Xóa đơn |
+| GET | `/api/admin/messages` | Danh sách tin nhắn liên hệ |
+| PATCH | `/api/admin/messages/{id}` | Đánh dấu đã đọc |
+| DELETE | `/api/admin/messages/{id}` | Xóa tin nhắn |
 
 ## 🎨 Design System
 
@@ -132,7 +140,7 @@ tarot-huyen-bi/
 ├── frontend/
 │   ├── public/
 │   │   ├── data/tarot-cards.json   # 78 cards data
-│   │   └── images/cards/           # 78 RWS JPGs
+│   │   └── images/cards/           # 78 Sola Busca JPGs + WebPs
 │   ├── src/
 │   │   ├── components/             # StarField, FloatingTarotCards, Navbar, …
 │   │   ├── pages/                  # Home, About, Services, Booking, Contact, Admin
@@ -149,7 +157,7 @@ tarot-huyen-bi/
 │   │   └── seed.py                 # Seed data
 │   ├── alembic/                    # Migrations
 │   └── requirements.txt
-└── scripts/download-cards.py       # Tải 78 RWS cards
+└── scripts/download-sola-busca.py  # Tải 78 Sola Busca cards (Wikimedia Commons)
 ```
 
 ## 🔒 CI/CD

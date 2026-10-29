@@ -1,80 +1,704 @@
 [
-  {"id":"m00","name":"The Fool","nameVi":"The Fool","img":"/images/cards/m00.jpg","arcana":"Major","suit":null,"meaning":"Khởi đầu mới, niềm tin, phiêu lưu"},
-  {"id":"m01","name":"The Magician","nameVi":"The Magician","img":"/images/cards/m01.jpg","arcana":"Major","suit":null,"meaning":"Sức mạnh ý chí, tài năng, tập trung"},
-  {"id":"m02","name":"The High Priestess","nameVi":"High Priestess","img":"/images/cards/m02.jpg","arcana":"Major","suit":null,"meaning":"Trực giác, bí ẩn, tiềm thức"},
-  {"id":"m03","name":"The Empress","nameVi":"The Empress","img":"/images/cards/m03.jpg","arcana":"Major","suit":null,"meaning":"Sinh sôi, nuôi dưỡng, phong phú"},
-  {"id":"m04","name":"The Emperor","nameVi":"The Emperor","img":"/images/cards/m04.jpg","arcana":"Major","suit":null,"meaning":"Quyền lực, cấu trúc, bảo vệ"},
-  {"id":"m05","name":"The Hierophant","nameVi":"The Hierophant","img":"/images/cards/m05.jpg","arcana":"Major","suit":null,"meaning":"Tri thức, truyền thống, dạy dỗ"},
-  {"id":"m06","name":"The Lovers","nameVi":"The Lovers","img":"/images/cards/m06.jpg","arcana":"Major","suit":null,"meaning":"Kết nối, lựa chọn, hài hoà"},
-  {"id":"m07","name":"The Chariot","nameVi":"The Chariot","img":"/images/cards/m07.jpg","arcana":"Major","suit":null,"meaning":"Chiến thắng, ý chí, quyết tâm"},
-  {"id":"m08","name":"Strength","nameVi":"Strength","img":"/images/cards/m08.jpg","arcana":"Major","suit":null,"meaning":"Nội lực, can đảm, kiên nhẫn"},
-  {"id":"m09","name":"The Hermit","nameVi":"The Hermit","img":"/images/cards/m09.jpg","arcana":"Major","suit":null,"meaning":"Chiêm nghiệm, nội tâm, tìm kiếm"},
-  {"id":"m10","name":"Wheel of Fortune","nameVi":"Wheel of Fortune","img":"/images/cards/m10.jpg","arcana":"Major","suit":null,"meaning":"Định mệnh, chu kỳ, may mắn"},
-  {"id":"m11","name":"Justice","nameVi":"Justice","img":"/images/cards/m11.jpg","arcana":"Major","suit":null,"meaning":"Công bằng, chân lý, cân bằng"},
-  {"id":"m12","name":"The Hanged Man","nameVi":"The Hanged Man","img":"/images/cards/m12.jpg","arcana":"Major","suit":null,"meaning":"Buông bỏ, góc nhìn mới, hy sinh"},
-  {"id":"m13","name":"Death","nameVi":"Death","img":"/images/cards/m13.jpg","arcana":"Major","suit":null,"meaning":"Chuyển hoá, tái sinh, kết thúc"},
-  {"id":"m14","name":"Temperance","nameVi":"Temperance","img":"/images/cards/m14.jpg","arcana":"Major","suit":null,"meaning":"Cân bằng, dung hoà, điều độ"},
-  {"id":"m15","name":"The Devil","nameVi":"The Devil","img":"/images/cards/m15.jpg","arcana":"Major","suit":null,"meaning":"Ám ảnh, trói buộc, vật chất"},
-  {"id":"m16","name":"The Tower","nameVi":"The Tower","img":"/images/cards/m16.jpg","arcana":"Major","suit":null,"meaning":"Đổ vỡ, thức tỉnh, biến cố"},
-  {"id":"m17","name":"The Star","nameVi":"The Star","img":"/images/cards/m17.jpg","arcana":"Major","suit":null,"meaning":"Hy vọng, cảm hứng, chữa lành"},
-  {"id":"m18","name":"The Moon","nameVi":"The Moon","img":"/images/cards/m18.jpg","arcana":"Major","suit":null,"meaning":"Giấc mơ, vô thức, ảo ảnh"},
-  {"id":"m19","name":"The Sun","nameVi":"The Sun","img":"/images/cards/m19.jpg","arcana":"Major","suit":null,"meaning":"Hạnh phúc, thành công, ấm áp"},
-  {"id":"m20","name":"Judgement","nameVi":"Judgement","img":"/images/cards/m20.jpg","arcana":"Major","suit":null,"meaning":"Tái sinh, thức tỉnh, phán xét"},
-  {"id":"m21","name":"The World","nameVi":"The World","img":"/images/cards/m21.jpg","arcana":"Major","suit":null,"meaning":"Hoàn thành, viên mãn, thành tựu"},
-  {"id":"c01","name":"Ace of Cups","nameVi":"Ách Cốc","img":"/images/cards/c01.jpg","arcana":"Minor","suit":"Cups","meaning":"Tình yêu mới, khởi đầu cảm xúc"},
-  {"id":"c02","name":"Two of Cups","nameVi":"Hai Cốc","img":"/images/cards/c02.jpg","arcana":"Minor","suit":"Cups","meaning":"Kết nối đôi, tình yêu đôi lứa"},
-  {"id":"c03","name":"Three of Cups","nameVi":"Ba Cốc","img":"/images/cards/c03.jpg","arcana":"Minor","suit":"Cups","meaning":"Ăn mừng, tình bạn, niềm vui"},
-  {"id":"c04","name":"Four of Cups","nameVi":"Bốn Cốc","img":"/images/cards/c04.jpg","arcana":"Minor","suit":"Cups","meaning":"Thờ ơ, suy tư, cơ hội mới"},
-  {"id":"c05","name":"Five of Cups","nameVi":"Năm Cốc","img":"/images/cards/c05.jpg","arcana":"Minor","suit":"Cups","meaning":"Mất mát, tiếc nuối, buồn"},
-  {"id":"c06","name":"Six of Cups","nameVi":"Sáu Cốc","img":"/images/cards/c06.jpg","arcana":"Minor","suit":"Cups","meaning":"Hoài niệm, kỷ niệm, cho đi"},
-  {"id":"c07","name":"Seven of Cups","nameVi":"Bảy Cốc","img":"/images/cards/c07.jpg","arcana":"Minor","suit":"Cups","meaning":"Ảo tưởng, lựa chọn, mơ mộng"},
-  {"id":"c08","name":"Eight of Cups","nameVi":"Tám Cốc","img":"/images/cards/c08.jpg","arcana":"Minor","suit":"Cups","meaning":"Rời bỏ, tìm kiếm, buông tay"},
-  {"id":"c09","name":"Nine of Cups","nameVi":"Chín Cốc","img":"/images/cards/c09.jpg","arcana":"Minor","suit":"Cups","meaning":"Toại nguyện, ước mơ thành thật"},
-  {"id":"c10","name":"Ten of Cups","nameVi":"Mười Cốc","img":"/images/cards/c10.jpg","arcana":"Minor","suit":"Cups","meaning":"Hạnh phúc viên mãn, gia đình"},
-  {"id":"c11","name":"Page of Cups","nameVi":"Lính Cốc","img":"/images/cards/c11.jpg","arcana":"Minor","suit":"Cups","meaning":"Sáng tạo, tin vui, trực giác"},
-  {"id":"c12","name":"Knight of Cups","nameVi":"Hiệp sĩ Cốc","img":"/images/cards/c12.jpg","arcana":"Minor","suit":"Cups","meaning":"Lãng mạn, theo đuổi, ngỏ lời"},
-  {"id":"c13","name":"Queen of Cups","nameVi":"Hoàng hậu Cốc","img":"/images/cards/c13.jpg","arcana":"Minor","suit":"Cups","meaning":"Bao dung, thấu hiểu, từ bi"},
-  {"id":"c14","name":"King of Cups","nameVi":"Vua Cốc","img":"/images/cards/c14.jpg","arcana":"Minor","suit":"Cups","meaning":"Chín chắn, giàu cảm xúc, kiểm soát"},
-  {"id":"p01","name":"Ace of Pentacles","nameVi":"Ách Tiền","img":"/images/cards/p01.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Tài lộc mới, khởi đầu vật chất"},
-  {"id":"p02","name":"Two of Pentacles","nameVi":"Hai Tiền","img":"/images/cards/p02.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Cân bằng, thích nghi, đa nhiệm"},
-  {"id":"p03","name":"Three of Pentacles","nameVi":"Ba Tiền","img":"/images/cards/p03.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Hợp tác, kỹ năng, xây dựng"},
-  {"id":"p04","name":"Four of Pentacles","nameVi":"Bốn Tiền","img":"/images/cards/p04.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Giữ gìn, keo kiệt, kiểm soát"},
-  {"id":"p05","name":"Five of Pentacles","nameVi":"Năm Tiền","img":"/images/cards/p05.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Khó khăn, thiếu thốn, lo âu"},
-  {"id":"p06","name":"Six of Pentacles","nameVi":"Sáu Tiền","img":"/images/cards/p06.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Rộng lượng, cho-nhận, hào phóng"},
-  {"id":"p07","name":"Seven of Pentacles","nameVi":"Bảy Tiền","img":"/images/cards/p07.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Kiên nhẫn, đánh giá, thu hoạch"},
-  {"id":"p08","name":"Eight of Pentacles","nameVi":"Tám Tiền","img":"/images/cards/p08.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Học nghề, rèn kỹ năng"},
-  {"id":"p09","name":"Nine of Pentacles","nameVi":"Chín Tiền","img":"/images/cards/p09.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Xa hoa, tự do, thành tựu"},
-  {"id":"p10","name":"Ten of Pentacles","nameVi":"Mười Tiền","img":"/images/cards/p10.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Giàu có, gia tộc, di sản"},
-  {"id":"p11","name":"Page of Pentacles","nameVi":"Lính Tiền","img":"/images/cards/p11.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Học hỏi, cơ hội mới, thực tế"},
-  {"id":"p12","name":"Knight of Pentacles","nameVi":"Hiệp sĩ Tiền","img":"/images/cards/p12.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Chăm chỉ, có trách nhiệm, bền bỉ"},
-  {"id":"p13","name":"Queen of Pentacles","nameVi":"Hoàng hậu Tiền","img":"/images/cards/p13.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Ấm áp, chu toàn, thịnh vượng"},
-  {"id":"p14","name":"King of Pentacles","nameVi":"Vua Tiền","img":"/images/cards/p14.jpg","arcana":"Minor","suit":"Pentacles","meaning":"Giàu có, thành đạt, vững vàng"},
-  {"id":"s01","name":"Ace of Swords","nameVi":"Ách Kiếm","img":"/images/cards/s01.jpg","arcana":"Minor","suit":"Swords","meaning":"Đột phá, chân lý, chiến thắng"},
-  {"id":"s02","name":"Two of Swords","nameVi":"Hai Kiếm","img":"/images/cards/s02.jpg","arcana":"Minor","suit":"Swords","meaning":"Phân vân, bế tắc, lựa chọn"},
-  {"id":"s03","name":"Three of Swords","nameVi":"Ba Kiếm","img":"/images/cards/s03.jpg","arcana":"Minor","suit":"Swords","meaning":"Đau khổ, tan vỡ, tổn thương"},
-  {"id":"s04","name":"Four of Swords","nameVi":"Bốn Kiếm","img":"/images/cards/s04.jpg","arcana":"Minor","suit":"Swords","meaning":"Nghỉ ngơi, hồi phục, thiền định"},
-  {"id":"s05","name":"Five of Swords","nameVi":"Năm Kiếm","img":"/images/cards/s05.jpg","arcana":"Minor","suit":"Swords","meaning":"Xung đột, thất bại, căng thẳng"},
-  {"id":"s06","name":"Six of Swords","nameVi":"Sáu Kiếm","img":"/images/cards/s06.jpg","arcana":"Minor","suit":"Swords","meaning":"Chuyển tiếp, vượt qua, đi tiếp"},
-  {"id":"s07","name":"Seven of Swords","nameVi":"Bảy Kiếm","img":"/images/cards/s07.jpg","arcana":"Minor","suit":"Swords","meaning":"Lừa dối, kế hoạch, ẩn náu"},
-  {"id":"s08","name":"Eight of Swords","nameVi":"Tám Kiếm","img":"/images/cards/s08.jpg","arcana":"Minor","suit":"Swords","meaning":"Tự giam, bế tắc, sợ hãi"},
-  {"id":"s09","name":"Nine of Swords","nameVi":"Chín Kiếm","img":"/images/cards/s09.jpg","arcana":"Minor","suit":"Swords","meaning":"Ác mộng, lo lắng, tuyệt vọng"},
-  {"id":"s10","name":"Ten of Swords","nameVi":"Mười Kiếm","img":"/images/cards/s10.jpg","arcana":"Minor","suit":"Swords","meaning":"Kết thúc đau đớn, chạm đáy"},
-  {"id":"s11","name":"Page of Swords","nameVi":"Lính Kiếm","img":"/images/cards/s11.jpg","arcana":"Minor","suit":"Swords","meaning":"Tò mò, giao tiếp, ý tưởng"},
-  {"id":"s12","name":"Knight of Swords","nameVi":"Hiệp sĩ Kiếm","img":"/images/cards/s12.jpg","arcana":"Minor","suit":"Swords","meaning":"Quyết liệt, nhanh nhẹn, tham vọng"},
-  {"id":"s13","name":"Queen of Swords","nameVi":"Hoàng hậu Kiếm","img":"/images/cards/s13.jpg","arcana":"Minor","suit":"Swords","meaning":"Sắc sảo, độc lập, thẳng thắn"},
-  {"id":"s14","name":"King of Swords","nameVi":"Vua Kiếm","img":"/images/cards/s14.jpg","arcana":"Minor","suit":"Swords","meaning":"Công minh, trí tuệ, uy quyền"},
-  {"id":"w01","name":"Ace of Wands","nameVi":"Ách Gậy","img":"/images/cards/w01.jpg","arcana":"Minor","suit":"Wands","meaning":"Cảm hứng mới, khởi đầu sáng tạo"},
-  {"id":"w02","name":"Two of Wands","nameVi":"Hai Gậy","img":"/images/cards/w02.jpg","arcana":"Minor","suit":"Wands","meaning":"Hoạch định, tương lai, quyết định"},
-  {"id":"w03","name":"Three of Wands","nameVi":"Ba Gậy","img":"/images/cards/w03.jpg","arcana":"Minor","suit":"Wands","meaning":"Mở rộng, viễn cảnh, phát triển"},
-  {"id":"w04","name":"Four of Wands","nameVi":"Bốn Gậy","img":"/images/cards/w04.jpg","arcana":"Minor","suit":"Wands","meaning":"Lễ hội, thành công, đoàn tụ"},
-  {"id":"w05","name":"Five of Wands","nameVi":"Năm Gậy","img":"/images/cards/w05.jpg","arcana":"Minor","suit":"Wands","meaning":"Cạnh tranh, xung đột, thử thách"},
-  {"id":"w06","name":"Six of Wands","nameVi":"Sáu Gậy","img":"/images/cards/w06.jpg","arcana":"Minor","suit":"Wands","meaning":"Chiến thắng, vinh danh, công nhận"},
-  {"id":"w07","name":"Seven of Wands","nameVi":"Bảy Gậy","img":"/images/cards/w07.jpg","arcana":"Minor","suit":"Wands","meaning":"Bảo vệ, kiên định, chống trả"},
-  {"id":"w08","name":"Eight of Wands","nameVi":"Tám Gậy","img":"/images/cards/w08.jpg","arcana":"Minor","suit":"Wands","meaning":"Tốc độ, tiến triển, đi lại"},
-  {"id":"w09","name":"Nine of Wands","nameVi":"Chín Gậy","img":"/images/cards/w09.jpg","arcana":"Minor","suit":"Wands","meaning":"Kiên cường, bền bỉ, ranh giới"},
-  {"id":"w10","name":"Ten of Wands","nameVi":"Mười Gậy","img":"/images/cards/w10.jpg","arcana":"Minor","suit":"Wands","meaning":"Gánh nặng, áp lực, trách nhiệm"},
-  {"id":"w11","name":"Page of Wands","nameVi":"Lính Gậy","img":"/images/cards/w11.jpg","arcana":"Minor","suit":"Wands","meaning":"Nhiệt huyết, khám phá, dũng cảm"},
-  {"id":"w12","name":"Knight of Wands","nameVi":"Hiệp sĩ Gậy","img":"/images/cards/w12.jpg","arcana":"Minor","suit":"Wands","meaning":"Phiêu lưu, năng lượng, bốc đồng"},
-  {"id":"w13","name":"Queen of Wands","nameVi":"Hoàng hậu Gậy","img":"/images/cards/w13.jpg","arcana":"Minor","suit":"Wands","meaning":"Tự tin, ấm áp, quyến rũ"},
-  {"id":"w14","name":"King of Wands","nameVi":"Vua Gậy","img":"/images/cards/w14.jpg","arcana":"Minor","suit":"Wands","meaning":"Lãnh đạo, tầm nhìn, táo bạo"}
+  {
+    "id": "m00",
+    "name": "The Fool",
+    "nameVi": "The Fool",
+    "img": "/images/cards/m00.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Khởi đầu mới, niềm tin, phiêu lưu"
+  },
+  {
+    "id": "m01",
+    "name": "The Magician",
+    "nameVi": "The Magician",
+    "img": "/images/cards/m01.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Sức mạnh ý chí, tài năng, tập trung"
+  },
+  {
+    "id": "m02",
+    "name": "The High Priestess",
+    "nameVi": "High Priestess",
+    "img": "/images/cards/m02.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Trực giác, bí ẩn, tiềm thức"
+  },
+  {
+    "id": "m03",
+    "name": "The Empress",
+    "nameVi": "The Empress",
+    "img": "/images/cards/m03.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Sinh sôi, nuôi dưỡng, phong phú"
+  },
+  {
+    "id": "m04",
+    "name": "The Emperor",
+    "nameVi": "The Emperor",
+    "img": "/images/cards/m04.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Quyền lực, cấu trúc, bảo vệ"
+  },
+  {
+    "id": "m05",
+    "name": "The Hierophant",
+    "nameVi": "The Hierophant",
+    "img": "/images/cards/m05.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Tri thức, truyền thống, dạy dỗ"
+  },
+  {
+    "id": "m06",
+    "name": "The Lovers",
+    "nameVi": "The Lovers",
+    "img": "/images/cards/m06.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Kết nối, lựa chọn, hài hoà"
+  },
+  {
+    "id": "m07",
+    "name": "The Chariot",
+    "nameVi": "The Chariot",
+    "img": "/images/cards/m07.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Chiến thắng, ý chí, quyết tâm"
+  },
+  {
+    "id": "m08",
+    "name": "Strength",
+    "nameVi": "Strength",
+    "img": "/images/cards/m08.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Nội lực, can đảm, kiên nhẫn"
+  },
+  {
+    "id": "m09",
+    "name": "The Hermit",
+    "nameVi": "The Hermit",
+    "img": "/images/cards/m09.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Chiêm nghiệm, nội tâm, tìm kiếm"
+  },
+  {
+    "id": "m10",
+    "name": "Wheel of Fortune",
+    "nameVi": "Wheel of Fortune",
+    "img": "/images/cards/m10.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Định mệnh, chu kỳ, may mắn"
+  },
+  {
+    "id": "m11",
+    "name": "Justice",
+    "nameVi": "Justice",
+    "img": "/images/cards/m11.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Công bằng, chân lý, cân bằng"
+  },
+  {
+    "id": "m12",
+    "name": "The Hanged Man",
+    "nameVi": "The Hanged Man",
+    "img": "/images/cards/m12.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Buông bỏ, góc nhìn mới, hy sinh"
+  },
+  {
+    "id": "m13",
+    "name": "Death",
+    "nameVi": "Death",
+    "img": "/images/cards/m13.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Chuyển hoá, tái sinh, kết thúc"
+  },
+  {
+    "id": "m14",
+    "name": "Temperance",
+    "nameVi": "Temperance",
+    "img": "/images/cards/m14.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Cân bằng, dung hoà, điều độ"
+  },
+  {
+    "id": "m15",
+    "name": "The Devil",
+    "nameVi": "The Devil",
+    "img": "/images/cards/m15.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Ám ảnh, trói buộc, vật chất"
+  },
+  {
+    "id": "m16",
+    "name": "The Tower",
+    "nameVi": "The Tower",
+    "img": "/images/cards/m16.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Đổ vỡ, thức tỉnh, biến cố"
+  },
+  {
+    "id": "m17",
+    "name": "The Star",
+    "nameVi": "The Star",
+    "img": "/images/cards/m17.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Hy vọng, cảm hứng, chữa lành"
+  },
+  {
+    "id": "m18",
+    "name": "The Moon",
+    "nameVi": "The Moon",
+    "img": "/images/cards/m18.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Giấc mơ, vô thức, ảo ảnh"
+  },
+  {
+    "id": "m19",
+    "name": "The Sun",
+    "nameVi": "The Sun",
+    "img": "/images/cards/m19.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Hạnh phúc, thành công, ấm áp"
+  },
+  {
+    "id": "m20",
+    "name": "Judgement",
+    "nameVi": "Judgement",
+    "img": "/images/cards/m20.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Tái sinh, thức tỉnh, phán xét"
+  },
+  {
+    "id": "m21",
+    "name": "The World",
+    "nameVi": "The World",
+    "img": "/images/cards/m21.webp",
+    "arcana": "Major",
+    "suit": null,
+    "meaning": "Hoàn thành, viên mãn, thành tựu"
+  },
+  {
+    "id": "c01",
+    "name": "Ace of Cups",
+    "nameVi": "Ách Cốc",
+    "img": "/images/cards/c01.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Tình yêu mới, khởi đầu cảm xúc"
+  },
+  {
+    "id": "c02",
+    "name": "Two of Cups",
+    "nameVi": "Hai Cốc",
+    "img": "/images/cards/c02.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Kết nối đôi, tình yêu đôi lứa"
+  },
+  {
+    "id": "c03",
+    "name": "Three of Cups",
+    "nameVi": "Ba Cốc",
+    "img": "/images/cards/c03.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Ăn mừng, tình bạn, niềm vui"
+  },
+  {
+    "id": "c04",
+    "name": "Four of Cups",
+    "nameVi": "Bốn Cốc",
+    "img": "/images/cards/c04.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Thờ ơ, suy tư, cơ hội mới"
+  },
+  {
+    "id": "c05",
+    "name": "Five of Cups",
+    "nameVi": "Năm Cốc",
+    "img": "/images/cards/c05.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Mất mát, tiếc nuối, buồn"
+  },
+  {
+    "id": "c06",
+    "name": "Six of Cups",
+    "nameVi": "Sáu Cốc",
+    "img": "/images/cards/c06.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Hoài niệm, kỷ niệm, cho đi"
+  },
+  {
+    "id": "c07",
+    "name": "Seven of Cups",
+    "nameVi": "Bảy Cốc",
+    "img": "/images/cards/c07.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Ảo tưởng, lựa chọn, mơ mộng"
+  },
+  {
+    "id": "c08",
+    "name": "Eight of Cups",
+    "nameVi": "Tám Cốc",
+    "img": "/images/cards/c08.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Rời bỏ, tìm kiếm, buông tay"
+  },
+  {
+    "id": "c09",
+    "name": "Nine of Cups",
+    "nameVi": "Chín Cốc",
+    "img": "/images/cards/c09.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Toại nguyện, ước mơ thành thật"
+  },
+  {
+    "id": "c10",
+    "name": "Ten of Cups",
+    "nameVi": "Mười Cốc",
+    "img": "/images/cards/c10.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Hạnh phúc viên mãn, gia đình"
+  },
+  {
+    "id": "c11",
+    "name": "Page of Cups",
+    "nameVi": "Lính Cốc",
+    "img": "/images/cards/c11.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Sáng tạo, tin vui, trực giác"
+  },
+  {
+    "id": "c12",
+    "name": "Knight of Cups",
+    "nameVi": "Hiệp sĩ Cốc",
+    "img": "/images/cards/c12.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Lãng mạn, theo đuổi, ngỏ lời"
+  },
+  {
+    "id": "c13",
+    "name": "Queen of Cups",
+    "nameVi": "Hoàng hậu Cốc",
+    "img": "/images/cards/c13.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Bao dung, thấu hiểu, từ bi"
+  },
+  {
+    "id": "c14",
+    "name": "King of Cups",
+    "nameVi": "Vua Cốc",
+    "img": "/images/cards/c14.webp",
+    "arcana": "Minor",
+    "suit": "Cups",
+    "meaning": "Chín chắn, giàu cảm xúc, kiểm soát"
+  },
+  {
+    "id": "p01",
+    "name": "Ace of Pentacles",
+    "nameVi": "Ách Tiền",
+    "img": "/images/cards/p01.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Tài lộc mới, khởi đầu vật chất"
+  },
+  {
+    "id": "p02",
+    "name": "Two of Pentacles",
+    "nameVi": "Hai Tiền",
+    "img": "/images/cards/p02.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Cân bằng, thích nghi, đa nhiệm"
+  },
+  {
+    "id": "p03",
+    "name": "Three of Pentacles",
+    "nameVi": "Ba Tiền",
+    "img": "/images/cards/p03.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Hợp tác, kỹ năng, xây dựng"
+  },
+  {
+    "id": "p04",
+    "name": "Four of Pentacles",
+    "nameVi": "Bốn Tiền",
+    "img": "/images/cards/p04.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Giữ gìn, keo kiệt, kiểm soát"
+  },
+  {
+    "id": "p05",
+    "name": "Five of Pentacles",
+    "nameVi": "Năm Tiền",
+    "img": "/images/cards/p05.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Khó khăn, thiếu thốn, lo âu"
+  },
+  {
+    "id": "p06",
+    "name": "Six of Pentacles",
+    "nameVi": "Sáu Tiền",
+    "img": "/images/cards/p06.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Rộng lượng, cho-nhận, hào phóng"
+  },
+  {
+    "id": "p07",
+    "name": "Seven of Pentacles",
+    "nameVi": "Bảy Tiền",
+    "img": "/images/cards/p07.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Kiên nhẫn, đánh giá, thu hoạch"
+  },
+  {
+    "id": "p08",
+    "name": "Eight of Pentacles",
+    "nameVi": "Tám Tiền",
+    "img": "/images/cards/p08.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Học nghề, rèn kỹ năng"
+  },
+  {
+    "id": "p09",
+    "name": "Nine of Pentacles",
+    "nameVi": "Chín Tiền",
+    "img": "/images/cards/p09.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Xa hoa, tự do, thành tựu"
+  },
+  {
+    "id": "p10",
+    "name": "Ten of Pentacles",
+    "nameVi": "Mười Tiền",
+    "img": "/images/cards/p10.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Giàu có, gia tộc, di sản"
+  },
+  {
+    "id": "p11",
+    "name": "Page of Pentacles",
+    "nameVi": "Lính Tiền",
+    "img": "/images/cards/p11.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Học hỏi, cơ hội mới, thực tế"
+  },
+  {
+    "id": "p12",
+    "name": "Knight of Pentacles",
+    "nameVi": "Hiệp sĩ Tiền",
+    "img": "/images/cards/p12.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Chăm chỉ, có trách nhiệm, bền bỉ"
+  },
+  {
+    "id": "p13",
+    "name": "Queen of Pentacles",
+    "nameVi": "Hoàng hậu Tiền",
+    "img": "/images/cards/p13.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Ấm áp, chu toàn, thịnh vượng"
+  },
+  {
+    "id": "p14",
+    "name": "King of Pentacles",
+    "nameVi": "Vua Tiền",
+    "img": "/images/cards/p14.webp",
+    "arcana": "Minor",
+    "suit": "Pentacles",
+    "meaning": "Giàu có, thành đạt, vững vàng"
+  },
+  {
+    "id": "s01",
+    "name": "Ace of Swords",
+    "nameVi": "Ách Kiếm",
+    "img": "/images/cards/s01.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Đột phá, chân lý, chiến thắng"
+  },
+  {
+    "id": "s02",
+    "name": "Two of Swords",
+    "nameVi": "Hai Kiếm",
+    "img": "/images/cards/s02.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Phân vân, bế tắc, lựa chọn"
+  },
+  {
+    "id": "s03",
+    "name": "Three of Swords",
+    "nameVi": "Ba Kiếm",
+    "img": "/images/cards/s03.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Đau khổ, tan vỡ, tổn thương"
+  },
+  {
+    "id": "s04",
+    "name": "Four of Swords",
+    "nameVi": "Bốn Kiếm",
+    "img": "/images/cards/s04.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Nghỉ ngơi, hồi phục, thiền định"
+  },
+  {
+    "id": "s05",
+    "name": "Five of Swords",
+    "nameVi": "Năm Kiếm",
+    "img": "/images/cards/s05.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Xung đột, thất bại, căng thẳng"
+  },
+  {
+    "id": "s06",
+    "name": "Six of Swords",
+    "nameVi": "Sáu Kiếm",
+    "img": "/images/cards/s06.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Chuyển tiếp, vượt qua, đi tiếp"
+  },
+  {
+    "id": "s07",
+    "name": "Seven of Swords",
+    "nameVi": "Bảy Kiếm",
+    "img": "/images/cards/s07.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Lừa dối, kế hoạch, ẩn náu"
+  },
+  {
+    "id": "s08",
+    "name": "Eight of Swords",
+    "nameVi": "Tám Kiếm",
+    "img": "/images/cards/s08.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Tự giam, bế tắc, sợ hãi"
+  },
+  {
+    "id": "s09",
+    "name": "Nine of Swords",
+    "nameVi": "Chín Kiếm",
+    "img": "/images/cards/s09.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Ác mộng, lo lắng, tuyệt vọng"
+  },
+  {
+    "id": "s10",
+    "name": "Ten of Swords",
+    "nameVi": "Mười Kiếm",
+    "img": "/images/cards/s10.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Kết thúc đau đớn, chạm đáy"
+  },
+  {
+    "id": "s11",
+    "name": "Page of Swords",
+    "nameVi": "Lính Kiếm",
+    "img": "/images/cards/s11.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Tò mò, giao tiếp, ý tưởng"
+  },
+  {
+    "id": "s12",
+    "name": "Knight of Swords",
+    "nameVi": "Hiệp sĩ Kiếm",
+    "img": "/images/cards/s12.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Quyết liệt, nhanh nhẹn, tham vọng"
+  },
+  {
+    "id": "s13",
+    "name": "Queen of Swords",
+    "nameVi": "Hoàng hậu Kiếm",
+    "img": "/images/cards/s13.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Sắc sảo, độc lập, thẳng thắn"
+  },
+  {
+    "id": "s14",
+    "name": "King of Swords",
+    "nameVi": "Vua Kiếm",
+    "img": "/images/cards/s14.webp",
+    "arcana": "Minor",
+    "suit": "Swords",
+    "meaning": "Công minh, trí tuệ, uy quyền"
+  },
+  {
+    "id": "w01",
+    "name": "Ace of Wands",
+    "nameVi": "Ách Gậy",
+    "img": "/images/cards/w01.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Cảm hứng mới, khởi đầu sáng tạo"
+  },
+  {
+    "id": "w02",
+    "name": "Two of Wands",
+    "nameVi": "Hai Gậy",
+    "img": "/images/cards/w02.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Hoạch định, tương lai, quyết định"
+  },
+  {
+    "id": "w03",
+    "name": "Three of Wands",
+    "nameVi": "Ba Gậy",
+    "img": "/images/cards/w03.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Mở rộng, viễn cảnh, phát triển"
+  },
+  {
+    "id": "w04",
+    "name": "Four of Wands",
+    "nameVi": "Bốn Gậy",
+    "img": "/images/cards/w04.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Lễ hội, thành công, đoàn tụ"
+  },
+  {
+    "id": "w05",
+    "name": "Five of Wands",
+    "nameVi": "Năm Gậy",
+    "img": "/images/cards/w05.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Cạnh tranh, xung đột, thử thách"
+  },
+  {
+    "id": "w06",
+    "name": "Six of Wands",
+    "nameVi": "Sáu Gậy",
+    "img": "/images/cards/w06.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Chiến thắng, vinh danh, công nhận"
+  },
+  {
+    "id": "w07",
+    "name": "Seven of Wands",
+    "nameVi": "Bảy Gậy",
+    "img": "/images/cards/w07.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Bảo vệ, kiên định, chống trả"
+  },
+  {
+    "id": "w08",
+    "name": "Eight of Wands",
+    "nameVi": "Tám Gậy",
+    "img": "/images/cards/w08.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Tốc độ, tiến triển, đi lại"
+  },
+  {
+    "id": "w09",
+    "name": "Nine of Wands",
+    "nameVi": "Chín Gậy",
+    "img": "/images/cards/w09.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Kiên cường, bền bỉ, ranh giới"
+  },
+  {
+    "id": "w10",
+    "name": "Ten of Wands",
+    "nameVi": "Mười Gậy",
+    "img": "/images/cards/w10.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Gánh nặng, áp lực, trách nhiệm"
+  },
+  {
+    "id": "w11",
+    "name": "Page of Wands",
+    "nameVi": "Lính Gậy",
+    "img": "/images/cards/w11.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Nhiệt huyết, khám phá, dũng cảm"
+  },
+  {
+    "id": "w12",
+    "name": "Knight of Wands",
+    "nameVi": "Hiệp sĩ Gậy",
+    "img": "/images/cards/w12.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Phiêu lưu, năng lượng, bốc đồng"
+  },
+  {
+    "id": "w13",
+    "name": "Queen of Wands",
+    "nameVi": "Hoàng hậu Gậy",
+    "img": "/images/cards/w13.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Tự tin, ấm áp, quyến rũ"
+  },
+  {
+    "id": "w14",
+    "name": "King of Wands",
+    "nameVi": "Vua Gậy",
+    "img": "/images/cards/w14.webp",
+    "arcana": "Minor",
+    "suit": "Wands",
+    "meaning": "Lãnh đạo, tầm nhìn, táo bạo"
+  }
 ]

@@ -8,6 +8,18 @@ interface Props {
   onSelect: (time: string) => void;
 }
 
+const SESSIONS = [
+  { label: "Khuya", icon: "🌙", from: 0, to: 6 },
+  { label: "Buổi sáng", icon: "🌅", from: 6, to: 12 },
+  { label: "Buổi chiều", icon: "☀️", from: 12, to: 18 },
+  { label: "Buổi tối", icon: "🌆", from: 18, to: 24 },
+];
+
+function sessionOf(t: string) {
+  const hour = parseInt(t.split(":")[0], 10);
+  return SESSIONS.find((s) => hour >= s.from && hour < s.to) ?? SESSIONS[0];
+}
+
 export default function TimeSlots({ serviceId, date, selected, onSelect }: Props) {
   const [slots, setSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,27 +67,41 @@ export default function TimeSlots({ serviceId, date, selected, onSelect }: Props
     );
   }
 
+  const groups = SESSIONS.map((s) => ({
+    ...s,
+    slots: slots.filter((t) => sessionOf(t).label === s.label),
+  })).filter((g) => g.slots.length > 0);
+
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-w-sm mx-auto">
-      {slots.map((t) => {
-        const isSelected = selected === t;
-        return (
-          <button
-            key={t}
-            onClick={() => onSelect(t)}
-            className={`
-              py-2 px-3 rounded-lg font-body font-semibold text-sm tracking-wide transition-all
-              ${isSelected
-                ? "bg-arcane text-mist shadow-md shadow-arcane/30"
-                : "bg-velvet/60 text-lilac border border-velvet hover:border-arcane/50 hover:text-mist"
-              }
-              focus-visible:outline-2 focus-visible:outline-candle-gold focus-visible:outline-offset-2
-            `}
-          >
-            {t}
-          </button>
-        );
-      })}
+    <div className="max-w-md mx-auto space-y-5">
+      {groups.map((g) => (
+        <div key={g.label}>
+          <p className="font-body text-lilac/70 text-sm tracking-wide mb-2 text-center">
+            {g.icon} {g.label}
+          </p>
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            {g.slots.map((t) => {
+              const isSelected = selected === t;
+              return (
+                <button
+                  key={t}
+                  onClick={() => onSelect(t)}
+                  className={`
+                    py-2 px-3 min-h-[44px] rounded-lg font-body font-semibold text-sm tracking-wide transition-all active:scale-[0.98]
+                    ${isSelected
+                      ? "bg-candle-gold text-void shadow-lg shadow-candle-gold/40 ring-1 ring-candle-gold"
+                      : "bg-velvet/60 text-lilac border border-velvet hover:border-candle-gold/70 hover:text-mist hover:bg-velvet"
+                    }
+                    focus-visible:outline-2 focus-visible:outline-candle-gold focus-visible:outline-offset-2
+                  `}
+                >
+                  {t}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
