@@ -1,0 +1,11 @@
+# Keep the host node_modules/dist out of the build context: `COPY . .` would
+# overwrite the deps `npm ci` just installed with host (win32) binaries.
+node_modules
+dist
+
+# Never bake local env files into a layer.
+.env
+.env.*
+!.env.example
+
+*.log
