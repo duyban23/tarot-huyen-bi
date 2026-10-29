@@ -1,13 +1,12 @@
 from datetime import datetime, timedelta, timezone
 
+import bcrypt
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from app.config import ADMIN_PASSWORD_HASH, ADMIN_USERNAME, SECRET_KEY
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
 
 ALGORITHM = "HS256"
@@ -20,7 +19,15 @@ def verify_password(plain: str) -> bool:
             "ADMIN_PASSWORD_HASH is not configured. "
             "Generate a bcrypt hash and set it in backend/.env"
         )
-    return pwd_context.verify(plain, ADMIN_PASSWORD_HASH)
+    # Same $2b$ algorithm as before, so existing hashes keep working.
+    return bcrypt.checkpw(
+        plain.encode("utf-8"), ADMIN_PASSWORD_HASH.encode("utf-8")
+    )
+
+
+def hash_password(plain: str) -> str:
+    """Generate a hash for ADMIN_PASSWORD_HASH (run once, store the output)."""
+    return bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def create_access_token() -> str:
@@ -39,5 +46,5 @@ def verify_token(
         if username != ADMIN_USERNAME:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
         return username
-    except JWTError:
+    except jwt.PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")

@@ -9,12 +9,7 @@ if (!rootEl) throw new Error("Root element not found");
 
 createRoot(rootEl).render(
   <StrictMode>
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true,
-      }}
-    >
+    <BrowserRouter>
       <App />
     </BrowserRouter>
   </StrictMode>,
