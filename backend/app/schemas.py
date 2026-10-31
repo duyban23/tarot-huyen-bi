@@ -50,7 +50,7 @@ class BookingCreate(BaseModel):
     meeting_method: str = Field(
         ...,
         pattern=r"^(online|offline)$",
-        description="Hình thức xem: online (gọi video) hoặc offline (gặp trực tiếp)",
+        description="Hình thức xem: online (gọi video) hoặc offline (gặp trực tiếp ở Hà Nội, Hà Nam, Ninh Bình)",
     )
     customer_name: str = Field(..., min_length=1, max_length=200)
     customer_phone: str = Field(
@@ -178,6 +178,77 @@ class ContactMessageOut(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+# ---------- AI readings ----------
+class AiFieldOut(BaseModel):
+    key: str
+    label: str
+    type: str
+    required: bool = False
+    placeholder: str | None = None
+    options: list[str] | None = None
+
+
+class AiServiceOut(BaseModel):
+    type: str
+    name: str
+    tagline: str
+    price_full: int
+    fields: list[AiFieldOut]
+
+
+class AiReadingRequest(BaseModel):
+    service: str = Field(..., min_length=1, max_length=50)
+    input: dict = Field(default_factory=dict)
+
+
+class AiReadingOut(BaseModel):
+    id: int
+    service: str
+    computed_summary: str
+    basic_result: str
+    cached: bool = False
+
+    model_config = {"from_attributes": False}
+
+
+class AiFullRequest(BaseModel):
+    service: str = Field(..., min_length=1, max_length=50)
+    input: dict = Field(default_factory=dict)
+    payment_code: str = Field(..., min_length=1, max_length=32)
+
+
+class AiFullOut(BaseModel):
+    id: int
+    service: str
+    full_result: str
+
+
+# ---------- Payments (SePay) ----------
+class PaymentCreate(BaseModel):
+    service: str = Field(..., min_length=1, max_length=50)
+    input: dict = Field(default_factory=dict)
+
+
+class PaymentOut(BaseModel):
+    code: str
+    service: str
+    amount: int
+    status: str
+    transfer_content: str
+    qr_url: str
+    account_name: str
+    bank: str
+    account: str
+
+    model_config = {"from_attributes": False}
+
+
+class PaymentStatusOut(BaseModel):
+    code: str
+    status: str
+    amount: int
 
 
 # ---------- Admin auth ----------

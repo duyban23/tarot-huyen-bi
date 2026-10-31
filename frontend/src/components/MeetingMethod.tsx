@@ -13,7 +13,7 @@ export const MEETING_METHODS: Record<
   offline: {
     label: "Xem Offline",
     shortLabel: "Off",
-    detail: "Gặp trực tiếp tại tiệm",
+    detail: "Gặp trực tiếp ở Hà Nội, Hà Nam, Ninh Bình",
   },
 };
 

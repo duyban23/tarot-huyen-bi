@@ -6,6 +6,7 @@ import StarField from "./components/StarField";
 import FloatingCTA from "./components/FloatingCTA";
 import FloatingContact from "./components/FloatingContact";
 import BookingPage from "./pages/BookingPage";
+import CungMyPage from "./pages/CungMyPage";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import ServicesPage from "./pages/ServicesPage";
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/booking" element={<BookingPage />} />
+          <Route path="/cung-my" element={<CungMyPage />} />
           <Route path="/phone" element={<PhoneFrame><BookingPage /></PhoneFrame>} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/recruit" element={<RecruitPage />} />

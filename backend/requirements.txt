@@ -10,3 +10,5 @@ alembic==1.18.4
 # crud.py dùng zoneinfo("Asia/Ho_Chi_Minh"); Windows không có tzdata hệ thống nên
 # thiếu gói này sẽ crash lúc import ở máy dev Windows (Linux/serverless có sẵn).
 tzdata==2026.5
+httpx==0.28.1
+lunar-python==1.4.8

@@ -230,7 +230,9 @@ export default function RecruitPage() {
     return (
       <main className="min-h-screen flex items-center justify-center px-4 pt-16">
         <div className="max-w-md w-full text-center animate-fade-in">
-          <span className="text-5xl block mb-6">🌱</span>
+          <span className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-2xl bg-candle-gold/15 border-2 border-candle-gold/50 shadow-[0_0_28px_rgba(212,168,67,0.35)]">
+            <Icon name="sprout" className="w-10 h-10" />
+          </span>
           <h1 className="font-display text-3xl text-mist mb-4">Đăng ký thành công!</h1>
           <p className="font-body text-lilac italic mb-8">
             Cảm ơn bạn đã đăng ký khóa học. My sẽ liên hệ trong thời gian sớm nhất để tư vấn lộ trình phù hợp.
@@ -263,7 +265,7 @@ export default function RecruitPage() {
                 cùng My
               </h1>
               <p className="font-body text-lilac italic mb-7 leading-relaxed max-w-md mx-auto">
-                Từ người mới hoàn toàn tới Reader chuyên nghiệp — và sâu hơn nữa là hành trình
+                Từ người chưa biết gì về Tarot trở thành Reader chuyên nghiệp — và sâu hơn nữa là hành trình
                 tái sinh chính mình. Chọn khóa học phù hợp với bạn bên dưới.
               </p>
 
@@ -374,7 +376,7 @@ export default function RecruitPage() {
                         key={ch.title}
                         className="flex items-start gap-2.5 px-1 py-1 font-body text-mist text-sm"
                       >
-                        <span className="text-candle-gold mt-0.5 shrink-0">🔮</span>
+                        <Icon name="crystal" className="w-4 h-4 mt-0.5 shrink-0" />
                         {ch.title}
                       </div>
                     )

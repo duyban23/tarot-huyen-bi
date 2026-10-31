@@ -8,6 +8,8 @@ import {
   getAdminApplications,
   getAdminBookings,
   getAdminMessages,
+  getAdminPayments,
+  getAdminReadings,
   getAdminServices,
   markMessageRead,
   setOnUnauthorized,
@@ -18,9 +20,10 @@ import {
   deleteBooking,
 } from "../api/client";
 import type { Booking, ContactMessage, IdolApplication, Service } from "../api/types";
+import type { AdminPayment, AdminReading } from "../api/client";
 import { MeetingMethodIcon } from "../components/MeetingMethod";
 
-type Tab = "bookings" | "services" | "applications" | "messages";
+type Tab = "bookings" | "services" | "applications" | "messages" | "ai";
 
 function statusBtn(token: string, label: string, active?: boolean) {
   const colors: Record<string, string> = {
@@ -38,6 +41,9 @@ export default function AdminDashboard() {
   const [services, setServices] = useState<Service[]>([]);
   const [applications, setApplications] = useState<IdolApplication[]>([]);
   const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [payments, setPayments] = useState<AdminPayment[]>([]);
+  const [readings, setReadings] = useState<AdminReading[]>([]);
+  const [payFilter, setPayFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [appFilter, setAppFilter] = useState("");
@@ -76,6 +82,15 @@ export default function AdminDashboard() {
       .catch((e) => setError(e.message));
   }, []);
 
+  const loadAi = useCallback(() => {
+    getAdminPayments(payFilter || undefined)
+      .then(setPayments)
+      .catch((e) => setError(e.message));
+    getAdminReadings()
+      .then(setReadings)
+      .catch((e) => setError(e.message));
+  }, [payFilter]);
+
   useEffect(() => {
     const token = localStorage.getItem("admin_token");
     if (!token) {
@@ -94,7 +109,8 @@ export default function AdminDashboard() {
     if (tab === "services") loadServices();
     if (tab === "applications") loadApplications();
     if (tab === "messages") loadMessages();
-  }, [tab, loadServices, loadApplications, loadMessages]);
+    if (tab === "ai") loadAi();
+  }, [tab, loadServices, loadApplications, loadMessages, loadAi]);
 
   async function handleStatus(id: number, status: string) {
     try {
@@ -325,6 +341,16 @@ export default function AdminDashboard() {
                 {messages.filter((m) => !m.is_read).length}
               </span>
             )}
+          </button>
+          <button
+            onClick={() => setTab("ai")}
+            className={`px-5 py-2.5 font-body text-sm tracking-wide uppercase transition-all ${
+              tab === "ai"
+                ? "text-mist border-b-2 border-arcane"
+                : "text-lilac/60 hover:text-lilac"
+            }`}
+          >
+            Cùng My
           </button>
         </div>
 
@@ -762,6 +788,110 @@ export default function AdminDashboard() {
                 ))}
               </div>
             )}
+          </section>
+        )}
+
+        {/* ──── Cùng My (AI + thanh toán) tab ──── */}
+        {tab === "ai" && (
+          <section>
+            <div className="flex flex-wrap gap-3 mb-4">
+              <select
+                value={payFilter}
+                onChange={(e) => setPayFilter(e.target.value)}
+                className="bg-velvet/60 border border-velvet rounded-lg px-3 py-1.5 font-body text-mist text-sm focus:outline-none focus:border-arcane"
+              >
+                <option value="">Tất cả đơn</option>
+                <option value="pending">Chờ chuyển khoản</option>
+                <option value="paid">Đã thanh toán</option>
+                <option value="failed">Sai tiền</option>
+              </select>
+              <button
+                onClick={loadAi}
+                className="px-3 py-1.5 rounded-lg font-body text-lilac border border-velvet hover:border-lilac/30 text-sm transition-all"
+              >
+                Tải lại
+              </button>
+            </div>
+
+            <h3 className="font-display text-sm tracking-widest uppercase text-mist mb-2">
+              Đơn thanh toán ({payments.length})
+            </h3>
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mb-8">
+              <table className="w-full min-w-[560px] text-left">
+                <thead>
+                  <tr className="border-b border-velvet text-lilac/60 font-body text-sm tracking-wide uppercase">
+                    <th scope="col" className="py-3 pr-2">Mã</th>
+                    <th scope="col" className="py-3 pr-2">Món</th>
+                    <th scope="col" className="py-3 pr-2">Tiền</th>
+                    <th scope="col" className="py-3 pr-2">Trạng thái</th>
+                    <th scope="col" className="py-3">Lúc tạo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payments.map((p) => (
+                    <tr key={p.id} className="border-b border-velvet/50">
+                      <td className="py-3 pr-2 font-body text-candle-gold text-sm whitespace-nowrap">{p.code}</td>
+                      <td className="py-3 pr-2 font-body text-lilac text-sm">{p.service_type}</td>
+                      <td className="py-3 pr-2 font-body text-mist text-sm whitespace-nowrap">
+                        {p.amount.toLocaleString("vi-VN")}₫
+                      </td>
+                      <td className="py-3 pr-2">
+                        <span className="px-2 py-0.5 rounded text-xs font-body font-semibold border border-arcane/40 text-lilac">
+                          {p.status === "paid" ? "Đã TT" : p.status === "failed" ? "Sai tiền" : "Chờ CK"}
+                        </span>
+                      </td>
+                      <td className="py-3 font-body text-lilac/60 text-xs whitespace-nowrap">
+                        {new Date(p.created_at).toLocaleString("vi-VN")}
+                      </td>
+                    </tr>
+                  ))}
+                  {payments.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center font-body text-lilac/50 italic">
+                        Chưa có đơn nào
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <h3 className="font-display text-sm tracking-widest uppercase text-mist mb-2">
+              Lượt xem ({readings.length})
+            </h3>
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+              <table className="w-full min-w-[560px] text-left">
+                <thead>
+                  <tr className="border-b border-velvet text-lilac/60 font-body text-sm tracking-wide uppercase">
+                    <th scope="col" className="py-3 pr-2">Món</th>
+                    <th scope="col" className="py-3 pr-2">Input</th>
+                    <th scope="col" className="py-3 pr-2">Bản full</th>
+                    <th scope="col" className="py-3">Lúc xem</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {readings.map((r) => (
+                    <tr key={r.id} className="border-b border-velvet/50">
+                      <td className="py-3 pr-2 font-body text-mist text-sm">{r.service_type}</td>
+                      <td className="py-3 pr-2 font-body text-lilac text-xs max-w-[220px] truncate">{r.input_json}</td>
+                      <td className="py-3 pr-2 font-body text-lilac text-sm">
+                        {r.has_full ? "✓ Có" : "—"}
+                      </td>
+                      <td className="py-3 font-body text-lilac/60 text-xs whitespace-nowrap">
+                        {new Date(r.created_at).toLocaleString("vi-VN")}
+                      </td>
+                    </tr>
+                  ))}
+                  {readings.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="py-8 text-center font-body text-lilac/50 italic">
+                        Chưa có lượt xem nào
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </section>
         )}
       </div>

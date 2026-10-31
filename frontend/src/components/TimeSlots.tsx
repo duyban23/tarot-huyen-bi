@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getAvailability } from "../api/client";
+import { Icon } from "./icons";
 
 interface Props {
   serviceId: number;
@@ -9,10 +10,10 @@ interface Props {
 }
 
 const SESSIONS = [
-  { label: "Khuya", icon: "🌙", from: 0, to: 6 },
-  { label: "Buổi sáng", icon: "🌅", from: 6, to: 12 },
-  { label: "Buổi chiều", icon: "☀️", from: 12, to: 18 },
-  { label: "Buổi tối", icon: "🌆", from: 18, to: 24 },
+  { label: "Khuya", icon: "moon", from: 0, to: 6 },
+  { label: "Buổi sáng", icon: "sunrise", from: 6, to: 12 },
+  { label: "Buổi chiều", icon: "sun", from: 12, to: 18 },
+  { label: "Buổi tối", icon: "sunset", from: 18, to: 24 },
 ];
 
 function sessionOf(t: string) {
@@ -76,8 +77,11 @@ export default function TimeSlots({ serviceId, date, selected, onSelect }: Props
     <div className="max-w-md mx-auto space-y-5">
       {groups.map((g) => (
         <div key={g.label}>
-          <p className="font-body text-lilac/70 text-sm tracking-wide mb-2 text-center">
-            {g.icon} {g.label}
+          <p className="font-body text-lilac/70 text-sm tracking-wide mb-2 flex items-center justify-center gap-2">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-candle-gold/20 to-arcane/15 border border-candle-gold/50 ring-1 ring-candle-gold/20 shadow-[0_0_14px_rgba(212,168,67,0.35)]">
+              <Icon name={g.icon} className="w-4 h-4" />
+            </span>
+            {g.label}
           </p>
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
             {g.slots.map((t) => {

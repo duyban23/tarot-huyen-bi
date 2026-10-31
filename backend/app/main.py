@@ -1,8 +1,7 @@
+import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
-
-import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +11,7 @@ from starlette.responses import Response
 
 from app.config import ADMIN_PASSWORD_HASH, CORS_ORIGINS, SECRET_KEY
 from app.database import Base, SessionLocal, engine
-from app.routers import admin, bookings, contact, recruit, services
+from app.routers import admin, ai, bookings, contact, payments, recruit, services
 from app.seed import seed_services
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -22,6 +21,15 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 FRONTEND_DIST = _REPO_ROOT / "frontend" / "dist"
 
 logger = logging.getLogger(__name__)
+
+# Uvicorn chỉ cấu hình logger của nó; log của app (Gemini latency, cache,
+# quota) sẽ bị nuốt nếu root logger vẫn ở mức WARNING.
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO"),
+    format="%(levelname)s %(name)s: %(message)s",
+)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup checks
@@ -76,6 +84,8 @@ app.add_middleware(
 
 app.include_router(services.router)
 app.include_router(bookings.router)
+app.include_router(ai.router)
+app.include_router(payments.router)
 app.include_router(contact.router)
 app.include_router(recruit.router)
 app.include_router(admin.router)

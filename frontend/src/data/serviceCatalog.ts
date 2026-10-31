@@ -28,19 +28,19 @@ export type CatalogCategory = {
 export const CATEGORIES: CatalogCategory[] = [
   {
     id: "thoi-gian",
-    icon: "⏳",
+    icon: "time",
     name: "Xem theo thời gian",
     desc: "Trong 1–2 tiếng đó các bạn sẽ được trò chuyện chuyên sâu với chuyên gia, Reader sẽ dùng tất cả các loại bài để giải đáp hết thắc mắc của bạn, cặn kẽ, lắng nghe tâm sự và giải quyết vấn đề cho bạn.",
     items: [
       { name: "Xem Online 1 tiếng", detail: "Gọi video, trò chuyện chuyên sâu trong 1 tiếng", price: "500.000 /tiếng" },
       { name: "Xem Online 2 tiếng", detail: "Gọi video, trò chuyện chuyên sâu trong 2 tiếng", price: "900.000 /2 tiếng" },
-      { name: "Xem Offline 1 tiếng", detail: "Gặp trực tiếp tại tiệm trong 1 tiếng", price: "800.000 /tiếng" },
-      { name: "Xem Offline 2 tiếng", detail: "Gặp trực tiếp tại tiệm trong 2 tiếng", price: "1.500.000 /2 tiếng" },
+      { name: "Xem Offline 1 tiếng", detail: "Gặp trực tiếp ở Hà Nội, Hà Nam, Ninh Bình trong 1 tiếng", price: "800.000 /tiếng" },
+      { name: "Xem Offline 2 tiếng", detail: "Gặp trực tiếp ở Hà Nội, Hà Nam, Ninh Bình trong 2 tiếng", price: "1.500.000 /2 tiếng" },
     ],
   },
   {
     id: "tarot",
-    icon: "🃏",
+    icon: "tarot",
     name: "Tarot",
     desc: "Từ 1 câu hỏi duy nhất tới full mọi vấn đề — mỗi kiểu một giá.",
     items: [
@@ -52,8 +52,21 @@ export const CATEGORIES: CatalogCategory[] = [
     ],
   },
   {
+    id: "tra",
+    icon: "leaf",
+    name: "Tea Leaf",
+    desc: "Bài trà cho tuần, 3–12 tháng — mốc thời gian gần tới cả năm.",
+    items: [
+      { name: "Tea Leaf 3 tháng full", detail: "Xem bài tuần hoặc bài trà mốc thời gian gần (3 tháng full vấn đề)", price: "250.000" },
+      { name: "Tea Leaf 6 tháng 3 vấn đề", detail: "Trải bài Tea Leaf 6 tháng, 3 vấn đề", price: "300.000" },
+      { name: "Tea Leaf 6 tháng full", detail: "Tea Leaf 6 tháng full vấn đề", price: "400.000" },
+      { name: "Bài trà full 12 tháng", detail: "Bài trà full 12 tháng/3 vấn đề", price: "450.000" },
+      { name: "Tea Leaf 12 tháng full", detail: "Trải bài Tea Leaf 12 tháng full 6 vấn đề: tình cảm, tiền bạc, hôn nhân, thành công, hạnh phúc, may mắn, học hành, công việc", price: "500.000" },
+    ],
+  },
+  {
     id: "bai-khac",
-    icon: "🎴",
+    icon: "cards",
     name: "Các loại bài khác",
     desc: "Haletu · Oracle · Lenormand · The Lover · The Heart.",
     items: [
@@ -68,23 +81,8 @@ export const CATEGORIES: CatalogCategory[] = [
     ],
   },
   {
-    id: "combo",
-    icon: "💫",
-    name: "Combo",
-    desc: "Kết hợp nhiều loại bài — đi sâu một lần cho tất cả mọi khúc mắc.",
-    items: [
-      { name: "Combo Tarot + Tea Leaf 6 tháng", detail: "Trải bài VIP combo Tarot + Tea Leaf trong vòng 6 tháng (không giới hạn thời gian)", price: "700.000" },
-      { name: "Combo VIP Full Tarot + Trà 12 tháng", detail: "Combo VIP Full Tarot + Trà trong vòng 12 tháng (tặng bài Haletu hoặc Oracle)", price: "1.000.000" },
-      { name: "Combo Tarot + Lenormand", detail: "Combo được yêu thích nhất: Tarot + Lenormand (sự kết hợp hoàn hảo tuyệt đối cho tất cả mọi khúc mắc)", price: "800.000" },
-      { name: "Combo 1 chuyện all bài", detail: "Combo sử dụng tất cả mọi loại bài (Haletu, Oracle, Tarot, Tea Leaf, Lenormand,…) để xem về duy nhất 1 chuyện như tình yêu, công việc, tiền bạc, gia đình,…", price: "650.000" },
-      { name: "Combo Pro trị liệu", detail: "Combo Pro: Full Tarot + Full Trà + Haletu + Oracle + Lenormand + tư vấn tình cảm + trị liệu tâm lý (trong vòng 3 tiếng, nếu thêm +450k/tiếng)", price: "1.500.000" },
-      { name: "Combo HOT toàn diện", detail: "COMBO HOT NHẤT: Full toàn bộ tất cả mọi loại bài kèm theo dõi chữa lành vết thương tâm hồn, không giới hạn thời gian xem, gợi ý câu hỏi, kèm bảo hành xem lại và tư vấn tình cảm miễn phí trong vòng 1 tháng bất cứ khi nào cần", price: "3.000.000" },
-      { name: "Dịch vụ tâm linh đặc biệt", detail: "Xem về người thứ 3, chết chóc, phá thai, sảy, những điều trái nhân văn, pháp luật, spell phù thuỷ… cần nhiều năng lượng, đối chọi và trả giá để đạt được mong muốn — giá cả ib tuỳ vấn đề tâm linh khó cỡ nào", price: "IB", link: "contact" },
-    ],
-  },
-  {
     id: "dich-vu-khac",
-    icon: "🔮",
+    icon: "crystal",
     name: "Dịch vụ khác",
     desc: "Thần số học, bản đồ sao, tử vi, lá số chiêm tinh, đá phong thủy và dạy xem Tarot.",
     items: [
@@ -100,16 +98,18 @@ export const CATEGORIES: CatalogCategory[] = [
     ],
   },
   {
-    id: "tra",
-    icon: "🍃",
-    name: "Tea Leaf",
-    desc: "Bài trà cho tuần, 3–12 tháng — mốc thời gian gần tới cả năm.",
+    id: "combo",
+    icon: "combo",
+    name: "Combo",
+    desc: "Kết hợp nhiều loại bài — đi sâu một lần cho tất cả mọi khúc mắc.",
     items: [
-      { name: "Tea Leaf 3 tháng full", detail: "Xem bài tuần hoặc bài trà mốc thời gian gần (3 tháng full vấn đề)", price: "250.000" },
-      { name: "Tea Leaf 6 tháng 3 vấn đề", detail: "Trải bài Tea Leaf 6 tháng, 3 vấn đề", price: "300.000" },
-      { name: "Tea Leaf 6 tháng full", detail: "Tea Leaf 6 tháng full vấn đề", price: "400.000" },
-      { name: "Bài trà full 12 tháng", detail: "Bài trà full 12 tháng/3 vấn đề", price: "450.000" },
-      { name: "Tea Leaf 12 tháng full", detail: "Trải bài Tea Leaf 12 tháng full 6 vấn đề: tình cảm, tiền bạc, hôn nhân, thành công, hạnh phúc, may mắn, học hành, công việc", price: "500.000" },
+      { name: "Combo Tarot + Tea Leaf 6 tháng", detail: "Trải bài VIP combo Tarot + Tea Leaf trong vòng 6 tháng (không giới hạn thời gian)", price: "700.000" },
+      { name: "Combo VIP Full Tarot + Trà 12 tháng", detail: "Combo VIP Full Tarot + Trà trong vòng 12 tháng (tặng bài Haletu hoặc Oracle)", price: "1.000.000" },
+      { name: "Combo Tarot + Lenormand", detail: "Combo được yêu thích nhất: Tarot + Lenormand (sự kết hợp hoàn hảo tuyệt đối cho tất cả mọi khúc mắc)", price: "800.000" },
+      { name: "Combo 1 chuyện all bài", detail: "Combo sử dụng tất cả mọi loại bài (Haletu, Oracle, Tarot, Tea Leaf, Lenormand,…) để xem về duy nhất 1 chuyện như tình yêu, công việc, tiền bạc, gia đình,…", price: "650.000" },
+      { name: "Combo Pro trị liệu", detail: "Combo Pro: Full Tarot + Full Trà + Haletu + Oracle + Lenormand + tư vấn tình cảm + trị liệu tâm lý (trong vòng 3 tiếng, nếu thêm +450k/tiếng)", price: "1.500.000" },
+      { name: "Combo HOT toàn diện", detail: "COMBO HOT NHẤT: Full toàn bộ tất cả mọi loại bài kèm theo dõi chữa lành vết thương tâm hồn, không giới hạn thời gian xem, gợi ý câu hỏi, kèm bảo hành xem lại và tư vấn tình cảm miễn phí trong vòng 1 tháng bất cứ khi nào cần", price: "3.000.000" },
+      { name: "Dịch vụ tâm linh đặc biệt", detail: "Xem về người thứ 3, chết chóc, phá thai, sảy, những điều trái nhân văn, pháp luật, spell phù thuỷ… cần nhiều năng lượng, đối chọi và trả giá để đạt được mong muốn — giá cả ib tuỳ vấn đề tâm linh khó cỡ nào", price: "IB", link: "contact" },
     ],
   },
 ];

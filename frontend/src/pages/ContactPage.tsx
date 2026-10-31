@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createContactMessage } from "../api/client";
 import SparkleButton from "../components/SparkleButton";
+import { Icon } from "../components/icons";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -40,7 +41,9 @@ export default function ContactPage() {
     return (
       <main className="min-h-screen flex items-center justify-center px-4 pt-16">
         <div className="max-w-md w-full text-center animate-fade-in">
-          <span className="text-5xl block mb-6">💌</span>
+          <span className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-2xl bg-candle-gold/15 border-2 border-candle-gold/50 shadow-[0_0_28px_rgba(212,168,67,0.35)]">
+            <Icon name="heart" className="w-10 h-10" />
+          </span>
           <h1 className="font-display text-3xl text-mist mb-4">Đã gửi tin nhắn!</h1>
           <p className="font-body text-lilac italic mb-8">
             Cảm ơn bạn đã liên hệ. My sẽ phản hồi trong thời gian sớm nhất.

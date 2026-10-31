@@ -32,6 +32,12 @@ class MeetingMethod(str, enum.Enum):
     offline = "offline"
 
 
+class PaymentStatus(str, enum.Enum):
+    pending = "pending"
+    paid = "paid"
+    failed = "failed"
+
+
 class Service(Base):
     __tablename__ = "services"
 
@@ -129,6 +135,63 @@ class ContactMessage(Base):
     phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     is_read: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, index=True
+    )
+
+
+class Payment(Base):
+    """Đơn thanh toán SePay cho bản xem AI chuyên sâu (sau này dùng cho cọc booking)."""
+
+    __tablename__ = "payments"
+    __table_args__ = (
+        Index("ix_payments_code", "code", unique=True),
+        Index("ix_payments_status", "status"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # Mã CK khách ghi vào nội dung chuyển khoản, vd HWM482910.
+    code: Mapped[str] = mapped_column(String(32), nullable=False, unique=True)
+    service_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    amount: Mapped[int] = mapped_column(nullable=False, comment="VND integer")
+    status: Mapped[PaymentStatus] = mapped_column(
+        Enum(PaymentStatus, name="payment_status"),
+        default=PaymentStatus.pending,
+        nullable=False,
+    )
+    sepay_tx_id: Mapped[str | None] = mapped_column(String(100), nullable=True, unique=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, index=True
+    )
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class AiReading(Base):
+    """Kết quả xem AI: bản free luôn có, bản full chỉ sau khi paid."""
+
+    __tablename__ = "ai_readings"
+    __table_args__ = (
+        Index("ix_ai_readings_service", "service_type"),
+        Index("ix_ai_readings_input_hash", "input_hash"),
+        Index(
+            "ix_ai_readings_quota",
+            "client_ip_hash",
+            "service_type",
+            "created_at",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    service_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    input_json: Mapped[str] = mapped_column(Text, nullable=False)
+    # sha256(service_type + input chuẩn hóa) — cache bản free, chống gọi AI lặp.
+    input_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    computed_json: Mapped[str] = mapped_column(Text, nullable=False)
+    basic_result: Mapped[str] = mapped_column(Text, nullable=False)
+    full_result: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # HMAC(IP) — đếm quota free phân tán mà không lưu IP thô.
+    client_ip_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    payment_id: Mapped[int | None] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, index=True
     )

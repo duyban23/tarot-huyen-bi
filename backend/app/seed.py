@@ -28,13 +28,13 @@ def seed_services(db: Session) -> None:
         ),
         Service(
             name="Xem Offline 1 tiếng",
-            description="Gặp trực tiếp tại tiệm trong 1 tiếng, trò chuyện chuyên sâu cùng Reader.",
+            description="Gặp trực tiếp ở Hà Nội, Hà Nam, Ninh Bình, trong 1 tiếng, trò chuyện chuyên sâu cùng Reader.",
             duration_minutes=60,
             price=800000,
         ),
         Service(
             name="Xem Offline 2 tiếng",
-            description="Gặp trực tiếp tại tiệm trong 2 tiếng, trò chuyện chuyên sâu cùng Reader.",
+            description="Gặp trực tiếp ở Hà Nội, Hà Nam, Ninh Bình, trong 2 tiếng, trò chuyện chuyên sâu cùng Reader.",
             duration_minutes=120,
             price=1500000,
         ),

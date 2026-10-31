@@ -8,6 +8,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
+    // `tsc -b` ghi file này liên tục → Vite sẽ reload cả trang nếu không bỏ qua.
+    watch: { ignored: ["**/*.tsbuildinfo"] },
     proxy: {
       "/api": {
         target: API_TARGET,

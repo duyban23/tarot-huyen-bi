@@ -1,11 +1,13 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth import create_access_token, verify_password, verify_token
 from app.config import ADMIN_USERNAME
+from app.net import client_ip
+from app.throttle import login_throttle
 from app.crud import (
     create_service,
     delete_booking,
@@ -23,6 +25,7 @@ from app.crud import (
     update_service,
 )
 from app.database import get_db
+from app.models import AiReading, Payment
 from app.schemas import (
     AdminLogin,
     BookingOut,
@@ -40,15 +43,26 @@ router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 
 @router.post("/login", response_model=TokenOut)
-def admin_login(body: AdminLogin):
+def admin_login(body: AdminLogin, request: Request):
+    ip = client_ip(request)
+    retry_after = login_throttle.retry_after(ip)
+    if retry_after:
+        raise HTTPException(
+            status_code=429,
+            detail="Bạn đã thử sai nhiều lần — vui lòng đợi ít phút rồi thử lại.",
+            headers={"Retry-After": str(retry_after)},
+        )
     try:
         valid = verify_password(body.password)
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
     except Exception:
+        login_throttle.fail(ip)
         raise HTTPException(status_code=401, detail="Invalid credentials")
     if body.username != ADMIN_USERNAME or not valid:
+        login_throttle.fail(ip)
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    login_throttle.reset(ip)
     token = create_access_token()
     return TokenOut(access_token=token)
 
@@ -219,3 +233,40 @@ def remove_message(
     if not ok:
         raise HTTPException(status_code=404, detail="Message not found")
     return None
+
+
+# ---------- AI readings & payments ----------
+@router.get("/payments")
+def list_payments(
+    status: str | None = Query(None),
+    db: Session = Depends(get_db),
+    _=Depends(verify_token),
+):
+    q = db.query(Payment).order_by(Payment.id.desc()).limit(200)
+    if status:
+        q = db.query(Payment).filter(Payment.status == status).order_by(Payment.id.desc()).limit(200)
+    return [
+        {
+            "id": p.id, "code": p.code, "service_type": p.service_type,
+            "amount": p.amount, "status": p.status.value,
+            "sepay_tx_id": p.sepay_tx_id,
+            "created_at": p.created_at, "paid_at": p.paid_at,
+        }
+        for p in q.all()
+    ]
+
+
+@router.get("/readings")
+def list_readings(
+    db: Session = Depends(get_db),
+    _=Depends(verify_token),
+):
+    rows = db.query(AiReading).order_by(AiReading.id.desc()).limit(200).all()
+    return [
+        {
+            "id": r.id, "service_type": r.service_type, "input_json": r.input_json,
+            "has_full": bool(r.full_result), "payment_id": r.payment_id,
+            "created_at": r.created_at,
+        }
+        for r in rows
+    ]

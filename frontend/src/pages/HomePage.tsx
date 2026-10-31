@@ -188,7 +188,32 @@ const FEEDBACKS = [
     comment: "Những lời tiên đoán rất chính xác. Tôi ngạc nhiên lắm!",
     date: "05/10/2026",
   },
+  {
+    type: "image" as const,
+    src: `/images/feedbacks/thumbs/fb_18.webp`,
+    full: `/images/feedbacks/fb_18.webp`,
+    stars: 5,
+    customerName: "K.T.",
+    service: "Tarot",
+    comment: "Xem đúng cả chuyện việc làm lẫn thời điểm. My tư vấn kỹ và dễ hiểu.",
+    date: "15/10/2026",
+  },
 ];
+
+/** "dd/mm/yyyy" -> số để so sánh (thiếu/sai thì coi như cũ nhất). */
+function feedbackOrder(date?: string): number {
+  const [d, m, y] = (date ?? "").split("/").map(Number);
+  return (y || 0) * 10000 + (m || 0) * 100 + (d || 0);
+}
+
+/**
+ * Feedback mới nhất luôn đứng đầu: chỉ cần thêm mục mới vào cuối `FEEDBACKS`
+ * với `date` đúng định dạng dd/mm/yyyy là nó tự nhảy lên vị trí đầu tiên
+ * (4 thẻ đầu hiện sẵn trên mobile, 8 thẻ đầu từ sm trở lên).
+ */
+const FEEDBACKS_SORTED = [...FEEDBACKS].sort(
+  (a, b) => feedbackOrder(b.date) - feedbackOrder(a.date)
+);
 
 const FOR_WHO = [
   { icon: "heart-crack", title: "Chuyện tình cảm rối ren", desc: "Crush mập mờ, người yêu xa cách, người cũ chưa quên — bạn cần một lời rõ ràng để biết nên giữ hay buông" },
@@ -294,7 +319,11 @@ export default function HomePage() {
               href="/booking"
               className="w-full sm:w-auto max-w-[320px] px-8 py-3 rounded-xl font-display text-sm tracking-widest uppercase bg-arcane text-mist hover:bg-arcane/80 transition-all shadow-lg shadow-arcane/25 btn-glow"
             >
-              ✨ Đặt lịch xem bài
+              <Icon
+                name="sparkles"
+                className="inline-block w-4 h-4 -mt-0.5 mr-1.5 drop-shadow-[0_0_6px_rgba(212,168,67,0.6)]"
+              />
+              Đặt lịch xem bài
             </SparkleButton>
             <SparkleButton
               as="link"
@@ -304,6 +333,17 @@ export default function HomePage() {
               Khám phá dịch vụ
             </SparkleButton>
           </div>
+
+          <a
+            href="/services#cung-my"
+            className="inline-block mt-6 font-body text-candle-gold/90 italic text-base hover:text-candle-gold hover:underline underline-offset-4 transition-all"
+          >
+            <Icon
+              name="sparkles"
+              className="inline-block w-4 h-4 -mt-0.5 mr-1 drop-shadow-[0_0_6px_rgba(212,168,67,0.6)]"
+            />
+            Vũ trụ đang nhắn gì cho bạn? — xem ngay 5 phút, miễn phí →
+          </a>
         </div>
 
 
@@ -324,7 +364,11 @@ export default function HomePage() {
             </div>
             <div>
               <p className="font-display text-3xl md:text-4xl text-candle-gold">
-                <CountUp end={5} suffix="★" />
+                <CountUp end={5} />
+                <Icon
+                  name="star"
+                  className="inline-block w-6 h-6 md:w-7 md:h-7 -mt-1 ml-1 align-middle drop-shadow-[0_0_6px_rgba(212,168,67,0.55)]"
+                />
               </p>
               <p className="font-body text-lilac/90 text-sm sm:text-base tracking-wide mt-1">Đánh giá</p>
             </div>
@@ -408,7 +452,11 @@ export default function HomePage() {
               href="/booking"
               className="px-8 py-3 rounded-xl font-display text-sm tracking-widest uppercase bg-arcane text-mist hover:bg-arcane/80 transition-all shadow-lg shadow-arcane/25 btn-glow"
             >
-              ✨ Đặt lịch ngay
+              <Icon
+                name="sparkles"
+                className="inline-block w-4 h-4 -mt-0.5 mr-1.5 drop-shadow-[0_0_6px_rgba(212,168,67,0.6)]"
+              />
+              Đặt lịch ngay
             </SparkleButton>
             <SparkleButton
               as="link"
@@ -427,9 +475,6 @@ export default function HomePage() {
       {/* ─── Tại sao bạn ở đây? ─── */}
       <Reveal className="py-16 md:py-24" delay={200}>
         <div className="max-w-4xl mx-auto px-4">
-          <p className="font-body text-candle-gold text-sm tracking-widest uppercase text-center mb-2">
-            ✦ Có phải bạn đang ở đây vì... ✦
-          </p>
           <h2 className="font-display text-2xl md:text-4xl text-mist text-center mb-3">
             Tại sao bạn ở đây?
           </h2>
@@ -470,7 +515,7 @@ export default function HomePage() {
           </h2>
 
           <div id="feedback-cards" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-            {FEEDBACKS.map((fb, i) => (
+            {FEEDBACKS_SORTED.map((fb, i) => (
               <button
                 key={i}
                 onClick={() => setLightboxItem(fb)}
@@ -508,7 +553,9 @@ export default function HomePage() {
                       className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                     />
                     <div className="absolute top-2 right-2 bg-black/40 rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="text-white text-xs">🔍</span>
+                      <span className="text-white">
+                        <Icon name="search" className="w-3 h-3" />
+                      </span>
                     </div>
                   </div>
 
@@ -525,8 +572,14 @@ export default function HomePage() {
                       {fb.comment}
                     </p>
                     <div className="flex items-center justify-between">
-                      <div className="text-candle-gold text-xs tracking-wider">
-                        {'★'.repeat(fb.stars)}
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: fb.stars }).map((_, i) => (
+                          <Icon
+                            key={i}
+                            name="star"
+                            className="w-3 h-3 drop-shadow-[0_0_4px_rgba(212,168,67,0.55)]"
+                          />
+                        ))}
                       </div>
                       <span className="text-lilac/90 text-xs">
                         {fb.date}

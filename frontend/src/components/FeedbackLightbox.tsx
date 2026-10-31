@@ -1,4 +1,5 @@
 import { useEffect, useCallback } from "react";
+import { Icon } from "./icons";
 
 interface FeedbackItem {
   type: "image" | "video";
@@ -70,8 +71,14 @@ export default function FeedbackLightbox({ item, onClose }: Props) {
               {item.comment}
             </p>
             <div className="flex items-center justify-between">
-              <div className="text-candle-gold text-sm tracking-wider">
-                {'★'.repeat(item.stars)}
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: item.stars }).map((_, i) => (
+                  <Icon
+                    key={i}
+                    name="star"
+                    className="w-3.5 h-3.5 drop-shadow-[0_0_4px_rgba(212,168,67,0.55)]"
+                  />
+                ))}
               </div>
               <span className="text-lilac/60 text-xs">
                 {item.date}

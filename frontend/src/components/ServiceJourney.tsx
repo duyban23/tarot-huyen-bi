@@ -7,8 +7,9 @@ import { Icon } from "./icons";
  * "Tìm một nơi để lòng được nhẹ hơn" — thay 6 ô dịch vụ cũ bằng 3 ô lật thẻ.
  *
  * Luồng: 3 ô (Xem theo thời gian · Xem theo các loại bài · Đào tạo) → lật thẻ ra
- * các nhánh (vd Xem theo các loại bài → Tarot / Combo / Tea Leaf / …) → bấm nhánh
- * thì các dịch vụ chi tiết hiện ra ở khung bên dưới.
+ * các nhánh (vd Xem theo các loại bài → Tarot / Combo / Tea Leaf / …) dạng
+ * accordion: bấm nhánh nào thì danh sách dịch vụ xổ xuống ngay dưới nhánh đó,
+ * bấm lại để thu.
  *
  * `service` phải khớp từng chữ với tên service trong DB (backend/app/seed.py)
  * để trang đặt lịch preselect được — thiếu thì dùng `to` hoặc để trống (→ /contact).
@@ -27,7 +28,9 @@ type JourneyItem = {
 type JourneyBranch = {
   icon: string;
   name: string;
-  hint: string;
+  hint?: string;
+  /** Loại bài nổi bật hiện dưới tên nhóm (vd Haletu · Oracle · Lenormand…) */
+  tags?: string[];
   items: JourneyItem[];
   footer?: string;
 };
@@ -52,7 +55,7 @@ const JOURNEY: JourneyBox[] = [
     preview: ["Online", "Offline", "Trọn 1–2 tiếng"],
     branches: [
       {
-        icon: "💬",
+        icon: "video",
         name: "Online",
         hint: "Gọi video, ở đâu cũng được",
         items: [
@@ -71,19 +74,19 @@ const JOURNEY: JourneyBox[] = [
         ],
       },
       {
-        icon: "🏠",
+        icon: "home",
         name: "Offline",
-        hint: "Gặp trực tiếp tại tiệm",
+        hint: "Gặp trực tiếp ở Hà Nội, Hà Nam, Ninh Bình",
         items: [
           {
             label: "Xem Offline 1 tiếng",
-            note: "Gặp trực tiếp tại tiệm trong 1 tiếng",
+            note: "Gặp trực tiếp ở Hà Nội, Hà Nam, Ninh Bình trong 1 tiếng",
             price: "800.000 /tiếng",
             service: "Xem Offline 1 tiếng",
           },
           {
             label: "Xem Offline 2 tiếng",
-            note: "Gặp trực tiếp tại tiệm trong 2 tiếng",
+            note: "Gặp trực tiếp ở Hà Nội, Hà Nam, Ninh Bình trong 2 tiếng",
             price: "1.500.000 /2 tiếng",
             service: "Xem Offline 2 tiếng",
           },
@@ -96,10 +99,10 @@ const JOURNEY: JourneyBox[] = [
     icon: "moon",
     title: "Xem theo các loại bài",
     desc: "Tarot, Haletu, Oracle, Lenormand, Tea Leaf, combo và các gói dịch vụ khác — từ trải bài cơ bản 1 câu hỏi tới full mọi vấn đề, chọn theo đúng loại bài bạn muốn xem.",
-    preview: ["Tarot", "Bài khác", "Combo", "Dịch vụ khác", "Tea Leaf"],
+    preview: ["Tarot", "Tea Leaf", "Bài khác", "Dịch vụ khác", "Combo"],
     branches: [
       {
-        icon: "🃏",
+        icon: "tarot",
         name: "Tarot",
         hint: "Từ 1 câu hỏi tới full",
         items: [
@@ -136,9 +139,46 @@ const JOURNEY: JourneyBox[] = [
         ],
       },
       {
-        icon: "🎴",
+        icon: "leaf",
+        name: "Tea Leaf",
+        hint: "Bài trà 3–12 tháng",
+        items: [
+          {
+            label: "Tea Leaf 3 tháng full",
+            note: "Xem bài tuần hoặc bài trà mốc thời gian gần (3 tháng full vấn đề)",
+            price: "250.000",
+            service: "Tea Leaf 3 tháng full",
+          },
+          {
+            label: "Tea Leaf 6 tháng 3 vấn đề",
+            note: "Trải bài Tea Leaf 6 tháng, 3 vấn đề",
+            price: "300.000",
+            service: "Tea Leaf 6 tháng 3 vấn đề",
+          },
+          {
+            label: "Tea Leaf 6 tháng full",
+            note: "Full vấn đề trong 6 tháng",
+            price: "400.000",
+            service: "Tea Leaf 6 tháng full",
+          },
+          {
+            label: "Bài trà full 12 tháng",
+            note: "12 tháng / 3 vấn đề",
+            price: "450.000",
+            service: "Bài trà full 12 tháng",
+          },
+          {
+            label: "Tea Leaf 12 tháng full",
+            note: "Full 6 vấn đề: tình cảm, tiền bạc, hôn nhân, thành công, hạnh phúc, may mắn, học hành, công việc",
+            price: "500.000",
+            service: "Tea Leaf 12 tháng full",
+          },
+        ],
+      },
+      {
+        icon: "cards",
         name: "Các loại bài khác",
-        hint: "Haletu, Oracle, Lenormand…",
+        tags: ["Haletu", "Oracle", "Lenormand", "The Lover", "The Heart"],
         items: [
           {
             label: "Trải bài xin lời khuyên Haletu",
@@ -191,55 +231,7 @@ const JOURNEY: JourneyBox[] = [
         ],
       },
       {
-        icon: "💫",
-        name: "Combo",
-        hint: "Kết hợp nhiều loại bài",
-        items: [
-          {
-            label: "Trải bài VIP combo Tarot + Tea Leaf 6 tháng",
-            note: "Không giới hạn thời gian",
-            price: "700.000",
-            service: "Combo Tarot + Tea Leaf 6 tháng",
-          },
-          {
-            label: "Combo VIP Full Tarot + Trà 12 tháng",
-            note: "Tặng bài Haletu hoặc Oracle",
-            price: "1.000.000",
-            service: "Combo VIP Full Tarot + Trà 12 tháng",
-          },
-          {
-            label: "Combo Tarot + Lenormand",
-            note: "Được yêu thích nhất — sự kết hợp hoàn hảo tuyệt đối cho tất cả mọi khúc mắc",
-            price: "800.000",
-            service: "Combo Tarot + Lenormand",
-          },
-          {
-            label: "Combo tất cả mọi loại bài",
-            note: "Haletu, Oracle, Tarot, Tea Leaf, Lenormand,… xem về duy nhất 1 chuyện: tình yêu, công việc, tiền bạc, gia đình,…",
-            price: "650.000",
-            service: "Combo 1 chuyện all bài",
-          },
-          {
-            label: "Combo Pro",
-            note: "Full Tarot + Full Trà + Haletu + Oracle + Lenormand + tư vấn tình cảm + trị liệu tâm lý (trong vòng 3 tiếng, nếu thêm +450k/tiếng)",
-            price: "1.500.000",
-            service: "Combo Pro trị liệu",
-          },
-          {
-            label: "COMBO HOT NHẤT",
-            note: "Full toàn bộ tất cả mọi loại bài kèm theo dõi chữa lành vết thương tâm hồn, không giới hạn thời gian xem, gợi ý câu hỏi, kèm bảo hành xem lại và tư vấn tình cảm miễn phí trong vòng 1 tháng bất cứ khi nào cần",
-            price: "3.000.000",
-            service: "Combo HOT toàn diện",
-          },
-          {
-            label: "Vấn đề tâm linh đặc biệt",
-            note: "Người thứ 3, chết chóc, phá thai, sảy, những điều trái nhân văn, pháp luật, spell phù thuỷ… cần nhiều năng lượng, đối chọi và trả giá để đạt được mong muốn. Giá cả ib tuỳ vấn đề tâm linh khó cỡ nào.",
-            price: "IB",
-          },
-        ],
-      },
-      {
-        icon: "🔮",
+        icon: "crystal",
         name: "Dịch vụ khác",
         hint: "Thần số học, bản đồ sao, tử vi",
         items: [
@@ -292,53 +284,64 @@ const JOURNEY: JourneyBox[] = [
         ],
       },
       {
-        icon: "🍃",
-        name: "Tea Leaf",
-        hint: "Bài trà 3–12 tháng",
+        icon: "combo",
+        name: "Combo",
+        hint: "Kết hợp nhiều loại bài",
         items: [
           {
-            label: "Tea Leaf 3 tháng full",
-            note: "Xem bài tuần hoặc bài trà mốc thời gian gần (3 tháng full vấn đề)",
-            price: "250.000",
-            service: "Tea Leaf 3 tháng full",
+            label: "Trải bài VIP combo Tarot + Tea Leaf 6 tháng",
+            note: "Không giới hạn thời gian",
+            price: "700.000",
+            service: "Combo Tarot + Tea Leaf 6 tháng",
           },
           {
-            label: "Tea Leaf 6 tháng 3 vấn đề",
-            note: "Trải bài Tea Leaf 6 tháng, 3 vấn đề",
-            price: "300.000",
-            service: "Tea Leaf 6 tháng 3 vấn đề",
+            label: "Combo VIP Full Tarot + Trà 12 tháng",
+            note: "Tặng bài Haletu hoặc Oracle",
+            price: "1.000.000",
+            service: "Combo VIP Full Tarot + Trà 12 tháng",
           },
           {
-            label: "Tea Leaf 6 tháng full",
-            note: "Full vấn đề trong 6 tháng",
-            price: "400.000",
-            service: "Tea Leaf 6 tháng full",
+            label: "Combo Tarot + Lenormand",
+            note: "Được yêu thích nhất — sự kết hợp hoàn hảo tuyệt đối cho tất cả mọi khúc mắc",
+            price: "800.000",
+            service: "Combo Tarot + Lenormand",
           },
           {
-            label: "Bài trà full 12 tháng",
-            note: "12 tháng / 3 vấn đề",
-            price: "450.000",
-            service: "Bài trà full 12 tháng",
+            label: "Combo tất cả mọi loại bài",
+            note: "Haletu, Oracle, Tarot, Tea Leaf, Lenormand,… xem về duy nhất 1 chuyện: tình yêu, công việc, tiền bạc, gia đình,…",
+            price: "650.000",
+            service: "Combo 1 chuyện all bài",
           },
           {
-            label: "Tea Leaf 12 tháng full",
-            note: "Full 6 vấn đề: tình cảm, tiền bạc, hôn nhân, thành công, hạnh phúc, may mắn, học hành, công việc",
-            price: "500.000",
-            service: "Tea Leaf 12 tháng full",
+            label: "Combo Pro",
+            note: "Full Tarot + Full Trà + Haletu + Oracle + Lenormand + tư vấn tình cảm + trị liệu tâm lý (trong vòng 3 tiếng, nếu thêm +450k/tiếng)",
+            price: "1.500.000",
+            service: "Combo Pro trị liệu",
+          },
+          {
+            label: "COMBO HOT NHẤT",
+            note: "Full toàn bộ tất cả mọi loại bài kèm theo dõi chữa lành vết thương tâm hồn, không giới hạn thời gian xem, gợi ý câu hỏi, kèm bảo hành xem lại và tư vấn tình cảm miễn phí trong vòng 1 tháng bất cứ khi nào cần",
+            price: "3.000.000",
+            service: "Combo HOT toàn diện",
+          },
+          {
+            label: "Vấn đề tâm linh đặc biệt",
+            note: "Người thứ 3, chết chóc, phá thai, sảy, những điều trái nhân văn, pháp luật, spell phù thuỷ… cần nhiều năng lượng, đối chọi và trả giá để đạt được mong muốn. Giá cả ib tuỳ vấn đề tâm linh khó cỡ nào.",
+            price: "IB",
           },
         ],
-      },
+      }
     ],
   },
   {
     id: "khoa-hoc",
     icon: "book",
     title: "Đào tạo",
-    desc: "Từ người chưa biết gì về Tarot, tới Reader chuyên nghiệp — và một khóa để chữa lành chính mình, phát triển bản thân, nữ tính, thiền, thay đổi và tái sinh.",
+    desc: "Từ người chưa biết gì về Tarot trở thành Reader chuyên nghiệp — và một khóa để chữa lành chính mình, phát triển bản thân, nữ tính, thiền, thay đổi và tái sinh.",
     preview: ["Cơ bản", "Nâng cao", "Tái sinh"],
     branches: [
       {
-        icon: "📘",
+        icon: "book",
         name: "Cơ bản",
         hint: "Bắt đầu từ con số 0",
         items: [
@@ -352,7 +355,7 @@ const JOURNEY: JourneyBox[] = [
         footer: "Đăng ký để My tư vấn lộ trình phù hợp.",
       },
       {
-        icon: "📗",
+        icon: "trophy",
         name: "Nâng cao",
         hint: "Đọc bài như một Reader",
         items: [
@@ -366,7 +369,7 @@ const JOURNEY: JourneyBox[] = [
         footer: "Đăng ký để My tư vấn lộ trình phù hợp.",
       },
       {
-        icon: "🌱",
+        icon: "sprout",
         name: "Tái sinh",
         hint: "Chữa lành tổn thương",
         items: [
@@ -467,10 +470,6 @@ export default function ServiceJourney() {
     setPicked(null);
   };
 
-  const activeBox = JOURNEY.find((b) => b.id === picked?.boxId) ?? null;
-  const activeBranch =
-    activeBox?.branches.find((br) => br.name === picked?.branch) ?? null;
-
   return (
     <>
       <div
@@ -504,7 +503,7 @@ export default function ServiceJourney() {
                       Mỗi khối có chiều cao cố định nên 3 thẻ thẳng hàng với
                       nhau từng dòng và có cùng chiều cao trên mobile. */}
                   <div className="flex-1 flex flex-col justify-center">
-                    <span className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-2xl bg-candle-gold/20 border-2 border-candle-gold/60 shadow-lg shadow-candle-gold/20 text-candle-gold group-hover:scale-110 group-hover:bg-candle-gold/35 group-hover:border-candle-gold transition-all">
+                    <span className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-2xl bg-gradient-to-br from-candle-gold/25 to-arcane/20 border-2 border-candle-gold/60 ring-1 ring-candle-gold/20 shadow-[0_0_20px_rgba(212,168,67,0.3)] text-candle-gold group-hover:scale-110 group-hover:bg-candle-gold/35 group-hover:border-candle-gold transition-all">
                       <Icon name={box.icon} className="w-5 h-5 md:w-7 md:h-7" />
                     </span>
                     <h3 className="font-display text-lg md:text-xl tracking-wider text-mist mt-3 md:mt-4 mb-1.5 md:mb-2 min-h-[3.5rem] group-hover:text-candle-gold transition-colors">
@@ -557,106 +556,113 @@ export default function ServiceJourney() {
                     </button>
                   </div>
 
-                  {isPickedHere && activeBranch ? (
-                    /* ── Đã chọn một lối: danh sách dịch vụ ── */
-                    <div
-                      key={activeBranch.name}
-                      className="animate-fade-in flex flex-1 flex-col min-h-0"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setPicked(null)}
-                        tabIndex={flipped ? undefined : -1}
-                        className="self-start font-body text-lilac/70 hover:text-candle-gold text-sm transition-colors"
-                      >
-                        ← Chọn lối khác
-                      </button>
-                      <h4 className="font-display text-lg md:text-xl text-mist mt-2">
-                        <span aria-hidden className="mr-1.5">
-                          {activeBranch.icon}
-                        </span>
-                        {activeBranch.name}
-                      </h4>
-                      <p className="font-body text-lilac/70 text-sm italic mb-3">
-                        {activeBranch.hint}
+                  {/* ── Danh sách lối vào dạng accordion: bấm nhóm để xổ dịch vụ ── */}
+                  <div className="journey-scroll flex-1 min-h-0 flex flex-col overflow-y-auto pr-1">
+                    {/* my-auto: dư chỗ thì canh giữa, hết chỗ thì xếp từ trên xuống */}
+                    <div className="my-auto">
+                      <p className="font-body text-lilac/70 text-[13px] md:text-sm italic mb-2 md:mb-3">
+                        Bạn muốn đi lối nào?
                       </p>
-
-                      <div className="journey-scroll flex-1 min-h-0 space-y-2 md:overflow-y-auto md:pr-1">
-                        {activeBranch.items.map((item) => (
-                          <Link
-                            key={`${item.label}-${item.price}`}
-                            to={itemHref(item)}
-                            title={itemCta(item)}
-                            tabIndex={flipped ? undefined : -1}
-                            className="tap-row group/item block rounded-xl border border-velvet/60 bg-void/40 px-3 py-2 hover:border-candle-gold/60 hover:bg-velvet/40 transition-all"
-                          >
-                            <span className="flex items-baseline justify-between gap-2">
-                              <span className="font-body text-mist text-[15px] font-medium group-hover/item:text-candle-gold transition-colors">
-                                {item.label}
-                              </span>
-                              <span className="font-display text-candle-gold text-[13px] font-semibold tracking-wide whitespace-nowrap shrink-0">
-                                {item.price}
-                              </span>
-                            </span>
-                            {item.note && (
-                              <span className="block font-body text-lilac/60 text-[13px] leading-snug mt-0.5">
-                                {item.note}
-                              </span>
-                            )}
-                          </Link>
-                        ))}
-                      </div>
-
-                      {activeBranch.footer && (
-                        <p className="font-body text-lilac/70 text-[13px] mt-3">
-                          {activeBranch.footer}
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    /* ── Chưa chọn: danh sách các lối vào ── */
-                    <div className="journey-scroll flex-1 min-h-0 flex flex-col md:overflow-y-auto md:pr-1">
-                      {/* my-auto: dư chỗ thì canh giữa, hết chỗ thì xếp từ trên xuống */}
-                      <div className="my-auto">
-                        <p className="font-body text-lilac/70 text-[13px] md:text-sm italic mb-2 md:mb-3">
-                          Bạn muốn đi lối nào?
-                        </p>
-                        {/* Mobile: 2 cột, chỉ tên lối (bỏ hint) cho gọn; từ md trở lên: 1 cột như cũ */}
-                        <div className="grid grid-cols-2 gap-2 md:grid-cols-1">
-                          {box.branches.map((br) => (
-                            <button
+                      <div className="space-y-2">
+                        {box.branches.map((br) => {
+                          const isOpen = isPickedHere && picked?.branch === br.name;
+                          return (
+                            <div
                               key={br.name}
-                              type="button"
-                              onClick={() => setPicked({ boxId: box.id, branch: br.name })}
-                              tabIndex={flipped ? undefined : -1}
-                              className="tap-row w-full h-12 md:h-auto md:min-h-[64px] flex items-center gap-2 md:gap-3 text-left px-2 md:px-3 md:py-2.5 rounded-xl border border-velvet/60 bg-void/40"
+                              className={`rounded-xl border bg-void/40 overflow-hidden transition-all ${
+                                isOpen
+                                  ? "border-candle-gold/60 shadow-[0_0_16px_rgba(212,168,67,0.22)]"
+                                  : "border-velvet/60"
+                              }`}
                             >
-                              <span
-                                aria-hidden
-                                className="shrink-0 text-base md:text-lg leading-none w-5 md:w-6 text-center"
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPicked(
+                                    isOpen ? null : { boxId: box.id, branch: br.name }
+                                  )
+                                }
+                                aria-expanded={isOpen}
+                                tabIndex={flipped ? undefined : -1}
+                                className="tap-row w-full flex items-center gap-2 md:gap-3 text-left px-2 md:px-3 py-2.5"
                               >
-                                {br.icon}
-                              </span>
-                              <span className="min-w-0 flex-1 flex flex-wrap items-baseline gap-x-2">
-                                <span className="font-body text-[13px] md:text-[15px] font-medium leading-tight md:leading-normal text-mist line-clamp-2">
-                                  {br.name}
+                                <span className="shrink-0 flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-br from-candle-gold/25 to-arcane/15 border border-candle-gold/55 ring-1 ring-candle-gold/20 shadow-[0_0_14px_rgba(212,168,67,0.35)]">
+                                  <Icon
+                                    name={br.icon}
+                                    className="w-4 h-4 md:w-[18px] md:h-[18px]"
+                                  />
                                 </span>
-                                <span className="hidden md:inline font-body text-lilac/60 text-[13px] leading-snug">
-                                  {br.hint}
+                                <span className="min-w-0 flex-1">
+                                  <span className="block font-body text-[13px] md:text-[15px] font-medium leading-tight md:leading-normal text-mist">
+                                    {br.name}
+                                  </span>
+                                  {br.tags && br.tags.length > 0 ? (
+                                    <span className="flex flex-wrap gap-1 mt-1">
+                                      {br.tags.map((tag) => (
+                                        <span
+                                          key={tag}
+                                          className="font-body text-[10px] md:text-[11px] leading-none tracking-wide text-candle-gold border border-candle-gold/40 bg-candle-gold/10 rounded-full px-1.5 md:px-2 py-1"
+                                        >
+                                          {tag}
+                                        </span>
+                                      ))}
+                                    </span>
+                                  ) : br.hint ? (
+                                    <span className="hidden md:block font-body text-lilac/60 text-[13px] leading-snug">
+                                      {br.hint}
+                                    </span>
+                                  ) : null}
                                 </span>
-                              </span>
-                              <span
-                                aria-hidden
-                                className="hidden md:inline shrink-0 text-sm text-lilac/50"
-                              >
-                                →
-                              </span>
-                            </button>
-                          ))}
-                        </div>
+                                <span
+                                  className={`shrink-0 flex items-center transition-transform ${
+                                    isOpen ? "rotate-180 text-candle-gold" : "text-lilac/50"
+                                  }`}
+                                >
+                                  <Icon
+                                    name="chevron-down"
+                                    className="w-3.5 h-3.5 md:w-4 md:h-4"
+                                  />
+                                </span>
+                              </button>
+
+                              {isOpen && (
+                                <div className="animate-fade-in border-t border-velvet/50 px-2 md:px-3 py-2 space-y-2">
+                                  {br.items.map((item) => (
+                                    <Link
+                                      key={`${item.label}-${item.price}`}
+                                      to={itemHref(item)}
+                                      title={itemCta(item)}
+                                      tabIndex={flipped ? undefined : -1}
+                                      className="tap-row group/item block rounded-lg border border-velvet/50 bg-void/50 px-2.5 py-2 hover:border-candle-gold/60 hover:bg-velvet/40 transition-all"
+                                    >
+                                      <span className="flex items-baseline justify-between gap-2">
+                                        <span className="font-body text-mist text-[14px] font-medium group-hover/item:text-candle-gold transition-colors">
+                                          {item.label}
+                                        </span>
+                                        <span className="font-display text-candle-gold text-[12px] font-semibold tracking-wide whitespace-nowrap shrink-0">
+                                          {item.price}
+                                        </span>
+                                      </span>
+                                      {item.note && (
+                                        <span className="block font-body text-lilac/60 text-[12px] leading-snug mt-0.5">
+                                          {item.note}
+                                        </span>
+                                      )}
+                                    </Link>
+                                  ))}
+                                  {br.footer && (
+                                    <p className="font-body text-lilac/70 text-[12px] pt-1">
+                                      {br.footer}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>

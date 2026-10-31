@@ -182,7 +182,13 @@ export default function AboutPage() {
               <p className="font-body text-lilac/60 text-xs sm:text-sm">khách hàng</p>
             </div>
             <div>
-              <p className="font-display text-2xl sm:text-3xl text-candle-gold"><CountUp end={5} suffix="★" /></p>
+              <p className="font-display text-2xl sm:text-3xl text-candle-gold">
+                <CountUp end={5} />
+                <Icon
+                  name="star"
+                  className="inline-block w-5 h-5 sm:w-6 sm:h-6 -mt-1 ml-1 align-middle drop-shadow-[0_0_6px_rgba(212,168,67,0.55)]"
+                />
+              </p>
               <p className="font-body text-lilac/60 text-xs sm:text-sm">đánh giá</p>
             </div>
           </div>
@@ -295,7 +301,11 @@ export default function AboutPage() {
               href="/booking"
               className="px-8 py-3 rounded-xl font-display text-sm tracking-widest uppercase bg-arcane text-mist hover:bg-arcane/80 transition-all shadow-lg shadow-arcane/25 btn-glow"
             >
-              ✨ Đặt lịch ngay
+              <Icon
+                name="sparkles"
+                className="inline-block w-4 h-4 -mt-0.5 mr-1.5 drop-shadow-[0_0_6px_rgba(212,168,67,0.6)]"
+              />
+              Đặt lịch ngay
             </SparkleButton>
             <Link
               to="/services"

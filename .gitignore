@@ -14,6 +14,7 @@ backend/.venv/
 frontend/dist/
 *.db
 *.sqlite3
+*.tsbuildinfo
 
 # ── Environment ──
 # Secrets live in Vercel project settings, never in the repo.

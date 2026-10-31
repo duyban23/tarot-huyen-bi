@@ -9,6 +9,7 @@ import ConfirmationScreen from "../components/ConfirmationScreen";
 import MoonStepper from "../components/MoonStepper";
 import ServiceCatalog from "../components/ServiceCatalog";
 import TimeSlots from "../components/TimeSlots";
+import { Icon } from "../components/icons";
 
 const BRAND = {
   name: "Healing With My",
@@ -220,7 +221,11 @@ export default function BookingPage() {
                       {selectedService.name}
                     </h3>
                     <p className="font-body text-lilac/70 text-sm mt-0.5">
-                      ⏱ {selectedService.duration_minutes} phút
+                      <Icon
+                        name="time"
+                        className="inline-block w-3.5 h-3.5 -mt-0.5 mr-1"
+                      />
+                      {selectedService.duration_minutes} phút
                       {selectedDate && selectedTime
                         ? ` · ${selectedDate} lúc ${selectedTime}`
                         : ""}
