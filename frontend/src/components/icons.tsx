@@ -5,6 +5,12 @@
 export type IconName =
   | "time"
   | "ai"
+  | "video"
+  | "sun"
+  | "sunrise"
+  | "sunset"
+  | "search"
+  | "close"
   | "tarot"
   | "leaf"
   | "cards"
@@ -24,6 +30,7 @@ export type IconName =
   | "users"
   | "yinyang"
   | "heartbeat"
+  | "chevron-down"
   | "sparkles";
 
 const PATHS: Record<IconName, React.ReactNode> = {
@@ -40,6 +47,37 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8L19 15z" />
     </>
   ),
+  video: (
+    <>
+      <rect x="3" y="6" width="12" height="12" rx="2" />
+      <path d="M15 10.5l5-2.5v8l-5-2.5" />
+    </>
+  ),
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4.5" />
+      <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8" />
+    </>
+  ),
+  sunrise: (
+    <>
+      <path d="M12 3v5M5.6 8.6l2.1 2.1M18.4 8.6l-2.1 2.1M3 18h18" />
+      <path d="M7 18a5 5 0 0110 0" />
+    </>
+  ),
+  sunset: (
+    <>
+      <path d="M12 8V3M5.6 8.6l2.1-2.1M18.4 8.6l-2.1-2.1M3 18h18" />
+      <path d="M7 18a5 5 0 0110 0" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M16.5 16.5L21 21" />
+    </>
+  ),
+  close: <path d="M6 6l12 12M18 6L6 18" />,
   tarot: (
     <>
       <rect x="6" y="4" width="12" height="16" rx="2" />
@@ -155,6 +193,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M6.5 12h2.5l1.3-2.5 2 4 1.3-1.5h3.9" />
     </>
   ),
+  "chevron-down": <path d="M6 9.5l6 6 6-6" />,
   sparkles: (
     <>
       <path d="M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6L12 4z" />
@@ -167,6 +206,12 @@ const PATHS: Record<IconName, React.ReactNode> = {
 const COLORS: Record<IconName, string> = {
   time: "text-sky-300",
   ai: "text-violet-300",
+  video: "text-sky-300",
+  sun: "text-yellow-300",
+  sunrise: "text-amber-300",
+  sunset: "text-orange-300",
+  search: "text-inherit",
+  close: "text-inherit",
   tarot: "text-candle-gold",
   leaf: "text-green-300",
   cards: "text-orange-300",
@@ -186,6 +231,7 @@ const COLORS: Record<IconName, string> = {
   users: "text-pink-300",
   yinyang: "text-stone-200",
   heartbeat: "text-red-400",
+  "chevron-down": "text-inherit",
   sparkles: "text-candle-gold",
 };
 

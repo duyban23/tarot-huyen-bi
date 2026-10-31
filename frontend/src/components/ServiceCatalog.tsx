@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Service } from "../api/types";
+import { Icon } from "./icons";
 import {
   CATEGORIES,
   fold,
@@ -70,7 +71,7 @@ export default function ServiceCatalog(props: Props) {
         list.push({
           cat: {
             id: "db-them",
-            icon: "✨",
+            icon: "sparkles",
             name: "Dịch vụ khác",
             desc: "Các dịch vụ được thêm từ trang quản trị.",
             items: [],
@@ -104,15 +105,9 @@ export default function ServiceCatalog(props: Props) {
       {/* ── Tìm kiếm (dính ngay dưới thanh menu) ── */}
       <div className="sticky top-16 z-30 -mx-4 px-4 pt-2 pb-3 bg-void/90 backdrop-blur-md">
         <div className="relative max-w-md mx-auto">
-          <svg
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-lilac/50 pointer-events-none"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            aria-hidden="true"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
-          </svg>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-lilac/50">
+            <Icon name="search" className="w-5 h-5" />
+          </span>
           <input
             // NOTE: phải là type="text", không dùng type="search": WebKit/Chromium
             // vẽ thêm nút xoá native → trùng với nút xoá bên dưới.
@@ -130,9 +125,7 @@ export default function ServiceCatalog(props: Props) {
               aria-label="Xoá tìm kiếm"
               className="absolute right-2 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center text-lilac/60 hover:text-mist"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <Icon name="close" className="w-5 h-5" />
             </button>
           )}
         </div>
@@ -171,8 +164,8 @@ export default function ServiceCatalog(props: Props) {
                   aria-expanded={isOpen}
                   className="w-full flex items-center gap-3 p-3.5 md:p-4 text-left min-h-[64px]"
                 >
-                  <span className="w-11 h-11 shrink-0 flex items-center justify-center rounded-xl bg-candle-gold/25 border-2 border-candle-gold/60 text-xl">
-                    {cat.icon}
+                  <span className="w-11 h-11 md:w-12 md:h-12 shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-candle-gold/30 to-arcane/15 border-2 border-candle-gold/60 ring-1 ring-candle-gold/20 shadow-[0_0_16px_rgba(212,168,67,0.35)]">
+                    <Icon name={cat.icon} className="w-6 h-6 md:w-7 md:h-7" />
                   </span>
                   <span className="flex-1 min-w-0">
                     <span className="block font-display text-sm md:text-base tracking-wider uppercase text-mist">
@@ -184,15 +177,13 @@ export default function ServiceCatalog(props: Props) {
                   </span>
                   <span className="shrink-0 flex items-center gap-1.5 text-lilac/60">
                     <span className="font-body text-xs whitespace-nowrap">{rows.length} mục</span>
-                    <svg
-                      className={`w-5 h-5 transition-transform duration-300 ${isOpen ? "rotate-180 text-candle-gold" : ""}`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      aria-hidden="true"
+                    <span
+                      className={`inline-flex transition-transform duration-300 ${
+                        isOpen ? "rotate-180 text-candle-gold" : ""
+                      }`}
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                      <Icon name="chevron-down" className="w-5 h-5" />
+                    </span>
                   </span>
                 </button>
 

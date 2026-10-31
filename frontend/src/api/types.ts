@@ -77,3 +77,62 @@ export interface ContactMessagePayload {
   phone?: string | null;
   message: string;
 }
+
+export interface AiField {
+  key: string;
+  label: string;
+  type: "text" | "date" | "time" | "textarea" | "select" | "checkbox";
+  required: boolean;
+  placeholder?: string | null;
+  options?: string[] | null;
+}
+
+export interface AiService {
+  type: string;
+  name: string;
+  tagline: string;
+  price_full: number;
+  fields: AiField[];
+}
+
+export interface AiCard {
+  vi_tri: string;
+  id?: string;
+  la: string;
+  img?: string;
+  y_nghia_goc: string;
+}
+
+export interface AiReadingResult {
+  id: number;
+  service: string;
+  computed_summary: string;
+  basic_result: string;
+  cached: boolean;
+  cards?: AiCard[] | null;
+  spread_label?: string | null;
+}
+
+export interface AiFullResult {
+  id: number;
+  service: string;
+  full_result: string;
+}
+
+export interface PaymentOrder {
+  code: string;
+  service: string;
+  amount: number;
+  status: string;
+  transfer_content: string;
+  qr_url: string;
+  account_name: string;
+  bank: string;
+  account: string;
+}
+
+export interface PaymentStatus {
+  code: string;
+  status: "pending" | "paid" | "failed";
+  amount: number;
+}

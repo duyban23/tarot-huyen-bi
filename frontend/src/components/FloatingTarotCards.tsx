@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import anime from "animejs";
+import { Icon } from "./icons";
 
 /* ── Card dimensions (7:12 ratio = 350:600) ── */
 const CARD_W = 72;
@@ -380,7 +381,11 @@ export default function FloatingTarotCards({ count = 6 }: { count?: number }) {
             }}>
               {card.name}
               <span style={{ display: "block", fontSize: 9, color: "#a07392", fontFamily: "Cormorant Garamond, serif" }}>
-                {card.meaning} {card.flipped ? "🃏" : "🔮"}
+                {card.meaning}{" "}
+                <Icon
+                  name={card.flipped ? "cards" : "crystal"}
+                  className="inline-block w-2.5 h-2.5 align-[-1px]"
+                />
               </span>
             </div>
           )}

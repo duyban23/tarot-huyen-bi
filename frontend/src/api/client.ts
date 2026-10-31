@@ -1,10 +1,15 @@
 import type {
+  AiFullResult,
+  AiReadingResult,
+  AiService,
   Booking,
   BookingCreatePayload,
   ContactMessage,
   ContactMessagePayload,
   IdolApplication,
   IdolApplicationPayload,
+  PaymentOrder,
+  PaymentStatus,
   Service,
   TokenResponse,
 } from "./types";
@@ -16,6 +21,16 @@ export class UnauthorizedError extends Error {
   constructor() {
     super("Unauthorized");
     this.name = "UnauthorizedError";
+  }
+}
+
+/** Non-2xx API response with the HTTP status kept for UI decisions. */
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
   }
 }
 
@@ -43,7 +58,7 @@ async function api<T>(path: string, options?: RequestInit): Promise<T> {
       _onUnauthorized();
       throw new UnauthorizedError();
     }
-    throw new Error(body.detail || `HTTP ${res.status}`);
+    throw new ApiError(body.detail || `HTTP ${res.status}`, res.status);
   }
   if (res.status === 204) return undefined as T;
   return res.json();
@@ -84,6 +99,48 @@ export function createContactMessage(data: ContactMessagePayload) {
     method: "POST",
     body: JSON.stringify(data),
   });
+}
+
+// AI xem cùng My
+export function getAiServices() {
+  return api<AiService[]>("/api/ai/services");
+}
+
+export function createAiReading(
+  service: string,
+  input: Record<string, unknown>,
+  signal?: AbortSignal
+) {
+  return api<AiReadingResult>("/api/ai/reading", {
+    method: "POST",
+    body: JSON.stringify({ service, input }),
+    signal,
+  });
+}
+
+export function createAiFull(
+  service: string,
+  input: Record<string, unknown>,
+  payment_code: string,
+  signal?: AbortSignal
+) {
+  return api<AiFullResult>("/api/ai/reading/full", {
+    method: "POST",
+    body: JSON.stringify({ service, input, payment_code }),
+    signal,
+  });
+}
+
+// SePay
+export function createPayment(service: string, input: Record<string, unknown>) {
+  return api<PaymentOrder>("/api/payments", {
+    method: "POST",
+    body: JSON.stringify({ service, input }),
+  });
+}
+
+export function getPaymentStatus(code: string) {
+  return api<PaymentStatus>(`/api/payments/${encodeURIComponent(code)}`);
 }
 
 // Auth
@@ -146,6 +203,40 @@ export function updateAdminService(id: number, data: Partial<Service>) {
 export function deleteAdminService(id: number) {
   return api<void>(`/api/admin/services/${id}`, {
     method: "DELETE",
+    headers: authHeader(),
+  });
+}
+
+// Admin AI & payments
+export interface AdminPayment {
+  id: number;
+  code: string;
+  service_type: string;
+  amount: number;
+  status: string;
+  sepay_tx_id: string | null;
+  created_at: string;
+  paid_at: string | null;
+}
+
+export interface AdminReading {
+  id: number;
+  service_type: string;
+  input_json: string;
+  has_full: boolean;
+  payment_id: number | null;
+  created_at: string;
+}
+
+export function getAdminPayments(status?: string) {
+  const qs = status ? `?status=${encodeURIComponent(status)}` : "";
+  return api<AdminPayment[]>(`/api/admin/payments${qs}`, {
+    headers: authHeader(),
+  });
+}
+
+export function getAdminReadings() {
+  return api<AdminReading[]>("/api/admin/readings", {
     headers: authHeader(),
   });
 }
