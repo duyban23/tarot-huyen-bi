@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 const HIDDEN_PREFIXES = ["/admin", "/phone"];
 
 const ZALO_URL = "https://zalo.me/0343993456";
-const FACEBOOK_URL = "https://www.facebook.com/hieumy.tarot";
+const FACEBOOK_URL = "https://www.facebook.com/ChemieTarot";
 
 /**
  * Nút contact nổi góc phải dưới: bấm bung ra 2 kênh Zalo + Messenger.

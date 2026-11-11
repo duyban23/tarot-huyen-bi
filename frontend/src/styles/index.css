@@ -48,6 +48,8 @@
 /* ── Base ── */
 html {
   scroll-behavior: smooth;
+  /* Giữ chỗ thanh cuộn để khung trang không co/giãn khi kết quả xuất hiện. */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -228,6 +230,46 @@ body {
 *:focus-visible {
   outline: 2px solid var(--color-candle-gold);
   outline-offset: 2px;
+}
+
+/* ── Ảnh nền không gian: chuyển động rất chậm (Ken Burns) ── */
+@keyframes space-kenburns {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.1) translate3d(-1.2%, -0.8%, 0);
+  }
+}
+
+.space-kenburns {
+  animation: space-kenburns 24s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* ── Hero text trồi lên khi vào trang ── */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-rise {
+  animation: hero-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .space-kenburns,
+  .hero-rise {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ── Chat scroll (khung chat /cung-my) ── */

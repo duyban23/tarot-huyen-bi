@@ -73,7 +73,7 @@ export const CATEGORIES: CatalogCategory[] = [
       { name: "Haletu xin lời khuyên 30'", detail: "Trải bài xin lời khuyên Haletu, kèm tư vấn tình cảm từ kinh nghiệm/góc nhìn/ý kiến cá nhân của Reader trong vòng 30'", price: "300.000" },
       { name: "Tín hiệu vũ trụ 30'", detail: "Bài tín hiệu vũ trụ / lời khuyên tình cảm / cuộc sống trong vòng 30'", price: "300.000" },
       { name: "Lenormand vận mệnh", detail: "Dự đoán vận mệnh, tiên đoán tương lai và nhìn lại quá khứ (trải bài xâu chuỗi 3–5 lá/1 câu hỏi)", price: "250.000" },
-      { name: "Grand Tableau 36 lá", detail: "Trải Grand Tableau 36 lá để kể 1 câu chuyện: quá khứ – hiện tại – tác động – tương lai xa từ 1 tháng – 1 năm, thậm chí 2–3 năm (1–2 tiếng)", price: "500.000" },
+      { name: "Huyền Học 36 lá", detail: "Trải Huyền Học 36 lá để kể 1 câu chuyện: quá khứ – hiện tại – tác động – tương lai xa từ 1 tháng – 1 năm, thậm chí 2–3 năm (1–2 tiếng)", price: "500.000" },
       { name: "Lenormand tổng quan", detail: "Trải tổng quan cho 1 đối tượng hoặc 1 vụ việc cụ thể trong khoảng thời gian xác định (vài tháng hoặc vài năm) · 300.000 – 400.000", price: "300.000 – 400.000" },
       { name: "Oracle kết hợp", detail: "Trải bài kết hợp Oracle (vừa được đặt câu hỏi vừa có mốc thời gian cụ thể, kết hợp giữa Tarot và Trà) · 100.000/câu hỏi", price: "100.000 /câu hỏi" },
       { name: "Bài The Lover", detail: "Chuyên dự báo tình yêu 1–3 tháng tới, tín hiệu vũ trụ hoặc đưa ra chỉ dẫn về mặt tình cảm", price: "200.000" },

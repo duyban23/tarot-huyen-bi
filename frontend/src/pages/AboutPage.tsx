@@ -8,17 +8,17 @@ const VALUES = [
   {
     icon: "moon",
     title: "Nói thật, không dọa",
-    desc: "Bạn sẽ không nghe những lời chung chung hay hù dọa. Chỉ có sự thật dịu dàng — đủ rõ để bạn quyết định.",
+    desc: "Không lời chung chung, không hù dọa. Chỉ có sự thật dịu dàng — đủ rõ để bạn tự quyết định.",
   },
   {
     icon: "heart",
-    title: "Bạn được lắng nghe",
-    desc: "Mỗi buổi xem là một cuộc trò chuyện không phán xét. Cứ kể hết — My ở đây để hiểu, không phải để đánh giá.",
+    title: "Được lắng nghe",
+    desc: "Mỗi buổi xem là một cuộc trò chuyện cởi mở. Cứ kể hết — My ở đây để hiểu, không phải để đánh giá.",
   },
   {
     icon: "sparkles",
-    title: "Ra về nhẹ lòng hơn",
-    desc: "Bạn sẽ rời đi với lòng rõ ràng và vững vàng hơn — đủ tự tin bước tiếp mà không cần dựa vào ai.",
+    title: "Nhẹ lòng hơn khi ra về",
+    desc: "Bạn rời đi với lòng rõ ràng và vững vàng hơn — đủ tự tin bước tiếp mà không cần dựa vào ai.",
   },
 ];
 
@@ -42,136 +42,188 @@ const PRESS_LINKS = [
     monogram: "D",
     logo: "/images/press/logo-danviet.svg",
   },
-  {
-    outlet: "Toplist Hà Nội",
-    label: "Top 12 Rooftop",
-    title: "Top 12 Quán Cafe Rooftop Hà Nội Được Yêu Thích — Chemie Coffee nổi tiếng về Tarot, Boardgame",
-    url: "https://toplisthanoi.com/quan-cafe-rooftop-ha-noi/",
-    monogram: "T",
-    logo: "/images/press/logo-toplisthanoi.svg",
-  },
 ];
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen pt-24 pb-16">
-      <div className="max-w-3xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <p className="font-body text-candle-gold text-sm tracking-widest uppercase mb-2">
-            ✦ Về My ✦
-          </p>
-          <h1 className="font-display text-3xl md:text-5xl text-mist mb-4">Giới thiệu</h1>
-        </div>
+    <main className="min-h-screen pb-16">
+      {/* ─── Hero: ảnh không gian thật làm nền ─── */}
+      <section className="relative isolate overflow-hidden">
+        <picture className="absolute inset-0 -z-10">
+          <source srcSet="/images/space/gallery/space-02.webp" type="image/webp" />
+          <img
+            src="/images/space/gallery/space-02.jpg"
+            alt="Không gian trải bài ấm áp với ánh nến tại Healing With My"
+            loading="eager"
+            decoding="async"
+            className="space-kenburns h-full w-full object-cover object-[center_42%]"
+          />
+        </picture>
+        <div aria-hidden className="absolute inset-0 -z-10 bg-void/64" />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-void/85 via-void/30 to-void"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,transparent_15%,rgba(26,16,40,0.55)_78%)]"
+        />
 
-        {/* Logo + Founder */}
-        <div className="text-center mb-12">
-          {/* Logo: dùng chung BrandLogo — cùng cỡ & cùng độ sáng với trang chủ */}
-          <div className="mb-6">
+        <div className="relative mx-auto flex min-h-[86svh] max-w-3xl flex-col items-center justify-center px-4 pb-24 pt-28 text-center">
+          <div className="hero-rise">
             <BrandLogo />
           </div>
-          <h2 className="font-display text-2xl text-mist mb-1">My</h2>
-          <p className="font-body text-candle-gold text-sm tracking-wide uppercase mb-6">
+          <h1
+            className="hero-rise mt-4 font-display text-4xl leading-tight text-mist md:text-6xl"
+            style={{ animationDelay: "100ms" }}
+          >
+            Giới thiệu
+          </h1>
+          <p
+            className="hero-rise mt-3 text-balance font-body text-[10px] uppercase tracking-[0.18em] text-candle-gold/90 sm:text-xs sm:tracking-[0.28em] md:text-sm"
+            style={{ animationDelay: "180ms" }}
+          >
             Người lắng nghe bằng Tarot · Tea Leaf
           </p>
-          <p className="font-body text-lilac max-w-xl mx-auto leading-relaxed">
-            Hơn 10 năm đồng hành cùng Tarot, Tea Leaf, Oracle và Grand Tableau —
-            My ở đây không phải để phán xét số phận bạn, mà để cùng bạn nhìn sâu vào lòng mình
-            và tìm lại sự bình yên đã lạc mất.
+          <p
+            className="hero-rise mt-6 max-w-xl font-body text-lg italic leading-relaxed text-mist/90 md:text-xl"
+            style={{ animationDelay: "260ms" }}
+          >
+            Hơn 10 năm đồng hành cùng Tarot, Tea Leaf, Oracle và Huyền Học —
+            My ở đây không phải để phán xét số phận bạn, mà để cùng bạn nhìn sâu
+            vào lòng mình và tìm lại sự bình yên đã lạc mất.
           </p>
+          <a
+            href="#cau-chuyen"
+            className="hero-rise mt-10 inline-flex flex-col items-center gap-2 font-body text-[11px] uppercase tracking-[0.28em] text-lilac/75 transition-colors hover:text-candle-gold"
+            style={{ animationDelay: "340ms" }}
+          >
+            Câu chuyện của My
+            <Icon name="chevron-down" className="h-5 w-5 animate-bounce" />
+          </a>
         </div>
 
-        {/* My story */}
-        <section className="mb-16">
-          <p className="font-body text-candle-gold text-sm tracking-widest uppercase text-center mb-2">
-            ✦ Câu chuyện của My ✦
-          </p>
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-void to-transparent"
+        />
+      </section>
+
+      <div className="mx-auto max-w-3xl px-4">
+        {/* My story — chữ đặt trên nền ảnh không gian */}
+        <section id="cau-chuyen" className="mb-14 scroll-mt-24 pt-14 md:pt-20">
           <h2 className="font-display text-xl md:text-2xl text-mist text-center mb-8 leading-tight">
-            Cô gái từng vỡ vụn,
+            Từ những mảnh vỡ,
             <br />
-            nay là nơi bình yên của hàng trăm người
+            My học cách ôm lấy chính mình
           </h2>
-          <div className="bg-velvet/40 border border-velvet rounded-xl p-6 md:p-8 space-y-4 font-body text-lilac leading-relaxed">
-            <p>
-              My đã từng mở một quán cà phê tổ hợp giải trí cho giới trẻ ở Hà Nội —
-              mang theo cả thanh xuân và niềm tin rằng chỉ cần hết mình thì giấc mơ nào
-              cũng thành. Rồi nó thất bại. Sạch trơn.
-            </p>
-            <p>
-              Sau lần kiệt sức đó, My rơi vào trầm cảm và lui về ở ẩn suốt một năm.
-              Một năm không muốn gặp ai, không muốn bắt đầu lại điều gì.
-            </p>
-            <p>
-              My đã từng không hạnh phúc. Đã từng cho đi rất nhiều, yêu hết mình
-              rồi đau đến nghẹt thở. Đã từng bị phản bội, bị lừa dối bởi chính
-              những người mình tin nhất.
-            </p>
-            <p>
-              My đã từng béo, từng xấu, từng bị bạo lực học đường, từng bị tẩy chay
-              và kỳ thị chỉ vì mình khác biệt. Đã từng soi gương mà không nhận ra
-              người trong đó là ai.
-            </p>
-            <p className="font-display text-lg md:text-xl text-mist leading-relaxed">
-              Vậy làm sao My vượt qua — để trở thành cô gái luôn tràn trề năng lượng
-              mà hôm nay ai cũng muốn ở cạnh?
-            </p>
-            <p>
-              Không có phép màu nào cả. Chỉ là một ngày, My học cách ngồi lại và ôm lấy
-              chính mình — ôm cả những mảnh vỡ, những vết thương, những phiên bản
-              từng bị chê cười. My học Tarot, học Tea Leaf, học chữa lành — không phải
-              để đoán số phận, mà để hiểu lòng người, bắt đầu từ lòng mình.
-            </p>
-            <p className="text-candle-gold/90">
-              Và hôm nay, My ở đây — để làm cho bạn điều mà năm đó My từng ước có ai đó
-              làm cho mình: lắng nghe, không phán xét, và cùng bạn tìm lại ánh sáng.
-            </p>
+          <div className="relative overflow-hidden rounded-3xl border border-velvet/60 shadow-xl shadow-void/40">
+            <picture className="absolute inset-0">
+              <source srcSet="/images/space/gallery/space-03.webp" type="image/webp" />
+              <img
+                src="/images/space/gallery/space-03.jpg"
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover object-[62%_28%] md:object-[74%_28%]"
+              />
+            </picture>
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-void/68 md:bg-transparent md:bg-gradient-to-r md:from-void md:via-void/85 md:to-void/5"
+            />
+            <div className="relative space-y-4 p-6 font-body leading-relaxed text-lilac md:max-w-[62%] md:p-9">
+              <p>
+                My từng dồn hết thanh xuân cho một dự án của riêng mình, mang theo
+                niềm tin rằng chỉ cần hết mình thì giấc mơ nào cũng thành. Rồi nó
+                thất bại. Có một năm, My chọn ở ẩn — không muốn gặp ai, cũng không
+                muốn bắt đầu lại điều gì.
+              </p>
+              <p>
+                My cũng từng yêu hết mình rồi đau đến nghẹt thở, từng bị phản bội
+                bởi người mình tin nhất, từng bị chê cười chỉ vì khác biệt. Đã có
+                lúc, My soi gương mà không nhận ra người trong đó là ai.
+              </p>
+              <p>
+                Không có phép màu nào cả. Chỉ là một ngày, My học cách ngồi lại và
+                ôm lấy chính mình — cả những mảnh vỡ, những vết thương, những phiên
+                bản từng bị chê cười. My học Tarot, Tea Leaf và chữa lành, không
+                phải để đoán số phận, mà để hiểu lòng người, bắt đầu từ lòng mình.
+              </p>
+              <p className="font-display text-lg md:text-xl text-mist leading-relaxed border-l-2 border-candle-gold/50 pl-4">
+                Và hôm nay, My ở đây — để làm cho bạn điều mà năm đó My từng ước có
+                ai đó làm cho mình: lắng nghe, thấu hiểu và cùng bạn tìm lại ánh sáng.
+              </p>
+            </div>
           </div>
         </section>
 
-        {/* Story */}
-        <section className="mb-16">
-          <h2 className="font-display text-xl md:text-2xl text-mist text-center mb-6">
-            Nếu bạn đang đọc những dòng này…
-          </h2>
-          <div className="bg-velvet/40 border border-velvet rounded-xl p-6 md:p-8 space-y-4 font-body text-lilac leading-relaxed">
-            <p>
-              Có lẽ bạn đang mang trong lòng một điều khó nói — một mối quan hệ chênh vênh,
-              một ngã rẽ sự nghiệp, hay chỉ là cảm giác mông lung chẳng biết mai sẽ ra sao.
-              Healing With My có mặt là vì những khoảnh khắc như thế.
+        {/* Quote band trên nền ảnh không gian */}
+        <section
+          id="khong-gian"
+          className="relative mb-14 scroll-mt-24 overflow-hidden rounded-3xl border border-velvet/60 shadow-xl shadow-void/40"
+        >
+          <picture className="absolute inset-0">
+            <source srcSet="/images/space/gallery/space-01.webp" type="image/webp" />
+            <img
+              src="/images/space/gallery/space-01.jpg"
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover object-[62%_center]"
+            />
+          </picture>
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-r from-void via-void/90 to-void/25"
+          />
+          <div className="relative max-w-md px-6 py-10 md:px-9 md:py-12">
+            <p className="font-body text-[10px] uppercase tracking-[0.32em] text-candle-gold/80">
+              Không gian của My
             </p>
-            <p>
-              Ở đây, các lá bài không phải để quyết định thay bạn. Chúng như một tấm gương hiền —
-              giúp bạn soi rõ điều trái tim mình thực sự muốn, để rồi can đảm hơn với lựa chọn của chính mình.
-            </p>
+            <blockquote className="mt-3 font-display text-xl italic leading-snug text-mist md:text-2xl">
+              “Ở đây không có phán xét. Chỉ có một tách trà, một bộ bài, và
+              khoảng thời gian dành riêng cho bạn.”
+            </blockquote>
+            <Link
+              to="/booking"
+              className="mt-6 inline-block font-body text-sm font-semibold uppercase tracking-wider text-candle-gold transition-transform hover:translate-x-1"
+            >
+              Đặt lịch trải bài →
+            </Link>
           </div>
         </section>
 
         {/* Values */}
-        <section className="mb-16">
+        <section className="mb-14">
           <h2 className="font-display text-xl md:text-2xl text-mist text-center mb-2">
             Điều bạn sẽ cảm nhận ở đây
           </h2>
           <p className="font-body text-lilac/60 italic text-center mb-8">
             Không phải lời khoe khoang — chỉ là lời hứa dịu dàng dành cho bạn.
           </p>
-          <div className="grid gap-5">
+          <div className="grid gap-4 sm:grid-cols-3">
             {VALUES.map((v) => (
               <div
                 key={v.title}
-                className="bg-velvet/40 border border-velvet rounded-xl p-6 flex items-start gap-4 hover:border-arcane/30 transition-colors"
+                className="bg-velvet/40 border border-velvet rounded-xl p-5 flex flex-col items-center text-center hover:border-arcane/30 transition-colors"
               >
-                <span className="shrink-0 text-candle-gold"><Icon name={v.icon} className="w-8 h-8" /></span>
-                <div>
-                  <h3 className="font-display text-base tracking-wider uppercase text-mist mb-1">{v.title}</h3>
-                  <p className="font-body text-lilac/70">{v.desc}</p>
-                </div>
+                <span className="mb-3 text-candle-gold">
+                  <Icon name={v.icon} className="w-7 h-7" />
+                </span>
+                <h3 className="font-display text-sm tracking-wider uppercase text-mist mb-2">
+                  {v.title}
+                </h3>
+                <p className="font-body text-lilac/70 text-sm leading-relaxed">{v.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* Stats */}
-        <section className="mb-16">
+        <section className="mb-14">
           <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center bg-velvet/40 border border-velvet rounded-xl p-5 sm:p-8">
             <div>
               <p className="font-display text-2xl sm:text-3xl text-candle-gold"><CountUp end={10} suffix="+" /></p>
@@ -195,10 +247,7 @@ export default function AboutPage() {
         </section>
 
         {/* Press */}
-        <section className="mb-16">
-          <p className="font-body text-candle-gold text-sm tracking-widest uppercase text-center mb-2">
-            ✦ Báo chí ✦
-          </p>
+        <section className="mb-14">
           <h2 className="font-display text-xl md:text-2xl text-mist text-center mb-8">
             Báo chí nói về My
           </h2>
@@ -293,7 +342,7 @@ export default function AboutPage() {
             Khi lòng đã mỏi, đừng đi một mình
           </h2>
           <p className="font-body text-lilac italic mb-6">
-            Đặt một buổi xem — để được lắng nghe, được thấu hiểu và nhẹ lòng bước tiếp.
+            Đặt một buổi xem — để có một khoảng lặng riêng và nhẹ lòng bước tiếp.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <SparkleButton

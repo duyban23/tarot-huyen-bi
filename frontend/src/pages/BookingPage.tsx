@@ -120,9 +120,6 @@ export default function BookingPage() {
           <p className="font-body text-lilac italic text-lg mb-1">
             {BRAND.tagline}
           </p>
-          <p className="font-body text-candle-gold/60 text-sm tracking-wide">
-            ✦ Reader · Healer · Coaching ✦
-          </p>
         </div>
 
         {/* ── Trước khi chọn: 1 dòng dẫn ngắn (khối giới thiệu dài đã bỏ) ── */}

@@ -5,13 +5,17 @@ Key chỉ nằm ở server. Không có key → trả thông báo thân thiện, 
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import time
 
 import httpx
 
-from app.config import GEMINI_API_KEY, GEMINI_MODEL, GEMINI_TIMEOUT_SECONDS
+from app.config import (
+    GEMINI_API_KEY,
+    GEMINI_FALLBACK_MODELS,
+    GEMINI_MODEL,
+    GEMINI_TIMEOUT_SECONDS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +37,6 @@ _SYSTEM = (
     "khảo từ chiêm tinh học, để bạn hiểu mình hơn — không phải lời khuyên y tế, "
     "pháp lý hay tài chính.'"
 )
-
-_RETRY_STATUS = {429, 500, 502, 503, 504}
-_MAX_ATTEMPTS = 3
 
 _DISCLAIMER = (
     "Những dòng này là góc nhìn tham khảo, để bạn hiểu mình hơn — "
@@ -67,16 +68,24 @@ async def interpret(data_summary: str, full: bool) -> tuple[str | None, str | No
     )
     prompt = f"{scope}\n\nDỮ LIỆU ĐÃ TÍNH:\n{data_summary}"
 
-    # Timeout cấu hình mặc định 50s: bản full thực tế 40-48s, còn 10s headroom
-    # so với maxDuration 60s của Vercel để kịp trả lỗi thân thiện. Connect
-    # timeout ngắn hơn để lỗi mạng không treo cả phút.
+    # Model chính có thể bị quá tải (503 UNAVAILABLE) vào giờ cao điểm, nên
+    # thử lần lượt các model dự phòng trước khi báo lỗi cho khách.
+    models = [GEMINI_MODEL]
+    models += [m for m in GEMINI_FALLBACK_MODELS if m and m != GEMINI_MODEL]
+
+    # Timeout mặc định 30s: bản full thực tế ~8-15s, còn dư cho model dự phòng
+    # và headroom so với maxDuration 60s của Vercel. Connect timeout ngắn hơn
+    # để lỗi mạng không treo lâu.
     timeout = httpx.Timeout(GEMINI_TIMEOUT_SECONDS, connect=10.0)
+    deadline = time.monotonic() + GEMINI_TIMEOUT_SECONDS
     async with httpx.AsyncClient(timeout=timeout) as client:
-        for attempt in range(1, _MAX_ATTEMPTS + 1):
+        for model in models:
+            if time.monotonic() >= deadline:
+                break
             started = time.perf_counter()
             try:
                 r = await client.post(
-                    f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent",
+                    f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
                     headers={
                         "x-goog-api-key": GEMINI_API_KEY,
                         "Content-Type": "application/json",
@@ -89,17 +98,18 @@ async def interpret(data_summary: str, full: bool) -> tuple[str | None, str | No
                             "maxOutputTokens": 2000 if full else 400,
                         },
                     },
+                    timeout=httpx.Timeout(
+                        max(10.0, deadline - time.monotonic()), connect=10.0
+                    ),
                 )
             except httpx.TimeoutException:
                 logger.warning(
-                    "gemini timeout full=%s attempt=%d elapsed=%.1fs",
-                    full, attempt, time.perf_counter() - started,
+                    "gemini timeout model=%s full=%s elapsed=%.1fs",
+                    model, full, time.perf_counter() - started,
                 )
                 return None, "My đang viết hơi lâu — bạn thử lại sau ít phút nhé."
             except Exception:
-                logger.exception(
-                    "gemini request failed full=%s attempt=%d", full, attempt
-                )
+                logger.exception("gemini request failed model=%s full=%s", model, full)
                 return None, "Mất kết nối tới những vì sao — bạn thử lại sau ít phút nhé."
 
             elapsed = time.perf_counter() - started
@@ -109,26 +119,23 @@ async def interpret(data_summary: str, full: bool) -> tuple[str | None, str | No
                     .get("content", {}).get("parts", [])
                 )
                 text = "".join(p.get("text", "") for p in parts).strip()
-                if not text:
-                    logger.warning(
-                        "gemini empty full=%s attempt=%d elapsed=%.1fs",
-                        full, attempt, elapsed,
+                if text:
+                    logger.info(
+                        "gemini ok model=%s full=%s elapsed=%.1fs prompt=%d chars out=%d chars",
+                        model, full, elapsed, len(prompt), len(text),
                     )
-                    return None, "Vũ trụ đang bận một chút — bạn thử lại sau ít phút nhé."
-                logger.info(
-                    "gemini ok full=%s attempt=%d elapsed=%.1fs prompt=%d chars out=%d chars",
-                    full, attempt, elapsed, len(prompt), len(text),
+                    return ensure_disclaimer(text), None
+                logger.warning(
+                    "gemini empty model=%s full=%s elapsed=%.1fs", model, full, elapsed
                 )
-                return ensure_disclaimer(text), None
+                continue
 
+            # 429/5xx: model đang quá tải hoặc hết quota → thử model kế tiếp.
             logger.warning(
-                "gemini status=%s full=%s attempt=%d elapsed=%.1fs body=%s",
-                r.status_code, full, attempt, elapsed,
+                "gemini status=%s model=%s full=%s elapsed=%.1fs body=%s",
+                r.status_code, model, full, elapsed,
                 r.text[:240].replace("\n", " "),
             )
-            if r.status_code in _RETRY_STATUS and attempt < _MAX_ATTEMPTS:
-                await asyncio.sleep(0.6 * attempt)
-                continue
-            return None, "Vũ trụ đang bận một chút — bạn thử lại sau ít phút nhé."
 
     return None, "Vũ trụ đang bận một chút — bạn thử lại sau ít phút nhé."
+
