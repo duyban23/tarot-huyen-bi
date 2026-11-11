@@ -120,8 +120,8 @@ def seed_services(db: Session) -> None:
             price=250000,
         ),
         Service(
-            name="Grand Tableau 36 lá",
-            description="Xem bài Lenormand trải Grand Tableau 36 lá để kể 1 câu chuyện: quá khứ – hiện tại – tác động – tương lai xa từ 1 tháng – 1 năm, thậm chí 2–3 năm (time từ 1–2 tiếng).",
+            name="Huyền Học 36 lá",
+            description="Trải bài Huyền Học 36 lá để kể 1 câu chuyện: quá khứ – hiện tại – tác động – tương lai xa từ 1 tháng – 1 năm, thậm chí 2–3 năm (time từ 1–2 tiếng).",
             duration_minutes=120,
             price=500000,
         ),
@@ -244,6 +244,7 @@ def seed_services(db: Session) -> None:
         "Tea Leaf - 6 tháng 3 vấn đề",
         "Tea Leaf - 6 tháng full",
         "Tea Leaf - 12 tháng full",
+        "Grand Tableau 36 lá",
         "Grand Tableau - cơ bản",
         "Grand Tableau - nâng cao",
         "Grand Tableau - VIP",

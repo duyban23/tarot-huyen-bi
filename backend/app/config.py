@@ -39,8 +39,17 @@ SLOT_INTERVAL = 30  # minutes
 # ---------- AI (Gemini) ----------
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+# Model chính bị quá tải (503) thì tự chuyển sang các model này, theo thứ tự.
+GEMINI_FALLBACK_MODELS = [
+    m.strip()
+    for m in os.getenv(
+        "GEMINI_FALLBACK_MODELS", "gemini-3.6-flash,gemini-3.5-flash"
+    ).split(",")
+    if m.strip()
+]
 # Giữ dưới maxDuration 60s của Vercel để kịp trả lỗi thân thiện thay vì bị cắt.
-GEMINI_TIMEOUT_SECONDS = float(os.getenv("GEMINI_TIMEOUT_SECONDS", "50"))
+# 30s là đủ: bản full thực tế ~8-15s, còn dư thời gian cho model dự phòng.
+GEMINI_TIMEOUT_SECONDS = float(os.getenv("GEMINI_TIMEOUT_SECONDS", "30"))
 # Lượt xem free tối đa mỗi IP / mỗi dịch vụ / mỗi ngày (chống cháy tiền).
 AI_FREE_PER_DAY = int(os.getenv("AI_FREE_PER_DAY", "5"))
 # Bump khi đổi prompt/model/kho tri thức để bỏ cache kết quả cũ.
@@ -50,6 +59,15 @@ AI_READING_RETENTION_DAYS = int(os.getenv("AI_READING_RETENTION_DAYS", "90"))
 
 # ---------- SePay ----------
 SEPAY_WEBHOOK_SECRET = os.getenv("SEPAY_WEBHOOK_SECRET", "")
+# Bật chế độ thanh toán demo: khách bấm xác nhận là đơn tự thành paid,
+# không gọi SePay và không hiện STK/QR thật. Tắt = quay lại luồng thật.
+PAYMENT_DEMO_MODE = os.getenv("PAYMENT_DEMO_MODE", "0") == "1"
+# Mở bản đầy đủ cho mọi người xem thử, KHÔNG cần thanh toán. Vẫn chặn quota
+# theo IP + tổng lượt/ngày bên dưới vì Gemini tốn phí thật. Đặt 0 để đóng lại.
+AI_FULL_DEMO_OPEN = os.getenv("AI_FULL_DEMO_OPEN", "1") == "1"
+# Tiền là giả nhưng Gemini vẫn tốn phí thật → vẫn phải chặn quota bản full.
+AI_DEMO_FULL_PER_DAY = int(os.getenv("AI_DEMO_FULL_PER_DAY", "2"))
+AI_DEMO_FULL_GLOBAL_PER_DAY = int(os.getenv("AI_DEMO_FULL_GLOBAL_PER_DAY", "30"))
 # Thông tin tài khoản nhận tiền để sinh VietQR (demo trước, STK thật sau).
 SEPAY_BANK = os.getenv("SEPAY_BANK", "MB")
 SEPAY_ACCOUNT = os.getenv("SEPAY_ACCOUNT", "0343993456")

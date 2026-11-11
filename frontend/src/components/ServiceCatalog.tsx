@@ -171,7 +171,7 @@ export default function ServiceCatalog(props: Props) {
                     <span className="block font-display text-sm md:text-base tracking-wider uppercase text-mist">
                       {cat.name}
                     </span>
-                    <span className="block font-body text-lilac/70 text-sm leading-snug mt-0.5 line-clamp-1 md:line-clamp-2">
+                    <span className="font-body text-lilac/70 text-sm leading-snug mt-0.5 line-clamp-1 md:line-clamp-2">
                       {cat.desc}
                     </span>
                   </span>
@@ -232,7 +232,7 @@ function ItemRow({ row, expanded, props }: { row: Row; expanded: boolean; props:
           {item.name}
         </span>
         {sub && (
-          <span className="block font-body text-lilac/55 text-sm leading-snug mt-0.5 line-clamp-1 md:line-clamp-2">
+          <span className="font-body text-lilac/55 text-sm leading-snug mt-0.5 line-clamp-1 md:line-clamp-2">
             {sub}
           </span>
         )}

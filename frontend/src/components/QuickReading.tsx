@@ -1,13 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  confirmDemoPayment,
   createAiFull,
   createAiReading,
   createPayment,
+  getAiConfig,
   getAiServices,
   getPaymentStatus,
 } from "../api/client";
 import type { AiField, AiReadingResult, AiService, PaymentOrder } from "../api/types";
 import AstroWheel from "./AstroWheel";
+import AiResponseText from "./AiResponseText";
+import DemoQr from "./DemoQr";
 import { Icon, type IconName } from "./icons";
 
 /**
@@ -37,10 +41,21 @@ const FULL_STEPS = [
   "Gần xong rồi, bạn đợi My nhé…",
 ];
 
+/** Giây đếm ngược giả lập xác nhận thanh toán demo. */
+const DEMO_CONFIRM_SECONDS = 3;
+
 type Phase = "form" | "reading" | "result" | "paying" | "pay" | "writing" | "full";
 
-const errMsg = (e: unknown) =>
-  e instanceof Error ? e.message : "Có lỗi xảy ra, bạn thử lại giúp My nhé.";
+const errMsg = (e: unknown) => {
+  const raw = e instanceof Error ? e.message : "";
+  if (/internal server error/i.test(raw)) {
+    return "My đang bận một chút — bạn thử lại giúp My nhé.";
+  }
+  if (/failed to fetch|networkerror|load failed|network request failed/i.test(raw)) {
+    return "Kết nối đang chập chờn — bạn kiểm tra mạng rồi thử lại nhé.";
+  }
+  return raw || "Có lỗi xảy ra, bạn thử lại giúp My nhé.";
+};
 
 const isAbortError = (e: unknown) =>
   typeof DOMException !== "undefined" &&
@@ -120,71 +135,6 @@ function groupFields(svc: AiService): Array<{ title: string; fields: AiField[] }
   return [{ title: "", fields: svc.fields }];
 }
 
-/** Con trỏ nhấp nháy ở chỗ My đang viết. */
-function Caret() {
-  return (
-    <span
-      aria-hidden
-      className="ml-0.5 inline-block w-[2px] translate-y-[2px] animate-pulse bg-candle-gold align-baseline"
-      style={{ height: "1em" }}
-    />
-  );
-}
-
-/**
- * Chữ hiện dần như đang được viết: vào chữ hơi nhanh để khung sớm đầy, rồi
- * chậm dần ở cuối cho êm mắt.
- * `reveal` = số ký tự đã hiện; bỏ trống thì hiện đủ ngay.
- */
-function RichText({ text, reveal }: { text: string; reveal?: number }) {
-  const lines = useMemo(() => text.split("\n"), [text]);
-  const limit = reveal ?? Number.POSITIVE_INFINITY;
-  const typing = reveal !== undefined && reveal < text.length;
-
-  let left = limit;
-  let caretPlaced = false;
-  const nodes: React.ReactNode[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    if (left <= 0 && caretPlaced) break;
-    const raw = lines[i];
-    const shown = raw.length > left ? raw.slice(0, Math.max(0, left)) : raw;
-    left -= raw.length + 1;
-
-    const t = shown.trim();
-    // Dòng đang gõ dở vẫn có thể là "##" hoặc "**" → bỏ ký hiệu để không lộ markdown thô.
-    const body = t.replace(/^#{1,6}\s*/, "").replace(/\*\*/g, "");
-    const isHeading = /^#{1,6}/.test(t) && body.length > 0;
-    const caretHere = typing && left <= 0 && !caretPlaced;
-    if (caretHere) caretPlaced = true;
-
-    if (!body) {
-      nodes.push(
-        <div key={i} className="h-1.5">
-          {caretHere && <Caret />}
-        </div>
-      );
-      continue;
-    }
-
-    nodes.push(
-      <p
-        key={i}
-        className={
-          isHeading
-            ? "pt-2 font-display text-[15px] leading-snug text-candle-gold"
-            : "font-body text-[15px] leading-relaxed text-mist/90"
-        }
-      >
-        {body}
-        {caretHere && <Caret />}
-      </p>
-    );
-  }
-
-  return <div className="space-y-1.5">{nodes}</div>;
-}
-
 /**
  * Đếm ký tự dần bằng requestAnimationFrame (rAF dừng khi tab ẩn nên không tốn pin).
  * Tổng thời gian co theo độ dài: free ~2s, bản đầy đủ tối đa ~6s.
@@ -244,24 +194,75 @@ function useTypewriter(text: string, enabled: boolean) {
 }
 
 /**
- * Khung đọc có chiều cao cố định: chữ chạy bên trong, khung không co giãn theo
- * từng câu nên cả trang đứng yên (mobile lẫn desktop). Thanh mảnh trên đầu là
- * tiến độ viết; chạm vào khung để hiện hết.
+ * Khung đọc kiểu "ô chat": cao cố định, chữ tự chạy ra và tự cuộn theo, có thanh
+ * cuộn để khách kéo lên/xuống đọc lại. Bản đầy đủ có thể bấm "Mở rộng" để bỏ
+ * giới hạn chiều cao khi muốn đọc trọn một mạch.
  */
 function ReadingFrame({
   text,
   revealed,
   typing,
   onSkip,
+  size = "free",
+  expanded = false,
   children,
 }: {
   text: string;
   revealed: number;
   typing: boolean;
   onSkip: () => void;
+  size?: "free" | "full";
+  expanded?: boolean;
   children: React.ReactNode;
 }) {
   const progress = text.length === 0 ? 1 : Math.min(1, revealed / text.length);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  // Khách đang ở cuối khung → chữ mới hiện ra thì tự cuộn theo. Khách kéo lên
+  // đọc lại thì dừng tự cuộn để không bị giật về cuối.
+  const followRef = useRef(true);
+
+  const measure = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    followRef.current = el.scrollTop + el.clientHeight >= el.scrollHeight - 24;
+  }, []);
+
+  // Chữ hiện dần làm nội dung cao lên; theo dõi khối chữ để cập nhật trạng thái.
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [measure]);
+
+  useEffect(() => {
+    measure();
+  }, [measure, expanded]);
+
+  useEffect(() => {
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [measure]);
+
+  // Bài mới → về đầu khung và bật lại chế độ tự cuộn.
+  useEffect(() => {
+    followRef.current = true;
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  }, [text]);
+
+  // Đang chạy chữ: giữ dòng mới nhất trong tầm mắt như khung chat.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !typing || !followRef.current) return;
+    el.scrollTop = el.scrollHeight;
+  }, [revealed, typing]);
+
+  const cappedHeight =
+    size === "full"
+      ? "h-[55vh] sm:h-[500px]"
+      : "h-[45vh] max-h-[380px] min-h-[240px]";
 
   return (
     <div className="relative">
@@ -272,16 +273,18 @@ function ReadingFrame({
         />
       </div>
       <div
+        ref={scrollRef}
         onClick={typing ? onSkip : undefined}
-        className="h-[48vh] max-h-[460px] min-h-[240px] overflow-y-auto pr-1 sm:h-[440px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-candle-gold/35 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[3px]"
-        style={{
-          maskImage:
-            "linear-gradient(to bottom, #000 0, #000 calc(100% - 26px), transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, #000 0, #000 calc(100% - 26px), transparent 100%)",
-        }}
+        onScroll={measure}
+        className={`${
+          expanded
+            ? "p-3"
+            : `${cappedHeight} overflow-y-auto p-3 [scrollbar-color:rgba(212,168,67,0.45)_rgba(255,255,255,0.04)] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-candle-gold/45 hover:[&::-webkit-scrollbar-thumb]:bg-candle-gold/65 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar]:w-2`
+        } relative rounded-xl border border-candle-gold/20 bg-void/45 [overflow-wrap:anywhere] transition-colors`}
       >
-        <div className="max-w-[70ch] pb-5">{children}</div>
+        <div ref={contentRef} className="mx-auto max-w-[70ch]">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -304,9 +307,17 @@ export default function QuickReading() {
   );
   const [copied, setCopied] = useState(false);
   const [stepIdx, setStepIdx] = useState(0);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [demoPaying, setDemoPaying] = useState(false);
+  const [demoSeconds, setDemoSeconds] = useState(0);
+  const [fullExpanded, setFullExpanded] = useState(false);
+  // Backend đang mở bản đầy đủ cho mọi người xem thử (không cần thanh toán).
+  const [fullDemoOpen, setFullDemoOpen] = useState(false);
 
   const pollRef = useRef<number | null>(null);
+  const demoTimerRef = useRef<number | null>(null);
   const resultRef = useRef<HTMLElement | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
   const fullRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const hydratedRef = useRef(false);
@@ -325,6 +336,12 @@ export default function QuickReading() {
 
   useEffect(() => {
     let alive = true;
+    setLoadError("");
+    getAiConfig()
+      .then((cfg) => alive && setFullDemoOpen(Boolean(cfg.full_demo_open)))
+      .catch(() => {
+        // Cấu hình không lấy được thì giữ luồng thanh toán như cũ.
+      });
     getAiServices()
       .then((list) => {
         if (!alive) return;
@@ -344,7 +361,10 @@ export default function QuickReading() {
           setPhase("full");
         } else if (saved.order && !saved.paid) {
           setPhase("pay");
-          startPoll(saved.order.code, saved.mode, saved.values ?? {});
+          // Đơn demo không có webhook — chờ khách bấm xác nhận, đừng poll vô ích.
+          if (!saved.order.demo) {
+            startPoll(saved.order.code, saved.mode, saved.values ?? {});
+          }
         } else {
           setPhase("result");
         }
@@ -357,9 +377,10 @@ export default function QuickReading() {
       alive = false;
       abortRef.current?.abort();
       if (pollRef.current) window.clearInterval(pollRef.current);
+      if (demoTimerRef.current) window.clearInterval(demoTimerRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [reloadKey]);
 
   // Lưu bài gần nhất để reload không mất bản free/bản full đã trả phí.
   useEffect(() => {
@@ -386,7 +407,7 @@ export default function QuickReading() {
     if (phase === "result") {
       resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-    if (phase === "full") {
+    if (phase === "full" || phase === "writing") {
       // Bản đầy đủ nằm dưới bản miễn phí → cuộn thẳng tới đó, không để khách
       // tưởng "bấm xong không thấy gì".
       fullRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -400,8 +421,16 @@ export default function QuickReading() {
     }
   }
 
+  function clearDemoTimer() {
+    if (demoTimerRef.current) {
+      window.clearInterval(demoTimerRef.current);
+      demoTimerRef.current = null;
+    }
+  }
+
   function resetAll(clearValues = true) {
     clearPoll();
+    clearDemoTimer();
     abortRef.current?.abort();
     abortRef.current = null;
     clearSavedReading();
@@ -414,7 +443,20 @@ export default function QuickReading() {
     setError("");
     setTouched(false);
     setCopied(false);
+    setDemoPaying(false);
+    setDemoSeconds(0);
+    setFullExpanded(false);
     if (clearValues) setValues({});
+    // Kết quả biến mất làm trang ngắn lại — đưa khách về đúng chỗ điền thông tin.
+    window.setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 0);
+  }
+
+  function retryLoad() {
+    setLoadError("");
+    setServices([]);
+    setReloadKey((k) => k + 1);
   }
 
   function chooseMode(type: string) {
@@ -425,7 +467,7 @@ export default function QuickReading() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!svc || phase !== "form") return;
+    if (!svc || !canEditForm) return;
 
     const missing = svc.fields.filter((f) => f.required && !(values[f.key] ?? "").trim());
     if (missing.length > 0) {
@@ -438,6 +480,15 @@ export default function QuickReading() {
     }
 
     setError("");
+    // Xem lại từ đầu: bỏ kết quả/đơn cũ, giữ nguyên form và dữ liệu đã điền.
+    if (phase !== "form") {
+      setFree(null);
+      setFull("");
+      setOrder(null);
+      setPaid(false);
+      setPending(null);
+      setFullExpanded(false);
+    }
     setPhase("reading");
     clearSavedReading();
     instantRef.current = false;
@@ -471,10 +522,49 @@ export default function QuickReading() {
       setOrder(created);
       setPending({ type: svc.type, input });
       setPhase("pay");
-      startPoll(created.code, svc.type, input);
+      // Đơn demo chờ khách bấm xác nhận; đơn thật mới poll SePay.
+      if (!created.demo) {
+        startPoll(created.code, svc.type, input);
+      }
     } catch (err) {
       setError(errMsg(err));
       setPhase("result");
+    }
+  }
+
+  function handleDemoConfirm() {
+    if (!order?.demo || demoPaying || phase !== "pay") return;
+    const currentOrder = order;
+    setError("");
+    setDemoPaying(true);
+    setDemoSeconds(DEMO_CONFIRM_SECONDS);
+    clearDemoTimer();
+    let left = DEMO_CONFIRM_SECONDS;
+    demoTimerRef.current = window.setInterval(() => {
+      left -= 1;
+      setDemoSeconds(Math.max(left, 0));
+      if (left > 0) return;
+      clearDemoTimer();
+      void finishDemoConfirm(currentOrder);
+    }, 1000);
+  }
+
+  async function finishDemoConfirm(currentOrder: PaymentOrder) {
+    const type = pending?.type ?? svc?.type;
+    const input = pending?.input ?? (svc ? buildInput(svc, values) : null);
+    if (!type || !input) {
+      setError("Không tìm thấy thông tin bài xem — bạn tạo lại giúp My nhé.");
+      setDemoPaying(false);
+      return;
+    }
+    try {
+      await confirmDemoPayment(currentOrder.code);
+      setPaid(true);
+      await fetchFull(currentOrder.code, type, input);
+    } catch (err) {
+      setError(errMsg(err));
+    } finally {
+      setDemoPaying(false);
     }
   }
 
@@ -511,7 +601,11 @@ export default function QuickReading() {
     }, 3000);
   }
 
-  async function fetchFull(code: string, type: string, input: Record<string, unknown>) {
+  async function fetchFull(
+    code: string | null,
+    type: string,
+    input: Record<string, unknown>
+  ) {
     setError("");
     setPhase("writing");
     instantRef.current = false;
@@ -519,16 +613,26 @@ export default function QuickReading() {
     const controller = new AbortController();
     abortRef.current = controller;
     try {
-      const r = await createAiFull(type, input, code, controller.signal);
+      const r = await createAiFull(type, input, code ?? "", controller.signal);
       setFull(r.full_result);
+      setFullExpanded(false);
       setPhase("full");
     } catch (err) {
       if (isAbortError(err)) return;
       setError(errMsg(err));
-      setPhase("pay");
+      // Có mã đơn → quay lại hộp chờ thanh toán; xem thử thì về kết quả free.
+      setPhase(code ? "pay" : "result");
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
     }
+  }
+
+  /** Xem thử bản đầy đủ: không tạo đơn, backend tự chặn quota theo IP. */
+  async function handleDemoFull() {
+    if (!svc || !free) return;
+    const input = buildInput(svc, values);
+    setPending({ type: svc.type, input });
+    await fetchFull(null, svc.type, input);
   }
 
   /** Viết lại bản full sau khi đã trả phí. Sau reload `pending` mất nên dựng
@@ -545,6 +649,9 @@ export default function QuickReading() {
 
   function cancelOrder() {
     clearPoll();
+    clearDemoTimer();
+    setDemoPaying(false);
+    setDemoSeconds(0);
     setOrder(null);
     setPending(null);
     setPhase("result");
@@ -558,13 +665,51 @@ export default function QuickReading() {
     window.setTimeout(() => setCopied(false), 2000);
   }
 
+  function toggleFullExpanded() {
+    const next = !fullExpanded;
+    setFullExpanded(next);
+    if (!next) {
+      // Thu gọn xong khung ngắn lại — kéo về đầu khung để không bị lạc chỗ.
+      window.setTimeout(() => {
+        fullRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 0);
+    }
+  }
+
   const steps = phase === "writing" ? FULL_STEPS : FREE_STEPS;
   const step = steps[Math.min(stepIdx, steps.length - 1)];
-  const showForm = phase === "form" || phase === "reading";
+  // Form luôn hiển thị; chỉ khoá khi đang xử lý/thanh toán để tránh đổi dữ liệu giữa chừng.
+  const canEditForm = phase === "form" || phase === "result" || phase === "full";
   const showResult = free !== null && phase !== "reading";
 
   const inputCls =
     "w-full min-w-0 rounded-xl border bg-void px-3 py-2.5 font-body text-[15px] text-mist placeholder:text-lilac/40 focus:outline-none focus:border-candle-gold transition-colors";
+
+  // Mất kết nối / backend lỗi: đừng để form trống + chữ "Internal Server Error".
+  if (loadError && services.length === 0) {
+    return (
+      <div
+        role="alert"
+        className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-candle-gold/20 bg-void/40 px-6 py-10 text-center"
+      >
+        <AstroWheel className="h-12 w-12 text-candle-gold/40" />
+        <p className="mt-3 font-display text-lg text-mist">Chưa kết nối được</p>
+        <p className="mt-1 max-w-xs font-body text-sm leading-relaxed text-lilac/70">
+          {loadError}
+        </p>
+        <button
+          type="button"
+          onClick={retryLoad}
+          className="mt-4 min-h-[44px] rounded-xl border border-candle-gold/60 px-5 py-2 font-body text-sm text-candle-gold transition-colors hover:bg-candle-gold/10"
+        >
+          Thử lại
+        </button>
+        <p className="mt-3 max-w-[16rem] font-body text-[11px] leading-relaxed text-lilac/45">
+          Bạn vẫn xem bảng giá và đặt lịch ở phía trên nhé.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -600,9 +745,8 @@ export default function QuickReading() {
         })}
       </div>
 
-      {/* ── Form điền tại chỗ ── */}
-      {showForm && (
-        <form onSubmit={handleSubmit} className="mt-3.5" noValidate>
+      {/* ── Form điền tại chỗ: giữ nguyên khi câu trả lời xuất hiện ── */}
+      <form ref={formRef} onSubmit={handleSubmit} className="mt-3.5 scroll-mt-24" noValidate>
           <p className="mb-2.5 text-center font-body text-[12px] leading-relaxed text-lilac/70">
             {mode === "ban-do-sao-doi"
               ? "My cần thông tin của cả hai — mỗi người 3 điều."
@@ -655,7 +799,7 @@ export default function QuickReading() {
                           id={id}
                           name={f.key}
                           value={value}
-                          disabled={phase === "reading"}
+                          disabled={!canEditForm}
                           onChange={(e) =>
                             setValues((v) => ({ ...v, [f.key]: e.target.value }))
                           }
@@ -680,7 +824,7 @@ export default function QuickReading() {
                             id={id}
                             type="checkbox"
                             checked={value === "on"}
-                            disabled={phase === "reading"}
+                            disabled={!canEditForm}
                             onChange={(e) =>
                               setValues((v) => ({
                                 ...v,
@@ -711,7 +855,7 @@ export default function QuickReading() {
                         name={f.key}
                         type={f.type}
                         value={value}
-                        disabled={phase === "reading"}
+                        disabled={!canEditForm}
                         placeholder={f.type === "text" ? (f.placeholder ?? f.label) : undefined}
                         autoComplete={f.type === "text" ? "off" : undefined}
                         onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
@@ -726,7 +870,7 @@ export default function QuickReading() {
 
           <button
             type="submit"
-            disabled={!svc || phase === "reading"}
+            disabled={!svc || !canEditForm}
             className="mt-4 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-candle-gold px-5 py-3 font-display text-sm tracking-widest uppercase text-void shadow-lg shadow-candle-gold/25 transition-all hover:bg-candle-gold/90 active:scale-[0.99] disabled:opacity-60"
           >
             <Icon name="sparkles" className="h-4 w-4" />
@@ -742,7 +886,6 @@ export default function QuickReading() {
             </p>
           )}
         </form>
-      )}
 
       {/* ── Đang xem ── */}
       {phase === "reading" && (
@@ -771,7 +914,7 @@ export default function QuickReading() {
           </p>
           <div className="mb-2 flex items-center justify-between gap-2">
             <p className="font-body text-[11px] tracking-widest uppercase text-candle-gold">
-              ✦ My nhắn cho bạn ✦
+              My nhắn cho bạn
             </p>
             {freeTyping.typing ? (
               <button
@@ -798,11 +941,11 @@ export default function QuickReading() {
             typing={freeTyping.typing}
             onSkip={freeTyping.skip}
           >
-            <RichText text={free.basic_result} reveal={freeTyping.revealed} />
+            <AiResponseText text={free.basic_result} reveal={freeTyping.revealed} />
           </ReadingFrame>
 
           {/* ── Bản đầy đủ ── */}
-          {phase !== "full" && (
+          {phase !== "full" && phase !== "writing" && (
             <div className="mt-4 rounded-xl border border-candle-gold/35 bg-candle-gold/5 p-3.5">
               {!order && (
                 <>
@@ -815,7 +958,7 @@ export default function QuickReading() {
                   </p>
                   <button
                     type="button"
-                    onClick={handlePay}
+                    onClick={fullDemoOpen ? handleDemoFull : handlePay}
                     disabled={phase === "paying"}
                     className="mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-candle-gold/70 bg-candle-gold/15 px-4 py-2.5 font-body text-[13.5px] font-semibold text-candle-gold transition-all hover:bg-candle-gold/25 active:scale-[0.99] disabled:opacity-60"
                   >
@@ -823,6 +966,11 @@ export default function QuickReading() {
                       <>
                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-candle-gold/30 border-t-candle-gold" />
                         My đang mở đơn…
+                      </>
+                    ) : fullDemoOpen ? (
+                      <>
+                        Xem bản đầy đủ · miễn phí thử nghiệm
+                        <span aria-hidden>→</span>
                       </>
                     ) : (
                       <>
@@ -832,41 +980,89 @@ export default function QuickReading() {
                     )}
                   </button>
                   <p className="mt-1.5 text-center font-body text-[11px] text-lilac/45">
-                    Chưa cần ngay — bản miễn phí ở trên vẫn giữ nguyên.
+                    {fullDemoOpen
+                      ? "Đang mở thử nghiệm — không cần thanh toán, mỗi người vài lượt mỗi ngày."
+                      : "Chưa cần ngay — bản miễn phí ở trên vẫn giữ nguyên."}
                   </p>
                 </>
               )}
 
-              {/* Chưa chuyển khoản: QR tại chỗ */}
+              {/* Chưa thanh toán: QR thật hoặc thẻ demo */}
               {order && !paid && (
                 <div className="text-center">
-                  <p className="font-body text-[12px] text-lilac/70">
-                    Quét mã để nhận bản đầy đủ
-                  </p>
-                  <img
-                    src={order.qr_url}
-                    alt="Mã QR chuyển khoản"
-                    width={208}
-                    height={208}
-                    loading="lazy"
-                    className="mx-auto my-2 h-44 w-44 rounded-xl bg-white p-2"
-                  />
-                  <p className="font-display text-lg font-bold text-candle-gold">
-                    {order.amount.toLocaleString("vi-VN")}₫
-                  </p>
-                  <p className="font-body text-[11px] leading-relaxed text-lilac/60">
-                    {order.bank} · {order.account} · {order.account_name}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={copyCode}
-                    className="mt-2 min-h-[40px] rounded-lg border border-candle-gold/50 px-3 py-1.5 font-body text-[12px] text-mist transition-all hover:bg-candle-gold/10 active:scale-[0.98]"
-                  >
-                    {copied ? "Đã chép ✓" : `Chép nội dung: ${order.transfer_content}`}
-                  </button>
-                  <p className="mt-2 animate-pulse font-body text-[11px] italic text-lilac/60">
-                    Đang chờ bạn chuyển khoản…
-                  </p>
+                  {order.demo ? (
+                    <>
+                      <p className="font-body text-[12px] font-semibold text-candle-gold">
+                        Thanh toán thử nghiệm
+                      </p>
+                      <p className="mt-1 font-body text-[11.5px] leading-relaxed text-lilac/65">
+                        Không trừ tiền thật. Bấm xác nhận để đi tiếp đúng luồng
+                        thanh toán.
+                      </p>
+                      <DemoQr className="my-3 h-40 w-40" />
+                      <p className="font-display text-lg font-bold text-candle-gold">
+                        {order.amount.toLocaleString("vi-VN")}₫
+                      </p>
+                      <p className="font-body text-[11px] text-lilac/55">
+                        Mã đơn: {order.code}
+                      </p>
+                      {demoPaying ? (
+                        <div
+                          className="mt-3 flex min-h-[46px] flex-col items-center justify-center rounded-xl border border-candle-gold/40 bg-void/40 px-4 py-2"
+                          aria-live="polite"
+                        >
+                          <span className="h-5 w-5 animate-spin rounded-full border-2 border-candle-gold/30 border-t-candle-gold" />
+                          <p className="mt-1.5 font-body text-[12px] text-mist">
+                            {demoSeconds > 0
+                              ? `Đang xác nhận giao dịch… ${demoSeconds}s`
+                              : "Đang xác nhận giao dịch…"}
+                          </p>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleDemoConfirm}
+                          className="mt-3 flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-candle-gold px-4 py-2.5 font-display text-[12px] font-semibold uppercase tracking-widest text-void transition-all hover:bg-candle-gold/90 active:scale-[0.99]"
+                        >
+                          Xác nhận thanh toán demo
+                        </button>
+                      )}
+                      <p className="mt-2 font-body text-[11px] italic text-lilac/55">
+                        Đây là bản thử nghiệm — không phát sinh giao dịch thật.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-body text-[12px] text-lilac/70">
+                        Quét mã để nhận bản đầy đủ
+                      </p>
+                      <img
+                        src={order.qr_url}
+                        alt="Mã QR chuyển khoản"
+                        width={208}
+                        height={208}
+                        loading="lazy"
+                        className="mx-auto my-2 h-44 w-44 rounded-xl bg-white p-2"
+                      />
+                      <p className="font-display text-lg font-bold text-candle-gold">
+                        {order.amount.toLocaleString("vi-VN")}₫
+                      </p>
+                      <p className="font-body text-[11px] leading-relaxed text-lilac/60">
+                        {order.bank} · {order.account} · {order.account_name}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={copyCode}
+                        className="mt-2 min-h-[40px] rounded-lg border border-candle-gold/50 px-3 py-1.5 font-body text-[12px] text-mist transition-all hover:bg-candle-gold/10 active:scale-[0.98]"
+                      >
+                        {copied ? "Đã chép ✓" : `Chép nội dung: ${order.transfer_content}`}
+                      </button>
+                      <p className="mt-2 animate-pulse font-body text-[11px] italic text-lilac/60">
+                        Đang chờ bạn chuyển khoản…
+                      </p>
+                    </>
+                  )}
+
                   {error && (
                     <p className="mt-1.5 font-body text-[12px] italic text-red-400">{error}</p>
                   )}
@@ -880,35 +1076,24 @@ export default function QuickReading() {
                 </div>
               )}
 
-              {/* Đã trả phí: chờ My viết bản đầy đủ */}
+              {/* Đã trả phí nhưng chưa viết xong: chỉ còn lỗi / nút thử lại.
+                  Trạng thái đang viết hiển thị trong thẻ "Bản đầy đủ" bên dưới. */}
               {order && paid && (
                 <div className="py-1 text-center" aria-live="polite">
-                  {phase === "writing" ? (
-                    <>
-                      <span className="mx-auto flex h-7 w-7 animate-spin rounded-full border-2 border-candle-gold/30 border-t-candle-gold" />
-                      <p className="mt-2 font-body text-[13px] text-mist">{step}</p>
-                      <p className="mt-0.5 font-body text-[11px] text-lilac/50">
-                        Đã nhận phí trà · {order.code}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="font-body text-[13px] text-candle-gold">
-                        ✦ Đã nhận phí trà · {order.code}
-                      </p>
-                      {error && (
-                        <p className="mt-1 font-body text-[12px] italic text-red-400">{error}</p>
-                      )}
-                      <button
-                        type="button"
-                        onClick={retryFull}
-                        disabled={!pending && !svc}
-                        className="mt-2 min-h-[40px] rounded-xl border border-candle-gold/60 px-4 py-1.5 font-body text-[12.5px] text-candle-gold hover:bg-candle-gold/10 disabled:opacity-60"
-                      >
-                        Thử lại
-                      </button>
-                    </>
+                  <p className="font-body text-[13px] text-candle-gold">
+                    Đã nhận phí trà · {order.code}
+                  </p>
+                  {error && (
+                    <p className="mt-1 font-body text-[12px] italic text-red-400">{error}</p>
                   )}
+                  <button
+                    type="button"
+                    onClick={retryFull}
+                    disabled={!pending && !svc}
+                    className="mt-2 min-h-[40px] rounded-xl border border-candle-gold/60 px-4 py-1.5 font-body text-[12.5px] text-candle-gold hover:bg-candle-gold/10 disabled:opacity-60"
+                  >
+                    Thử lại
+                  </button>
                 </div>
               )}
 
@@ -920,15 +1105,16 @@ export default function QuickReading() {
             </div>
           )}
 
-          {/* ── Bản đầy đủ đã có ── */}
-          {phase === "full" && full && (
+          {/* ── Bản đầy đủ: chờ viết xong tại chỗ rồi hiện luôn nội dung ── */}
+          {(phase === "writing" || (phase === "full" && full)) && (
             <div
               ref={fullRef}
-              className="mt-4 scroll-mt-24 rounded-xl border border-candle-gold/40 bg-arcane/10 p-3.5"
+              className="mt-4 scroll-mt-24 overflow-hidden rounded-2xl border border-candle-gold/40 bg-gradient-to-br from-arcane/20 via-void/35 to-velvet/20 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
             >
               <div className="mb-2 flex items-center justify-between gap-2">
-                <p className="font-body text-[11px] tracking-widest uppercase text-candle-gold">
-                  ✦ Bản đầy đủ của bạn ✦
+                <p className="flex items-center gap-1.5 font-body text-[11px] uppercase tracking-widest text-candle-gold">
+                  <Icon name="sparkles" className="h-3.5 w-3.5" />
+                  Bản đầy đủ của bạn
                 </p>
                 {fullTyping.typing && (
                   <button
@@ -940,21 +1126,54 @@ export default function QuickReading() {
                   </button>
                 )}
               </div>
-              <ReadingFrame
-                text={full}
-                revealed={fullTyping.revealed}
-                typing={fullTyping.typing}
-                onSkip={fullTyping.skip}
-              >
-                <RichText text={full} reveal={fullTyping.revealed} />
-              </ReadingFrame>
-              <button
-                type="button"
-                onClick={() => resetAll()}
-                className="mt-4 min-h-[44px] w-full rounded-xl border border-candle-gold/60 px-4 py-2 font-body text-[13px] text-candle-gold transition-all hover:bg-candle-gold/10 active:scale-[0.99]"
-              >
-                Xem món khác
-              </button>
+
+              {phase === "writing" ? (
+                <div className="py-6 text-center" aria-live="polite">
+                  <span className="mx-auto flex h-7 w-7 animate-spin rounded-full border-2 border-candle-gold/30 border-t-candle-gold" />
+                  <p className="mt-2 font-body text-[13px] text-mist">{step}</p>
+                  <p className="mt-0.5 font-body text-[11px] text-lilac/50">
+                    {order ? `Đã nhận phí trà · ${order.code}` : "Bản xem thử miễn phí"}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <ReadingFrame
+                    text={full}
+                    revealed={fullTyping.revealed}
+                    typing={fullTyping.typing}
+                    onSkip={fullTyping.skip}
+                    size="full"
+                    expanded={fullExpanded}
+                  >
+                    <AiResponseText text={full} reveal={fullTyping.revealed} />
+                  </ReadingFrame>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={toggleFullExpanded}
+                      aria-expanded={fullExpanded}
+                      className="flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-candle-gold/45 bg-candle-gold/10 px-3 py-2 font-body text-[12.5px] font-medium text-candle-gold transition-colors hover:bg-candle-gold/20 active:scale-[0.99]"
+                    >
+                      {fullExpanded ? "Thu gọn" : "Mở rộng"}
+                      <span
+                        aria-hidden
+                        className={`text-[10px] transition-transform duration-200 ${
+                          fullExpanded ? "rotate-180" : ""
+                        }`}
+                      >
+                        ▼
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => resetAll()}
+                      className="min-h-[42px] rounded-xl border border-velvet/70 px-3 py-2 font-body text-[12.5px] text-lilac/85 transition-colors hover:border-candle-gold/40 hover:text-candle-gold active:scale-[0.99]"
+                    >
+                      Xem món khác
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </section>

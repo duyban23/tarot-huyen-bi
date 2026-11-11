@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ReactNode } from "react";
 import { createIdolApplication } from "../api/client";
 import SparkleButton from "../components/SparkleButton";
 import Reveal from "../components/Reveal";
@@ -124,62 +123,8 @@ const INPUT =
   "w-full bg-void border border-velvet rounded-lg px-4 py-2.5 font-body text-mist placeholder-lilac/40 focus:outline-none focus:border-candle-gold focus:ring-2 focus:ring-candle-gold/40 transition-all";
 
 /**
- * Mở/gập một mục.
- *  - level="course": thẻ khóa học — quầng sáng vàng y như thẻ ở các trang khác.
- *  - level="chapter": dòng nhỏ bên trong — sáng lên khi đưa chuột/chạm vào.
- * `selected` = khách đã chọn khóa này (bấm thẻ giá hoặc nút đăng ký) → sáng nhất.
+ * Nội dung khóa học hiển thị đầy đủ — không cần mở/gập.
  */
-function Accordion({
-  title,
-  children,
-  defaultOpen = false,
-  level = "chapter",
-  selected = false,
-}: {
-  title: ReactNode;
-  children: ReactNode;
-  defaultOpen?: boolean;
-  level?: "course" | "chapter";
-  selected?: boolean;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  const isCourse = level === "course";
-  return (
-    <div
-      className={`overflow-hidden ${
-        isCourse
-          ? `tap-card rounded-2xl ${open ? "is-open" : ""} ${selected ? "is-selected" : ""}`
-          : `tap-row rounded-xl border border-velvet/50 bg-void/40 ${open ? "is-open" : ""}`
-      }`}
-    >
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
-        className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left min-h-[52px] hover:bg-velvet/25 active:bg-velvet/35 transition-colors"
-      >
-        <span className="font-display text-sm md:text-base tracking-wider text-mist">{title}</span>
-        <span
-          className={`shrink-0 text-candle-gold text-lg leading-none transition-all duration-300 ${
-            open ? "rotate-45 drop-shadow-[0_0_10px_rgba(212,168,67,0.9)]" : ""
-          }`}
-          aria-hidden="true"
-        >
-          +
-        </span>
-      </button>
-      <div
-        className="grid transition-all duration-300 ease-out"
-        style={{ gridTemplateRows: open ? "1fr" : "0fr", opacity: open ? 1 : 0 }}
-      >
-        <div className="overflow-hidden">
-          <div className="px-4 pb-4 pt-1 border-t border-velvet/40">{children}</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function RecruitPage() {
   const [form, setForm] = useState({
     full_name: "",
@@ -318,79 +263,92 @@ export default function RecruitPage() {
       {/* Chi tiết khóa học */}
       <Reveal className="py-8 md:py-12" delay={100}>
         <div className="max-w-3xl mx-auto px-4">
-          <p className="font-body text-candle-gold text-sm tracking-widest uppercase text-center mb-2">
-            ✦ Nội dung giảng dạy ✦
-          </p>
           <h2 className="font-display text-2xl md:text-4xl text-mist text-center mb-8">
             Các khóa học
           </h2>
 
           <div className="space-y-4">
-            {COURSES.map((course, idx) => (
-              <Accordion
-                key={course.id}
-                level="course"
-                selected={form.course === course.name}
-                defaultOpen={idx === 0}
-                title={
-                  <span className="flex items-center gap-3">
-                    <span className="text-candle-gold"><Icon name={course.icon} className="w-6 h-6" /></span>
-                    <span>
-                      <span className="block">
-                        {course.name}
-                        {course.badge && (
-                          <span className="ml-2 inline-block align-middle bg-candle-gold/20 border border-candle-gold/50 text-candle-gold font-body text-[11px] tracking-wider uppercase px-2 py-0.5 rounded-full">
-                            {course.badge}
-                          </span>
-                        )}
-                      </span>
-                      <span className="block font-body text-sm mt-1.5">
-                        {course.oldPrice && (
-                          <span className="text-lilac/50 text-sm line-through mr-2">{course.oldPrice}</span>
-                        )}
-                        <span className="text-candle-gold font-bold text-xl md:text-2xl tracking-wide">{course.price}</span>
-                      </span>
-                    </span>
-                  </span>
-                }
-              >
-                <p className="font-body text-lilac/85 text-sm italic mb-3">{course.tagline}</p>
-                <div className="space-y-2">
-                  {course.chapters.map((ch) =>
-                    ch.points ? (
-                      <Accordion key={ch.title} title={<span className="text-sm">{ch.title}</span>}>
-                        <ul className="space-y-1.5">
-                          {ch.points.map((p) => (
-                            <li
-                              key={p}
-                              className="flex items-start gap-2.5 font-body text-lilac/90 text-sm"
-                            >
-                              <span className="text-candle-gold mt-0.5 shrink-0">✦</span>
-                              {p}
-                            </li>
-                          ))}
-                        </ul>
-                      </Accordion>
-                    ) : (
-                      <div
-                        key={ch.title}
-                        className="flex items-start gap-2.5 px-1 py-1 font-body text-mist text-sm"
-                      >
-                        <Icon name="crystal" className="w-4 h-4 mt-0.5 shrink-0" />
-                        {ch.title}
-                      </div>
-                    )
-                  )}
-                </div>
-                <SparkleButton
-                  type="button"
-                  onClick={() => chooseCourse(course.name)}
-                  className="w-full mt-4 py-3 rounded-xl font-display text-sm tracking-widest uppercase bg-arcane text-mist hover:bg-arcane/80 transition-all btn-glow"
+            {COURSES.map((course) => {
+              const selected = form.course === course.name;
+              return (
+                <article
+                  key={course.id}
+                  className={`tap-card overflow-hidden rounded-2xl ${selected ? "is-selected" : ""}`}
                 >
-                  Đăng ký {course.name}
-                </SparkleButton>
-              </Accordion>
-            ))}
+                  {/* Đầu thẻ khóa học */}
+                  <div className="border-b border-velvet/40 px-4 py-4 md:px-5">
+                    <div className="flex items-center gap-3">
+                      <span className="text-candle-gold">
+                        <Icon name={course.icon} className="w-6 h-6" />
+                      </span>
+                      <div>
+                        <p className="font-display text-base tracking-wider text-mist md:text-lg">
+                          {course.name}
+                          {course.badge && (
+                            <span className="ml-2 inline-block align-middle rounded-full border border-candle-gold/50 bg-candle-gold/20 px-2 py-0.5 font-body text-[11px] uppercase tracking-wider text-candle-gold">
+                              {course.badge}
+                            </span>
+                          )}
+                        </p>
+                        <p className="mt-1.5 font-body text-sm">
+                          {course.oldPrice && (
+                            <span className="mr-2 text-sm text-lilac/50 line-through">
+                              {course.oldPrice}
+                            </span>
+                          )}
+                          <span className="text-xl font-bold tracking-wide text-candle-gold md:text-2xl">
+                            {course.price}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Nội dung — luôn hiển thị, không mở/gập */}
+                  <div className="px-4 pb-4 pt-4 md:px-5">
+                    <p className="mb-4 font-body text-sm italic text-lilac/85">
+                      {course.tagline}
+                    </p>
+                    <div className="space-y-4">
+                      {course.chapters.map((ch) => (
+                        <div key={ch.title}>
+                          <p className="flex items-start gap-2.5 font-display text-sm leading-snug text-mist md:text-[15px]">
+                            <span
+                              aria-hidden
+                              className="mt-[6px] h-1.5 w-1.5 shrink-0 rotate-45 border border-candle-gold/70 bg-candle-gold/20"
+                            />
+                            <span>{ch.title}</span>
+                          </p>
+                          {ch.points && (
+                            <ul className="ml-[7px] mt-2 space-y-1.5 border-l border-candle-gold/25 pl-4">
+                              {ch.points.map((p) => (
+                                <li
+                                  key={p}
+                                  className="flex items-start gap-2.5 font-body text-sm text-lilac/90"
+                                >
+                                  <span
+                                    aria-hidden
+                                    className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-candle-gold/70"
+                                  />
+                                  {p}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <SparkleButton
+                      type="button"
+                      onClick={() => chooseCourse(course.name)}
+                      className="mt-5 w-full rounded-xl bg-arcane py-3 font-display text-sm uppercase tracking-widest text-mist transition-all hover:bg-arcane/80 btn-glow"
+                    >
+                      Đăng ký {course.name}
+                    </SparkleButton>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </Reveal>

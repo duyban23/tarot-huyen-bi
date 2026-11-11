@@ -1,4 +1,4 @@
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { Link } from "react-router-dom";
 import anime from "animejs";
 import Reveal from "../components/Reveal";
@@ -9,13 +9,11 @@ import CountUp from "../components/CountUp";
 import SparkleButton from "../components/SparkleButton";
 import Footer from "../components/Footer";
 import FeedbackLightbox from "../components/FeedbackLightbox";
+import SpaceGallery from "../components/SpaceGallery";
 import { Icon } from "../components/icons";
 
 import { getServices } from "../api/client";
 import type { Service } from "../api/types";
-
-// Import tarot card data
-import tarotCardsData from "../../public/data/tarot-cards.json";
 
 const FEEDBACKS = [
   {
@@ -222,10 +220,44 @@ const FOR_WHO = [
   { icon: "home", title: "Mối quan hệ khó xử", desc: "Gia đình, bạn bè, đồng nghiệp — có điều khó nói với ai, bạn cần một nơi an toàn để trút ra" },
 ];
 
+const IF_YOU_ARE = [
+  "thức khuya vì một câu hỏi chưa có lời đáp",
+  "đứng giữa hai lựa chọn mà không biết hỏi ai",
+  "mỉm cười với mọi người, nhưng lòng rối bời",
+  "yêu một người mà không chắc được thương",
+  "muốn hiểu mình, nhưng không biết bắt đầu từ đâu",
+];
+
+/**
+ * Quote cards có chữ nằm sẵn trong ảnh (do My thiết kế). Giữ nguyên câu chữ
+ * trong `text` để alt text + figcaption vẫn đọc được với screen reader/SEO.
+ */
+const QUOTE_CARDS = [
+  {
+    webp: "/images/space/quotes/quote-01.webp",
+    jpg: "/images/space/quotes/quote-01.jpg",
+    text: "Cảm xúc được sinh ra để tái tạo và sửa chữa, nhưng chúng ta vô tình biến nó thành những người lính và biến bản thân thành bãi chiến trường.",
+  },
+  {
+    webp: "/images/space/quotes/quote-02.webp",
+    jpg: "/images/space/quotes/quote-02.jpg",
+    text: "Bạn có quyền chọn điều mình đưa vào tiềm thức. Đừng đưa tổn thương vào đó — nó sẽ thành thói quen ý nghĩ và cảm xúc chạy tự động.",
+  },
+  {
+    webp: "/images/space/quotes/quote-03.webp",
+    jpg: "/images/space/quotes/quote-03.jpg",
+    text: "Thẳng thắn không nhất thiết là làm người khác tổn thương. Bạn có thể chọn cách nói sự thật một cách mềm mại, uyển chuyển.",
+  },
+];
+
 export default function HomePage() {
   const [services, setServices] = useState<Service[]>([]);
   const [lightboxItem, setLightboxItem] = useState<typeof FEEDBACKS[number] | null>(null);
   const [showAllFeedback, setShowAllFeedback] = useState(false);
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  // Khung video đang mở: chỉ iframe của trang này được mount/tải.
+  const [videoTab, setVideoTab] = useState<"youtube" | "tiktok">("youtube");
+  const quoteTouchX = useRef<number | null>(null);
 
   useEffect(() => {
     getServices().then(setServices).catch((e) => console.warn("getServices failed:", e.message));
@@ -294,7 +326,7 @@ export default function HomePage() {
       {/* ─── Hero ─── */}
       <section className="relative min-h-[100dvh] flex overflow-hidden pt-16">
         <Suspense fallback={null}>
-          <GalaxyTarotSystem count={18} cardData={tarotCardsData as any} />
+          <GalaxyTarotSystem count={18} />
         </Suspense>
         {/* Phủ mờ nền tím để logo và chữ nổi hơn */}
         <div aria-hidden className="absolute inset-0 z-[1] bg-void/45 pointer-events-none" />
@@ -352,59 +384,273 @@ export default function HomePage() {
       {/* ─── Section divider ─── */}
       <div className="section-divider my-4" />
 
-      {/* ─── Stats ─── */}
-      <Reveal className="py-16">
-        <div className="max-w-3xl mx-auto px-4">
-          <div className="grid grid-cols-3 gap-3 sm:gap-8 text-center">
-            <div>
-              <p className="font-display text-3xl md:text-4xl text-candle-gold">
-                <CountUp end={500} suffix="+" />
-              </p>
-              <p className="font-body text-lilac/90 text-sm sm:text-base tracking-wide mt-1">Khách hàng</p>
+      {/* ─── Không gian của My — gallery + video ─── */}
+      <Reveal className="py-16 md:py-24" amount={0.15}>
+        <div id="khong-gian" className="max-w-5xl mx-auto scroll-mt-24 px-4">
+          <h2 className="font-display text-2xl md:text-4xl text-mist text-center mb-3 leading-tight">
+            Một không gian riêng,<br />để bạn được là chính mình
+          </h2>
+          <p className="font-body text-lilac/70 italic text-center mb-8 md:mb-10 max-w-xl mx-auto">
+            Nơi My đón khách, pha một tách trà và cùng bạn trò chuyện — chậm rãi, riêng tư và không phán xét.
+          </p>
+
+          <div className="mb-10 md:mb-14">
+            <SpaceGallery />
+          </div>
+
+          {/* Video: YouTube + TikTok chung một khung, bấm mũi tên để chuyển
+              trang — chỉ khung đang xem mới tải iframe, không load cả hai. */}
+          <div className="mx-auto">
+            <div
+              key={videoTab}
+              className={
+                videoTab === "youtube"
+                  ? "animate-fade-in mx-auto max-w-3xl"
+                  : "animate-fade-in mx-auto w-full max-w-[280px]"
+              }
+            >
+              {videoTab === "youtube" ? (
+                <figure className="min-w-0">
+                  <div className="group relative overflow-hidden rounded-2xl border border-arcane/30 shadow-xl shadow-arcane/20 transition-colors hover:border-candle-gold/60">
+                    <div className="aspect-video w-full">
+                      <iframe
+                        className="pointer-events-none h-full w-full"
+                        src="https://www.youtube.com/embed/4UwqrUl5wP8"
+                        title="Healing With My — Video giới thiệu"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        loading="lazy"
+                        tabIndex={-1}
+                      />
+                    </div>
+                    <a
+                      href="https://www.youtube.com/watch?v=4UwqrUl5wP8"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Xem video giới thiệu trên YouTube (mở tab mới)"
+                      className="absolute inset-0 z-10 cursor-pointer rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-candle-gold"
+                    />
+                  </div>
+                  <figcaption className="mt-3 flex items-center justify-between gap-3">
+                    <span className="font-body text-candle-gold/80 text-[11px] tracking-[0.25em] uppercase">
+                      YouTube
+                    </span>
+                    <a
+                      href="https://www.youtube.com/watch?v=4UwqrUl5wP8"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-body text-lilac/55 text-xs hover:text-candle-gold transition-colors"
+                    >
+                      Xem trên YouTube ↗
+                    </a>
+                  </figcaption>
+                </figure>
+              ) : (
+                <figure className="relative w-full">
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute -inset-4 rounded-[32px] bg-arcane/10 blur-2xl"
+                  />
+                  <div className="group relative overflow-hidden rounded-[24px] border border-arcane/30 bg-void shadow-xl shadow-arcane/20 transition-colors hover:border-candle-gold/60">
+                    <div className="aspect-[4/5] w-full">
+                      {/* Player nhúng của TikTok đang trả "Server error" cho video
+                          này, nên dùng ảnh bìa + nút play dẫn thẳng sang TikTok. */}
+                      <img
+                        src="/images/tiktok-cover.webp"
+                        alt="Video TikTok — Chữa lành cùng My"
+                        width={640}
+                        height={800}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 bg-gradient-to-t from-void/75 via-void/10 to-void/20"
+                    />
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute left-1/2 top-1/2 z-10 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-candle-gold/60 bg-void/55 text-candle-gold shadow-lg shadow-void/50 backdrop-blur-sm transition-transform duration-300 group-hover:scale-105"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 h-6 w-6" aria-hidden>
+                        <path d="M8 5.14v13.72a.6.6 0 0 0 .92.51l10.79-6.86a.6.6 0 0 0 0-1.02L8.92 4.63A.6.6 0 0 0 8 5.14Z" />
+                      </svg>
+                    </span>
+                    <a
+                      href="https://www.tiktok.com/@chemietarot_happy/video/7702067975481806100"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Xem video trên TikTok (mở tab mới)"
+                      className="absolute inset-0 z-20 cursor-pointer rounded-[24px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-candle-gold"
+                    />
+                  </div>
+                  <figcaption className="relative mt-3 text-center">
+                    <p className="font-display text-[15px] leading-snug text-mist">
+                      Chữa lành cùng My
+                    </p>
+                    <a
+                      href="https://www.tiktok.com/@chemietarot_happy/video/7702067975481806100"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-block font-body text-lilac/55 text-xs hover:text-candle-gold transition-colors"
+                    >
+                      Xem trên TikTok ↗
+                    </a>
+                  </figcaption>
+                </figure>
+              )}
             </div>
-            <div>
-              <p className="font-display text-3xl md:text-4xl text-candle-gold">
-                <CountUp end={5} />
-                <Icon
-                  name="star"
-                  className="inline-block w-6 h-6 md:w-7 md:h-7 -mt-1 ml-1 align-middle drop-shadow-[0_0_6px_rgba(212,168,67,0.55)]"
-                />
-              </p>
-              <p className="font-body text-lilac/90 text-sm sm:text-base tracking-wide mt-1">Đánh giá</p>
-            </div>
-            <div>
-              <p className="font-display text-3xl md:text-4xl text-candle-gold">
-                <CountUp end={10} suffix="+" />
-              </p>
-              <p className="font-body text-lilac/90 text-sm sm:text-base tracking-wide mt-1">Năm kinh nghiệm</p>
+
+            {/* Điều hướng chuyển trang video */}
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setVideoTab("youtube")}
+                disabled={videoTab === "youtube"}
+                aria-label="Quay lại video YouTube"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-arcane/30 text-lilac/70 transition-colors hover:border-candle-gold/60 hover:text-candle-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-candle-gold disabled:cursor-default disabled:opacity-30 disabled:hover:border-arcane/30 disabled:hover:text-lilac/70"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+                  <path d="M15 6l-6 6 6 6" />
+                </svg>
+              </button>
+
+              <div className="flex items-center gap-1.5">
+                {(["youtube", "tiktok"] as const).map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setVideoTab(id)}
+                    aria-pressed={videoTab === id}
+                    className={`rounded-full border px-3 py-1 font-body text-[10.5px] uppercase tracking-[0.18em] transition-colors ${
+                      videoTab === id
+                        ? "border-candle-gold/50 bg-candle-gold/15 text-candle-gold"
+                        : "border-arcane/25 text-lilac/55 hover:border-arcane/45 hover:text-lilac"
+                    }`}
+                  >
+                    {id === "youtube" ? "YouTube" : "TikTok"}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setVideoTab("tiktok")}
+                disabled={videoTab === "tiktok"}
+                aria-label="Sang video TikTok"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-arcane/30 text-lilac/70 transition-colors hover:border-candle-gold/60 hover:text-candle-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-candle-gold disabled:cursor-default disabled:opacity-30 disabled:hover:border-arcane/30 disabled:hover:text-lilac/70"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+                  <path d="M9 6l6 6-6 6" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
       </Reveal>
 
-      {/* ─── Video — Không gian của My ─── */}
-      <Reveal className="py-16 md:py-24" amount={0.15}>
-        <div className="max-w-3xl mx-auto px-4">
-          <p className="font-body text-candle-gold text-sm tracking-widest uppercase text-center mb-2">
-            ✦ Không gian của My ✦
-          </p>
-          <h2 className="font-display text-2xl md:text-4xl text-mist text-center mb-3 leading-tight">
-            Ghé thăm Chemie Coffee,<br />nơi giấc mơ bắt đầu
-          </h2>
-          <p className="font-body text-lilac/70 italic text-center mb-10 max-w-xl mx-auto">
-            Tổ hợp cà phê giữa lòng Hà Nội — nơi My từng gửi gắm cả thanh xuân, và nay là nơi bạn có thể gặp My trực tiếp.
-          </p>
-          <div className="relative overflow-hidden rounded-2xl border border-arcane/30 shadow-xl shadow-arcane/20">
-            <div className="aspect-video w-full">
-              <iframe
-                className="w-full h-full"
-                src="https://www.youtube.com/embed/4UwqrUl5wP8"
-                title="Chemie Coffee — Tổ hợp Cà Phê Boardgame 24/7 tại Hà Nội"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-                loading="lazy"
-              />
+      {/* ─── Section divider ─── */}
+      <div className="section-divider my-4" />
+
+      {/* ─── Nếu bạn đang... / Thì bạn đang ở đúng chỗ ─── */}
+      <Reveal className="relative py-16 md:py-24" amount={0.15}>
+        {/* Quầng sáng nền */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute left-1/2 top-1/2 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-arcane/10 blur-[120px]" />
+          <div className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-candle-gold/[0.07] blur-[80px]" />
+        </div>
+
+        <div className="relative mx-auto max-w-3xl px-4">
+          <div className="relative overflow-hidden rounded-[28px] border border-arcane/25 bg-gradient-to-b from-velvet/60 via-void/70 to-velvet/40 px-6 py-10 shadow-[0_40px_100px_-60px_rgba(0,0,0,1)] sm:px-10 md:px-16 md:py-14">
+            {/* Halo trong thẻ */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -top-24 left-1/2 h-56 w-[26rem] -translate-x-1/2 rounded-full bg-arcane/15 blur-[70px]"
+            />
+            {/* Chỉ sáng mép trên + 4 góc trang trí */}
+            <span
+              aria-hidden
+              className="absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-candle-gold/50 to-transparent"
+            />
+            <span
+              aria-hidden
+              className="absolute left-4 top-4 h-5 w-5 rounded-tl-[10px] border-l border-t border-candle-gold/35"
+            />
+            <span
+              aria-hidden
+              className="absolute right-4 top-4 h-5 w-5 rounded-tr-[10px] border-r border-t border-candle-gold/35"
+            />
+            <span
+              aria-hidden
+              className="absolute bottom-4 left-4 h-5 w-5 rounded-bl-[10px] border-b border-l border-candle-gold/35"
+            />
+            <span
+              aria-hidden
+              className="absolute bottom-4 right-4 h-5 w-5 rounded-br-[10px] border-b border-r border-candle-gold/35"
+            />
+
+            <div className="relative">
+              {/* Eyebrow */}
+              <div className="flex items-center justify-center gap-3 sm:gap-4">
+                <span
+                  aria-hidden
+                  className="h-px w-8 bg-gradient-to-r from-transparent to-candle-gold/60 sm:w-12"
+                />
+                <p className="font-body text-candle-gold text-[10px] tracking-[0.3em] uppercase sm:text-[11px] sm:tracking-[0.34em]">
+                  Nếu bạn đang
+                </p>
+                <span
+                  aria-hidden
+                  className="h-px w-8 bg-gradient-to-l from-transparent to-candle-gold/60 sm:w-12"
+                />
+              </div>
+
+              {/* Danh sách chạy theo đường chỉ vàng */}
+              <div className="relative mx-auto mt-8 max-w-xl pl-7 sm:mt-9 md:pl-9">
+                <span
+                  aria-hidden
+                  className="absolute bottom-2 left-[3px] top-2 w-px bg-gradient-to-b from-candle-gold/5 via-candle-gold/40 to-candle-gold/5"
+                />
+                <ul className="space-y-4 sm:space-y-5">
+                  {IF_YOU_ARE.map((line) => (
+                    <li key={line} className="group relative">
+                      <span
+                        aria-hidden
+                        className="absolute -left-7 top-[0.55em] h-[7px] w-[7px] rotate-45 border border-candle-gold/80 bg-void shadow-[0_0_12px_rgba(212,168,67,0.55)] transition-all duration-300 group-hover:bg-candle-gold/25 group-hover:shadow-[0_0_18px_rgba(212,168,67,0.9)] md:-left-9"
+                      />
+                      <p className="font-display text-[17px] leading-[1.5] text-mist/90 transition-colors duration-300 text-balance group-hover:text-mist sm:text-xl md:text-[23px]">
+                        {line}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Dấu ngăn */}
+              <div
+                aria-hidden
+                className="mx-auto mt-9 flex max-w-sm items-center gap-3 sm:mt-10"
+              >
+                <span className="h-px flex-1 bg-gradient-to-r from-transparent to-arcane/40" />
+                <Icon
+                  name="sparkles"
+                  className="h-4 w-4 shrink-0 drop-shadow-[0_0_8px_rgba(212,168,67,0.5)]"
+                />
+                <span className="h-px flex-1 bg-gradient-to-l from-transparent to-arcane/40" />
+              </div>
+
+              {/* Kết đoạn */}
+              <div className="mt-6 text-center sm:mt-7">
+                <h2 className="font-display text-[26px] leading-[1.15] drop-shadow-[0_0_30px_rgba(212,168,67,0.25)] sm:text-3xl md:text-[42px] text-balance">
+                  <span className="bg-gradient-to-r from-mist via-[#f2dba0] to-candle-gold bg-clip-text text-transparent">
+                    Thì bạn đang ở đúng chỗ.
+                  </span>
+                </h2>
+                <p className="mx-auto mt-3 max-w-md font-body text-[15px] italic leading-relaxed text-lilac/80 sm:text-base md:text-lg text-balance">
+                  Chỉ cần ngồi xuống, kể thật lòng — phần còn lại, mình cùng nhìn.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -437,34 +683,70 @@ export default function HomePage() {
         </div>
       </Reveal>
 
-      {/* ─── CTA ─── */}
+      {/* ─── Section divider ─── */}
+      <div className="section-divider my-4" />
+
+      {/* ─── Phan Thần Hiểu My là ai? ─── */}
       <Reveal className="py-16 md:py-24" delay={150}>
-        <div className="text-center px-4">
-          <h2 className="font-display text-2xl md:text-4xl text-mist mb-4">
-            Đêm nay, đừng ôm nỗi lo một mình
-          </h2>
-          <p className="font-body text-lilac italic mb-8 max-w-md mx-auto">
-            Đặt một buổi xem — để có người lắng nghe, để lòng được sáng rõ và bình yên trở lại.
+        <div className="max-w-2xl mx-auto px-4 text-center">
+          <p className="font-body text-candle-gold/80 text-xs tracking-widest uppercase mb-2">
+            Reader · Healer · Coaching
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <SparkleButton
-              as="link"
-              href="/booking"
-              className="px-8 py-3 rounded-xl font-display text-sm tracking-widest uppercase bg-arcane text-mist hover:bg-arcane/80 transition-all shadow-lg shadow-arcane/25 btn-glow"
+          <h2 className="font-display text-2xl md:text-4xl text-mist mb-4 leading-tight">
+            Phan Thần Hiểu My là ai?
+          </h2>
+          <div className="mx-auto max-w-xl space-y-3 text-left font-body text-lilac leading-relaxed">
+            <p>
+              My là người lắng nghe bằng Tarot, Tea Leaf và Huyền Học. Hơn 10 năm qua,
+              My đồng hành cùng hàng trăm người đang đứng giữa những ngã rẽ — không
+              phải để phán xét số phận, mà để cùng họ nhìn sâu vào lòng mình và tìm
+              lại sự bình yên đã lạc mất.
+            </p>
+            <p>
+              My không hứa những lời tiên tri tuyệt đối. My chỉ ở đây, chậm rãi và
+              thành thật, để bạn có một nơi đủ an toàn mà nói ra những điều khó nói
+              nhất.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-6 grid max-w-xl grid-cols-3 gap-2 text-center sm:gap-4">
+            <div className="rounded-xl border border-velvet/60 bg-velvet/30 px-2 py-3">
+              <p className="font-display text-xl sm:text-2xl text-candle-gold">
+                <CountUp end={10} suffix="+" />
+              </p>
+              <p className="font-body text-lilac/60 text-[11px] sm:text-xs mt-1">
+                năm kinh nghiệm
+              </p>
+            </div>
+            <div className="rounded-xl border border-velvet/60 bg-velvet/30 px-2 py-3">
+              <p className="font-display text-xl sm:text-2xl text-candle-gold">
+                <CountUp end={500} suffix="+" />
+              </p>
+              <p className="font-body text-lilac/60 text-[11px] sm:text-xs mt-1">
+                khách hàng
+              </p>
+            </div>
+            <div className="rounded-xl border border-velvet/60 bg-velvet/30 px-2 py-3">
+              <p className="font-display text-xl sm:text-2xl text-candle-gold">
+                <CountUp end={5} />
+                <Icon
+                  name="star"
+                  className="inline-block w-4 h-4 -mt-1 ml-0.5 align-middle drop-shadow-[0_0_5px_rgba(212,168,67,0.55)]"
+                />
+              </p>
+              <p className="font-body text-lilac/60 text-[11px] sm:text-xs mt-1">
+                đánh giá
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <Link
+              to="/about"
+              className="font-body text-candle-gold hover:text-mist underline underline-offset-4 decoration-arcane/30 transition-all"
             >
-              <Icon
-                name="sparkles"
-                className="inline-block w-4 h-4 -mt-0.5 mr-1.5 drop-shadow-[0_0_6px_rgba(212,168,67,0.6)]"
-              />
-              Đặt lịch ngay
-            </SparkleButton>
-            <SparkleButton
-              as="link"
-              href="/services"
-              className="px-8 py-3 rounded-xl font-display text-sm tracking-widest uppercase border border-velvet text-lilac hover:border-arcane/50 hover:text-mist transition-all"
-            >
-              Xem bảng giá
-            </SparkleButton>
+              Đọc câu chuyện đầy đủ →
+            </Link>
           </div>
         </div>
       </Reveal>
@@ -479,7 +761,7 @@ export default function HomePage() {
             Tại sao bạn ở đây?
           </h2>
           <p className="font-body text-lilac/70 italic text-center mb-12 max-w-xl mx-auto">
-            Nếu một trong những dòng này giống bạn — thì bạn đã đến đúng nơi rồi.
+            Nếu một trong những dòng này giống bạn — hãy để My khai mở điều đang làm bạn nặng lòng.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
             {FOR_WHO.map((w) => (
@@ -491,12 +773,152 @@ export default function HomePage() {
             ))}
           </div>
           <div className="text-center mt-8">
-            <Link
-              to="/booking"
-              className="font-body text-candle-gold hover:text-mist underline underline-offset-4 decoration-arcane/30 transition-all"
+            <SparkleButton
+              as="link"
+              href="/services#cung-my"
+              className="px-8 py-3 rounded-xl font-display text-sm tracking-widest uppercase bg-arcane text-mist hover:bg-arcane/80 transition-all shadow-lg shadow-arcane/25 btn-glow"
             >
-              Kể My nghe chuyện của bạn →
-            </Link>
+              <Icon
+                name="sparkles"
+                className="inline-block w-4 h-4 -mt-0.5 mr-1.5 drop-shadow-[0_0_6px_rgba(212,168,67,0.6)]"
+              />
+              Xem miễn phí để khai mở
+            </SparkleButton>
+            <p className="mt-3 font-body text-lilac/60 text-xs tracking-wide">
+              5 phút · miễn phí · chỉ cần ngày sinh
+            </p>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ─── Section divider ─── */}
+      <div className="section-divider my-4" />
+
+      {/* ─── Quotes ─── */}
+      <Reveal className="relative py-16 md:py-24" amount={0.15}>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+        >
+          <div className="absolute left-1/2 top-1/2 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-arcane/10 blur-[120px]" />
+          <div className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-candle-gold/[0.06] blur-[80px]" />
+        </div>
+
+        <div id="loi-nhan" className="relative mx-auto max-w-5xl scroll-mt-24 px-4">
+          <div className="mb-3 flex items-center justify-center gap-3">
+            <span
+              aria-hidden
+              className="h-px w-8 bg-gradient-to-r from-transparent to-candle-gold/50 sm:w-12"
+            />
+            <p className="font-body text-[10px] uppercase tracking-[0.32em] text-candle-gold/80 sm:text-[11px]">
+              Lời nhắn từ My
+            </p>
+            <span
+              aria-hidden
+              className="h-px w-8 bg-gradient-to-l from-transparent to-candle-gold/50 sm:w-12"
+            />
+          </div>
+
+          <h2 className="font-display text-2xl md:text-4xl text-mist text-center leading-tight">
+            Đôi điều My muốn nhắn bạn
+          </h2>
+          <p className="mx-auto mt-3 mb-9 max-w-md text-center font-body text-sm italic text-lilac/60 md:mb-12">
+            Những điều My gửi lại sau mỗi buổi trò chuyện.
+          </p>
+
+          {/* Desktop: 3 cột */}
+          <div className="hidden lg:grid lg:grid-cols-3 lg:gap-5">
+            {QUOTE_CARDS.map((q) => (
+              <figure
+                key={q.webp}
+                className="group relative aspect-[314/591] overflow-hidden rounded-2xl border border-velvet/60 bg-velvet/30 shadow-lg shadow-velvet/20 transition-all duration-300 hover:-translate-y-1 hover:border-arcane/40 hover:shadow-xl hover:shadow-arcane/20"
+              >
+                <picture>
+                  <source srcSet={q.webp} type="image/webp" />
+                  <img
+                    src={q.jpg}
+                    alt={`Lời nhắn từ My: “${q.text}”`}
+                    width={314}
+                    height={591}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                  />
+                </picture>
+              </figure>
+            ))}
+          </div>
+
+          {/* Mobile/tablet: một card duy nhất, nút chuyển nằm 2 bên */}
+          <div className="-mx-4 lg:hidden">
+            <div className="mx-auto flex w-full max-w-[416px] items-center justify-center gap-1 px-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setQuoteIndex(
+                    (i) => (i - 1 + QUOTE_CARDS.length) % QUOTE_CARDS.length
+                  )
+                }
+                aria-label="Xem lời nhắn trước"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-arcane/30 bg-void/85 text-lilac shadow-lg shadow-void/50 backdrop-blur transition-colors hover:border-candle-gold/60 hover:text-candle-gold"
+              >
+                <Icon name="chevron-down" className="h-5 w-5 rotate-90" />
+              </button>
+
+              <div
+                className="relative aspect-[314/591] min-w-0 flex-1 touch-pan-y overflow-hidden rounded-2xl border border-velvet/60 bg-velvet/30 shadow-lg shadow-velvet/20"
+                onTouchStart={(e) => {
+                  quoteTouchX.current = e.touches[0].clientX;
+                }}
+                onTouchEnd={(e) => {
+                  if (quoteTouchX.current === null) return;
+                  const dx = e.changedTouches[0].clientX - quoteTouchX.current;
+                  quoteTouchX.current = null;
+                  if (Math.abs(dx) < 40) return;
+                  setQuoteIndex(
+                    (i) =>
+                      (i + (dx < 0 ? 1 : -1) + QUOTE_CARDS.length) %
+                      QUOTE_CARDS.length
+                  );
+                }}
+              >
+                {QUOTE_CARDS.map((q, i) => (
+                  <picture
+                    key={q.webp}
+                    aria-hidden={i !== quoteIndex}
+                    className={`absolute inset-0 transition-opacity duration-500 ${
+                      i === quoteIndex ? "opacity-100" : "pointer-events-none opacity-0"
+                    }`}
+                  >
+                    <source srcSet={q.webp} type="image/webp" />
+                    <img
+                      src={q.jpg}
+                      alt={`Lời nhắn từ My: “${q.text}”`}
+                      width={314}
+                      height={591}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover"
+                    />
+                  </picture>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setQuoteIndex((i) => (i + 1) % QUOTE_CARDS.length)
+                }
+                aria-label="Xem lời nhắn tiếp theo"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-arcane/30 bg-void/85 text-lilac shadow-lg shadow-void/50 backdrop-blur transition-colors hover:border-candle-gold/60 hover:text-candle-gold"
+              >
+                <Icon name="chevron-down" className="h-5 w-5 -rotate-90" />
+              </button>
+            </div>
+
+            <p className="sr-only" aria-live="polite">
+              Lời nhắn {quoteIndex + 1} / {QUOTE_CARDS.length}
+            </p>
           </div>
         </div>
       </Reveal>
@@ -507,9 +929,6 @@ export default function HomePage() {
       {/* ─── Feedback ─── */}
       <Reveal className="py-16 md:py-24" delay={100}>
         <div className="max-w-5xl mx-auto px-4">
-          <p className="font-body text-candle-gold text-sm tracking-widest uppercase text-center mb-2">
-            ✦ Phản hồi từ khách hàng ✦
-          </p>
           <h2 className="font-display text-2xl md:text-4xl text-mist text-center mb-12">
             Khách hàng nói gì?
           </h2>
@@ -608,32 +1027,6 @@ export default function HomePage() {
           onClose={() => setLightboxItem(null)}
         />
       )}
-
-      {/* ─── Section divider ─── */}
-      <div className="section-divider my-4" />
-
-      {/* ─── Câu chuyện của My (bản ngắn — dẫn sang trang giới thiệu) ─── */}
-      <Reveal className="py-12 md:py-16" amount={0.15}>
-        <div className="max-w-2xl mx-auto px-4 text-center">
-          <p className="font-body text-candle-gold text-sm tracking-widest uppercase mb-2">
-            ✦ Câu chuyện của My ✦
-          </p>
-          <h2 className="font-display text-2xl md:text-3xl text-mist mb-6 leading-tight">
-            Cô gái từng vỡ vụn,<br />nay là nơi bình yên của hàng trăm người
-          </h2>
-          <p className="font-body text-lilac leading-relaxed mb-6">
-            My từng mở một quán cà phê ở Hà Nội, rồi thất bại và ở ẩn suốt một năm.
-            My học Tarot, Tea Leaf và chữa lành — không phải để đoán số phận, mà để
-            hiểu lòng người, bắt đầu từ lòng mình.
-          </p>
-          <Link
-            to="/about"
-            className="font-body text-candle-gold hover:text-mist underline underline-offset-4 decoration-arcane/30 transition-all"
-          >
-            Đọc câu chuyện đầy đủ →
-          </Link>
-        </div>
-      </Reveal>
 
       {/* ─── Section divider ─── */}
       <div className="section-divider my-4" />

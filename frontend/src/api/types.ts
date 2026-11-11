@@ -117,6 +117,14 @@ export interface AiFullResult {
   id: number;
   service: string;
   full_result: string;
+  /** true = bản xem thử, không gắn đơn thanh toán. */
+  demo?: boolean;
+}
+
+export interface AiConfig {
+  full_demo_open: boolean;
+  free_per_day: number;
+  full_demo_per_day: number;
 }
 
 export interface PaymentOrder {
@@ -129,6 +137,8 @@ export interface PaymentOrder {
   account_name: string;
   bank: string;
   account: string;
+  /** true = đơn thanh toán thử nghiệm, không trừ tiền thật. */
+  demo?: boolean;
 }
 
 export interface PaymentStatus {

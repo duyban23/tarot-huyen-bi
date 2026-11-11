@@ -1,4 +1,5 @@
 import type {
+  AiConfig,
   AiFullResult,
   AiReadingResult,
   AiService,
@@ -106,6 +107,11 @@ export function getAiServices() {
   return api<AiService[]>("/api/ai/services");
 }
 
+/** Cờ cấu hình: bản đầy đủ có đang mở xem thử (không cần thanh toán) không. */
+export function getAiConfig() {
+  return api<AiConfig>("/api/ai/config");
+}
+
 export function createAiReading(
   service: string,
   input: Record<string, unknown>,
@@ -137,6 +143,14 @@ export function createPayment(service: string, input: Record<string, unknown>) {
     method: "POST",
     body: JSON.stringify({ service, input }),
   });
+}
+
+/** Chỉ hoạt động khi backend bật PAYMENT_DEMO_MODE — giả lập SePay báo đã nhận tiền. */
+export function confirmDemoPayment(code: string) {
+  return api<{ ok: boolean; code: string; status: string; demo: boolean }>(
+    `/api/payments/${encodeURIComponent(code)}/demo-confirm`,
+    { method: "POST" }
+  );
 }
 
 export function getPaymentStatus(code: string) {

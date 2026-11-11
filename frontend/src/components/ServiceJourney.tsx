@@ -199,10 +199,10 @@ const JOURNEY: JourneyBox[] = [
             service: "Lenormand vận mệnh",
           },
           {
-            label: "Lenormand Grand Tableau 36 lá",
+            label: "Lenormand Huyền Học 36 lá",
             note: "Quá khứ – hiện tại – tác động – tương lai xa từ 1 tháng – 1 năm, thậm chí 2–3 năm (1–2 tiếng)",
             price: "500.000",
-            service: "Grand Tableau 36 lá",
+            service: "Huyền Học 36 lá",
           },
           {
             label: "Lenormand trải tổng quan",

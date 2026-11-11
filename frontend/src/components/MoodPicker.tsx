@@ -45,7 +45,7 @@ export default function MoodPicker() {
                 <span className="block font-display text-sm md:text-base leading-snug text-mist">
                   {m.question}
                 </span>
-                <span className="block font-body text-lilac/80 text-sm leading-snug mt-0.5 line-clamp-1 md:line-clamp-2">
+                <span className="font-body text-lilac/80 text-sm leading-snug mt-0.5 line-clamp-1 md:line-clamp-2">
                   {m.hint}
                 </span>
               </span>
@@ -104,7 +104,7 @@ function PickRow({ name, expanded }: { name: string; expanded: boolean }) {
           {item.name}
         </span>
         {item.detail && (
-          <span className="block font-body text-lilac/60 text-sm leading-snug mt-0.5 line-clamp-2">
+          <span className="font-body text-lilac/60 text-sm leading-snug mt-0.5 line-clamp-2">
             {item.detail}
           </span>
         )}

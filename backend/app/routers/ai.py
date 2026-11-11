@@ -17,7 +17,13 @@ from app.ai_services import (
     price_for,
     validate_input,
 )
-from app.config import AI_FREE_PER_DAY
+from app.config import (
+    AI_DEMO_FULL_GLOBAL_PER_DAY,
+    AI_DEMO_FULL_PER_DAY,
+    AI_FREE_PER_DAY,
+    AI_FULL_DEMO_OPEN,
+    PAYMENT_DEMO_MODE,
+)
 from app.database import get_db
 from app.models import AiReading, Payment, PaymentStatus
 from app.net import client_ip, client_key
@@ -137,8 +143,18 @@ async def ai_reading_free(body: dict, request: Request, db: Session = Depends(ge
     }
 
 
+@router.get("/config")
+def ai_config():
+    """Cờ cấu hình cho frontend: bản đầy đủ có đang mở thử nghiệm không."""
+    return {
+        "full_demo_open": AI_FULL_DEMO_OPEN,
+        "free_per_day": AI_FREE_PER_DAY,
+        "full_demo_per_day": AI_DEMO_FULL_PER_DAY,
+    }
+
+
 @router.post("/reading/full")
-async def ai_reading_full(body: dict, db: Session = Depends(get_db)):
+async def ai_reading_full(body: dict, request: Request, db: Session = Depends(get_db)):
     service_type = str(body.get("service", ""))
     svc = get_service(service_type)
     if not svc:
@@ -149,28 +165,132 @@ async def ai_reading_full(body: dict, db: Session = Depends(get_db)):
 
     maybe_purge_ai_readings(db)
 
+    ip_key = client_key(client_ip(request))
     code = str(body.get("payment_code", "")).strip()
-    payment = db.query(Payment).filter(Payment.code == code).first()
-    if not payment or payment.status != PaymentStatus.paid:
+    payment = db.query(Payment).filter(Payment.code == code).first() if code else None
+    paid = bool(payment and payment.status == PaymentStatus.paid)
+
+    if paid and payment.service_type != service_type:
+        return JSONResponse({"detail": "Đơn này không khớp món bạn đang xem."}, status_code=422)
+
+    # Chưa trả phí: chỉ mở khi đang bật chế độ xem thử (vẫn chặn quota bên dưới).
+    if not paid and not AI_FULL_DEMO_OPEN:
         return JSONResponse(
             {"detail": "My chưa nhận được phí trà của đơn này — bạn quét QR thanh toán trước nhé."},
             status_code=402,
         )
-    if payment.service_type != service_type:
-        return JSONResponse({"detail": "Đơn này không khớp món bạn đang xem."}, status_code=422)
 
     # Đơn đã dùng để mở 1 bản full rồi → trả lại bản cũ (không gọi AI lại).
-    existing = (
-        db.query(AiReading)
-        .filter(AiReading.payment_id == payment.id, AiReading.full_result.is_not(None))
-        .first()
-    )
+    if paid:
+        existing = (
+            db.query(AiReading)
+            .filter(AiReading.payment_id == payment.id, AiReading.full_result.is_not(None))
+            .first()
+        )
+    else:
+        # Xem thử mở tự do: cùng lá số thì trả lại bản đã viết, không tốn thêm lượt.
+        existing = (
+            db.query(AiReading)
+            .filter(
+                AiReading.service_type == service_type,
+                AiReading.input_hash == canonical_hash(service_type, cleaned),
+                AiReading.full_result.is_not(None),
+            )
+            .order_by(AiReading.id.desc())
+            .first()
+        )
     if existing and existing.full_result:
         logger.info(
-            "ai.full reused service=%s payment_id=%s id=%s",
-            service_type, payment.id, existing.id,
+            "ai.full reused service=%s payment_id=%s id=%s demo=%s",
+            service_type, payment.id if paid else None, existing.id, not paid,
         )
-        return {"id": existing.id, "service": service_type, "full_result": existing.full_result}
+        return {
+            "id": existing.id,
+            "service": service_type,
+            "full_result": existing.full_result,
+            "demo": not paid,
+        }
+
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+
+    # Demo thanh toán: tiền là giả nhưng Gemini vẫn tốn phí thật → chặn theo IP
+    # và tổng lượt/ngày. Đặt sau cache để xem lại/retry không bị trừ lượt.
+    if paid and PAYMENT_DEMO_MODE:
+        used = (
+            db.query(AiReading)
+            .filter(
+                AiReading.client_ip_hash == ip_key,
+                AiReading.full_result.is_not(None),
+                AiReading.created_at >= cutoff,
+            )
+            .count()
+        )
+        if used >= AI_DEMO_FULL_PER_DAY:
+            logger.info(
+                "ai.demo quota blocked ip_service=%s used=%d limit=%d",
+                service_type, used, AI_DEMO_FULL_PER_DAY,
+            )
+            return JSONResponse(
+                {"detail": "Hôm nay bạn đã xem hết lượt bản đầy đủ trong đợt thử nghiệm — hẹn bạn ngày mai nhé."},
+                status_code=429,
+            )
+        total = (
+            db.query(AiReading)
+            .filter(
+                AiReading.full_result.is_not(None),
+                AiReading.created_at >= cutoff,
+            )
+            .count()
+        )
+        if total >= AI_DEMO_FULL_GLOBAL_PER_DAY:
+            logger.info(
+                "ai.demo global cap blocked total=%d limit=%d",
+                total, AI_DEMO_FULL_GLOBAL_PER_DAY,
+            )
+            return JSONResponse(
+                {"detail": "My đã nhận đủ lượt xem thử nghiệm hôm nay — bạn quay lại ngày mai nhé."},
+                status_code=429,
+            )
+
+    # Mở thử nghiệm không cần thanh toán: quota riêng, chỉ đếm các bản demo.
+    if not paid:
+        used = (
+            db.query(AiReading)
+            .filter(
+                AiReading.client_ip_hash == ip_key,
+                AiReading.payment_id.is_(None),
+                AiReading.full_result.is_not(None),
+                AiReading.created_at >= cutoff,
+            )
+            .count()
+        )
+        if used >= AI_DEMO_FULL_PER_DAY:
+            logger.info(
+                "ai.open-demo quota blocked service=%s used=%d limit=%d",
+                service_type, used, AI_DEMO_FULL_PER_DAY,
+            )
+            return JSONResponse(
+                {"detail": "Hôm nay bạn đã xem hết lượt bản đầy đủ miễn phí — hẹn bạn ngày mai nhé."},
+                status_code=429,
+            )
+        total = (
+            db.query(AiReading)
+            .filter(
+                AiReading.payment_id.is_(None),
+                AiReading.full_result.is_not(None),
+                AiReading.created_at >= cutoff,
+            )
+            .count()
+        )
+        if total >= AI_DEMO_FULL_GLOBAL_PER_DAY:
+            logger.info(
+                "ai.open-demo global cap blocked total=%d limit=%d",
+                total, AI_DEMO_FULL_GLOBAL_PER_DAY,
+            )
+            return JSONResponse(
+                {"detail": "My đã nhận đủ lượt xem miễn phí hôm nay — bạn quay lại ngày mai nhé."},
+                status_code=429,
+            )
 
     try:
         computed = svc["compute"](cleaned)
@@ -188,13 +308,20 @@ async def ai_reading_full(body: dict, db: Session = Depends(get_db)):
         computed_json=json.dumps(computed, ensure_ascii=False),
         basic_result="",
         full_result=text,
-        payment_id=payment.id,
+        payment_id=payment.id if paid else None,
+        # Giữ hash IP cho bản thử nghiệm để đếm quota; flow trả tiền thật thì không lưu.
+        client_ip_hash=ip_key if (not paid or PAYMENT_DEMO_MODE) else None,
     )
     db.add(reading)
     db.commit()
     db.refresh(reading)
     logger.info(
-        "ai.full generated service=%s payment_id=%s id=%s chars=%d",
-        service_type, payment.id, reading.id, len(text),
+        "ai.full generated service=%s payment_id=%s id=%s demo=%s chars=%d",
+        service_type, payment.id if paid else None, reading.id, not paid, len(text),
     )
-    return {"id": reading.id, "service": service_type, "full_result": text}
+    return {
+        "id": reading.id,
+        "service": service_type,
+        "full_result": text,
+        "demo": not paid,
+    }

@@ -1,5 +1,6 @@
 """Thanh toán SePay: tạo đơn + VietQR → webhook đối soát → poll trạng thái."""
 
+import logging
 import random
 import re
 from datetime import datetime, timezone
@@ -12,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.ai_services import get_service, price_for, validate_input
 from app.config import (
     PAYMENT_CODE_PREFIX,
+    PAYMENT_DEMO_MODE,
     SEPAY_ACCOUNT,
     SEPAY_ACCOUNT_NAME,
     SEPAY_BANK,
@@ -21,6 +23,8 @@ from app.database import get_db
 from app.models import Payment, PaymentStatus
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
+
+logger = logging.getLogger(__name__)
 
 _CODE_RE = re.compile(r"HWM\d{6}", re.IGNORECASE)
 
@@ -60,17 +64,56 @@ def create_payment(body: dict, db: Session = Depends(get_db)):
     db.add(payment)
     db.commit()
     db.refresh(payment)
+    demo = PAYMENT_DEMO_MODE
     return {
         "code": code,
         "service": service_type,
         "amount": amount,
         "status": payment.status.value,
         "transfer_content": code,
-        "qr_url": _qr_url(amount, code),
-        "account_name": SEPAY_ACCOUNT_NAME,
-        "bank": SEPAY_BANK,
-        "account": SEPAY_ACCOUNT,
+        # Demo: không trả QR/STK thật để tránh khách chuyển tiền ngoài đời.
+        "demo": demo,
+        "qr_url": "" if demo else _qr_url(amount, code),
+        "account_name": "Thanh toán thử nghiệm" if demo else SEPAY_ACCOUNT_NAME,
+        "bank": "DEMO" if demo else SEPAY_BANK,
+        "account": "DEMO" if demo else SEPAY_ACCOUNT,
     }
+
+
+@router.post("/{code}/demo-confirm")
+def demo_confirm_payment(code: str, db: Session = Depends(get_db)):
+    """Giả lập SePay báo đã nhận tiền — chỉ mở khi PAYMENT_DEMO_MODE=1."""
+    if not PAYMENT_DEMO_MODE:
+        # 404 thay vì 403: production không lộ endpoint demo.
+        return JSONResponse({"detail": "Not found"}, status_code=404)
+
+    payment = db.query(Payment).filter(Payment.code == code.upper()).first()
+    if not payment:
+        return JSONResponse({"detail": "Không tìm thấy đơn này."}, status_code=404)
+    if payment.status == PaymentStatus.paid:
+        return {"ok": True, "code": payment.code, "status": "paid", "demo": True}
+    if payment.status != PaymentStatus.pending:
+        return JSONResponse(
+            {"detail": "Đơn này không còn chờ thanh toán — bạn tạo đơn mới nhé."},
+            status_code=409,
+        )
+
+    payment.status = PaymentStatus.paid
+    # Prefix DEMO- để admin/lọc dữ liệu biết đây không phải giao dịch thật.
+    payment.sepay_tx_id = f"DEMO-{payment.code}"
+    payment.paid_at = datetime.now(timezone.utc)
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("payment.demo-confirm failed code=%s", code)
+        return JSONResponse(
+            {"detail": "My chưa xác nhận được giao dịch — bạn thử lại nhé."},
+            status_code=500,
+        )
+    db.refresh(payment)
+    logger.info("payment.demo-confirm code=%s amount=%s", payment.code, payment.amount)
+    return {"ok": True, "code": payment.code, "status": "paid", "demo": True}
 
 
 @router.get("/{code}")
