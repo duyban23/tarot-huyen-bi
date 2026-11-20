@@ -75,6 +75,10 @@ def _heal_bookings_schema() -> dict:
         "Schema drift: bookings.meeting_method thiếu — đang tự thêm cột. "
         "Nên chạy `alembic upgrade head` trên DB production."
     )
+    # Neon cấp user không có CREATE trên schema public → CREATE TYPE bị từ chối.
+    # Cột VARCHAR vẫn dùng được với SQLAlchemy Enum (chỉ gửi/nhận chuỗi
+    # 'online'/'offline'), nên hạ cấp kiểu thay vì bỏ cuộc.
+    col_type = "meeting_method"
     try:
         with engine.begin() as conn:
             # CREATE TYPE không có IF NOT EXISTS ở mọi bản Postgres → bọc DO.
@@ -85,18 +89,28 @@ def _heal_bookings_schema() -> dict:
                     "EXCEPTION WHEN duplicate_object THEN NULL; END $$;"
                 )
             )
+    except Exception as exc:
+        logger.warning(
+            "Không tạo được TYPE meeting_method (%s) — dùng VARCHAR thay thế", exc
+        )
+        report["enum_error"] = f"{type(exc).__name__}: {str(exc)[:200]}"
+        col_type = "VARCHAR(10)"
+
+    try:
+        with engine.begin() as conn:
             conn.execute(
                 text(
                     "ALTER TABLE bookings ADD COLUMN meeting_method "
-                    "meeting_method NOT NULL DEFAULT 'online'"
+                    f"{col_type} NOT NULL DEFAULT 'online'"
                 )
             )
-        logger.info("Schema drift fixed: đã thêm bookings.meeting_method")
+        logger.info("Schema drift fixed: đã thêm bookings.meeting_method (%s)", col_type)
         report["added"] = True
+        report["column_type"] = col_type
     except Exception as exc:
         logger.exception("Không thêm được bookings.meeting_method")
         report["added"] = False
-        report["error"] = f"{type(exc).__name__}: {exc}"
+        report["error"] = f"{type(exc).__name__}: {str(exc)[:300]}"
     return report
 
 
