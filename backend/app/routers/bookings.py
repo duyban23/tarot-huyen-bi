@@ -1,3 +1,4 @@
+import logging
 from datetime import date, datetime, time
 from zoneinfo import ZoneInfo
 
@@ -9,6 +10,8 @@ from app.crud import create_booking, get_available_slots
 from app.database import get_db
 from app.models import Booking, BookingStatus, MeetingMethod, Service
 from app.schemas import BookingCreate, BookingOut
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 
@@ -24,7 +27,15 @@ def check_availability(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format (use YYYY-MM-DD)")
 
-    slots = get_available_slots(db, service_id, target_date)
+    try:
+        slots = get_available_slots(db, service_id, target_date)
+    except Exception:
+        # Vercel trả "Internal Server Error" trơn, không có traceback — log lại
+        # kèm tham số để lần sau đọc log là biết ngay hỏng ở đâu.
+        logger.exception(
+            "availability failed (service_id=%s, date=%s)", service_id, date_str
+        )
+        raise
     return slots
 
 

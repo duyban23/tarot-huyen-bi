@@ -6,6 +6,8 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import inspect, text
+from sqlalchemy.exc import NoSuchTableError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import Response
 
@@ -28,6 +30,61 @@ logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"),
     format="%(levelname)s %(name)s: %(message)s",
 )
+
+
+def _heal_bookings_schema() -> None:
+    """Vá cột `bookings.meeting_method` nếu DB prod còn thiếu.
+
+    DB production được dựng bằng `Base.metadata.create_all` — hàm này chỉ tạo
+    *bảng* còn thiếu, không bao giờ ALTER bảng cũ. Vì vậy khi code thêm cột
+    `meeting_method` (migration d4e5f6a4b890) mà migration không được chạy,
+    mọi query `Booking` sẽ 500 dù endpoint không dùng cột đó (vd availability).
+
+    Alembic vẫn là nguồn chuẩn; đây chỉ là lưới an toàn idempotent, chạy 1 lần
+    kiểm tra rẻ ở cold start. Lỗi ở đây không được làm sập app.
+    """
+    if engine.dialect.name != "postgresql":
+        return
+    try:
+        columns = {c["name"] for c in inspect(engine).get_columns("bookings")}
+    except NoSuchTableError:
+        # DB quá cũ, chưa từng có bảng bookings → tạo bảng còn thiếu (không
+        # đụng bảng đã có). create_all không ALTER nên an toàn cho dữ liệu.
+        logger.warning("Schema drift: bảng bookings chưa có — đang tạo từ models")
+        try:
+            Base.metadata.create_all(bind=engine)
+        except Exception:
+            logger.exception("Không tạo được bảng bookings")
+        return
+    except Exception:
+        logger.exception("Schema check: không đọc được bảng bookings — bỏ qua")
+        return
+    if "meeting_method" in columns:
+        return
+
+    logger.warning(
+        "Schema drift: bookings.meeting_method thiếu — đang tự thêm cột. "
+        "Nên chạy `alembic upgrade head` trên DB production."
+    )
+    try:
+        with engine.begin() as conn:
+            # CREATE TYPE không có IF NOT EXISTS ở mọi bản Postgres → bọc DO.
+            conn.execute(
+                text(
+                    "DO $$ BEGIN "
+                    "CREATE TYPE meeting_method AS ENUM ('online', 'offline'); "
+                    "EXCEPTION WHEN duplicate_object THEN NULL; END $$;"
+                )
+            )
+            conn.execute(
+                text(
+                    "ALTER TABLE bookings ADD COLUMN meeting_method "
+                    "meeting_method NOT NULL DEFAULT 'online'"
+                )
+            )
+        logger.info("Schema drift fixed: đã thêm bookings.meeting_method")
+    except Exception:
+        logger.exception("Không thêm được bookings.meeting_method")
 
 
 @asynccontextmanager
@@ -56,6 +113,10 @@ async def lifespan(app: FastAPI):
             logger.exception(
                 "Database create_all failed — check DATABASE_URL and DB availability"
             )
+
+    # Vá schema lệch TRƯỚC seed/booking: đây là lỗi đang làm availability 500
+    # trên production (xem docstring).
+    _heal_bookings_schema()
 
     # seed chạy CẢ trên Vercel: đây là cách duy nhất giữ menu trong code khớp DB
     # production. Nếu bỏ, DB cũ vẫn còn bộ tên cũ → link `/booking?service=<tên

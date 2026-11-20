@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
 from zoneinfo import ZoneInfo
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.config import SLOT_INTERVAL, WORK_END, WORK_START
 
@@ -94,10 +94,13 @@ def get_available_slots(
     if not service:
         return []
 
-    # find all non-cancelled bookings for that date
+    # Chỉ lấy đúng 2 cột cần cho việc tính chồng lấn. Trước đây query cả
+    # `Booking` + joinedload(service) → SELECT mọi cột, nên một cột lệch schema
+    # trong DB prod (vd bookings.meeting_method thiếu) làm cả endpoint 500 dù
+    # availability không dùng tới cột đó.
     booked = (
-        db.query(Booking)
-        .options(joinedload(Booking.service))
+        db.query(Booking.appointment_time, Service.duration_minutes)
+        .outerjoin(Service, Service.id == Booking.service_id)
         .filter(
             Booking.appointment_date == target_date,
             Booking.status != BookingStatus.cancelled,
@@ -118,10 +121,11 @@ def get_available_slots(
             continue
         # check overlap with existing bookings
         overlaps = False
-        for b in booked:
+        for booked_time, booked_duration in booked:
+            # Dịch vụ của booking cũ đã bị xoá (hiếm) → coi như chiếm 1 slot.
             if _interval_overlaps(
                 slot, service.duration_minutes,
-                b.appointment_time, b.service.duration_minutes,
+                booked_time, booked_duration or service.duration_minutes,
             ):
                 overlaps = True
                 break

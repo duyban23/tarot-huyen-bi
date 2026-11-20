@@ -21,7 +21,13 @@ _MEETING_ENUM = sa.Enum('online', 'offline', name='meeting_method')
 
 
 def upgrade() -> None:
-    _MEETING_ENUM.create(op.get_bind(), checkfirst=True)
+    bind = op.get_bind()
+    _MEETING_ENUM.create(bind, checkfirst=True)
+    # DB prod từng được vá tay / tự vá ở startup (main._heal_bookings_schema)
+    # nên cột có thể đã tồn tại — kiểm tra trước để migration vẫn chạy được.
+    columns = {c["name"] for c in sa.inspect(bind).get_columns("bookings")}
+    if "meeting_method" in columns:
+        return
     op.add_column(
         'bookings',
         sa.Column(
