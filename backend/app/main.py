@@ -32,7 +32,10 @@ logging.basicConfig(
 )
 
 
-def _heal_bookings_schema() -> None:
+_LIFESPAN_RAN = False
+
+
+def _heal_bookings_schema() -> dict:
     """Vá cột `bookings.meeting_method` nếu DB prod còn thiếu.
 
     DB production được dựng bằng `Base.metadata.create_all` — hàm này chỉ tạo
@@ -43,8 +46,9 @@ def _heal_bookings_schema() -> None:
     Alembic vẫn là nguồn chuẩn; đây chỉ là lưới an toàn idempotent, chạy 1 lần
     kiểm tra rẻ ở cold start. Lỗi ở đây không được làm sập app.
     """
+    report: dict = {"dialect": engine.dialect.name, "lifespan_ran": _LIFESPAN_RAN}
     if engine.dialect.name != "postgresql":
-        return
+        return report
     try:
         columns = {c["name"] for c in inspect(engine).get_columns("bookings")}
     except NoSuchTableError:
@@ -53,14 +57,19 @@ def _heal_bookings_schema() -> None:
         logger.warning("Schema drift: bảng bookings chưa có — đang tạo từ models")
         try:
             Base.metadata.create_all(bind=engine)
-        except Exception:
+        except Exception as exc:
             logger.exception("Không tạo được bảng bookings")
-        return
-    except Exception:
+            report["error"] = f"{type(exc).__name__}: {exc}"
+        return report
+    except Exception as exc:
         logger.exception("Schema check: không đọc được bảng bookings — bỏ qua")
-        return
+        report["error"] = f"{type(exc).__name__}: {exc}"
+        return report
+
+    report["columns"] = sorted(columns)
     if "meeting_method" in columns:
-        return
+        report["added"] = False
+        return report
 
     logger.warning(
         "Schema drift: bookings.meeting_method thiếu — đang tự thêm cột. "
@@ -83,12 +92,18 @@ def _heal_bookings_schema() -> None:
                 )
             )
         logger.info("Schema drift fixed: đã thêm bookings.meeting_method")
-    except Exception:
+        report["added"] = True
+    except Exception as exc:
         logger.exception("Không thêm được bookings.meeting_method")
+        report["added"] = False
+        report["error"] = f"{type(exc).__name__}: {exc}"
+    return report
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global _LIFESPAN_RAN
+    _LIFESPAN_RAN = True
     # Startup checks
     if not ADMIN_PASSWORD_HASH:
         logger.warning(
@@ -134,6 +149,25 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Tarot Booking API", lifespan=lifespan)
+
+
+@app.get("/api/_diag", include_in_schema=False)
+def _diag_schema():
+    """TẠM THỜI: kiểm tra schema bookings trên production. Xoá sau khi xác minh."""
+    from app.models import Booking
+
+    report = _heal_bookings_schema()
+    db = SessionLocal()
+    try:
+        db.query(Booking).limit(1).all()
+        report["select_ok"] = True
+    except Exception as exc:
+        report["select_ok"] = False
+        report["select_error"] = f"{type(exc).__name__}: {str(exc)[:300]}"
+    finally:
+        db.close()
+    return report
+
 
 app.add_middleware(
     CORSMiddleware,
