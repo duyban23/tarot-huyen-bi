@@ -221,11 +221,15 @@ const FOR_WHO = [
 ];
 
 const IF_YOU_ARE = [
-  "thức khuya vì một câu hỏi chưa có lời đáp",
-  "đứng giữa hai lựa chọn mà không biết hỏi ai",
-  "mỉm cười với mọi người, nhưng lòng rối bời",
-  "yêu một người mà không chắc được thương",
-  "muốn hiểu mình, nhưng không biết bắt đầu từ đâu",
+  "Trải qua những cảm xúc hỗn loạn, hoặc đang dần mất đi cảm hứng sống",
+  "Thức khuya trằn trọc vì một câu hỏi chưa có lời giải đáp",
+  "Đứng giữa hai sự lựa chọn nhưng phân vân không biết chọn gì",
+  "Cảm thấy cuộc đời trôi dạt mà không biết đi đâu về đâu, ngày mai sẽ ra sao, một năm, hai năm nữa mình sẽ là ai",
+  "Gặm nhấm nỗi buồn mỗi đêm mà không ai thấu, với hàng ngàn câu hỏi vì sao",
+  "Vừa trải qua thất bại và nghi ngờ giá trị bản thân",
+  "Khao khát hạnh phúc và được yêu thương nhưng còn chưa chữa lành được tổn thương cũ để thăng bằng và nữ tính",
+  "Muốn Menifest người yêu cũ, người yêu tương lai, nhưng không ai chỉ cách hành xử đúng để quay lại hoặc gây ấn tượng với người mới",
+  "Đang mắc kẹt trong một mối quan hệ không được coi trọng vì không có giá trị",
 ];
 
 /**
@@ -561,8 +565,8 @@ export default function HomePage() {
           <div className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-candle-gold/[0.07] blur-[80px]" />
         </div>
 
-        <div className="relative mx-auto max-w-3xl px-4">
-          <div className="relative overflow-hidden rounded-[28px] border border-arcane/25 bg-gradient-to-b from-velvet/60 via-void/70 to-velvet/40 px-6 py-10 shadow-[0_40px_100px_-60px_rgba(0,0,0,1)] sm:px-10 md:px-16 md:py-14">
+        <div className="relative mx-auto max-w-5xl px-4">
+          <div className="relative overflow-hidden rounded-[28px] border border-arcane/25 bg-gradient-to-b from-velvet/60 via-void/70 to-velvet/40 px-6 py-8 shadow-[0_40px_100px_-60px_rgba(0,0,0,1)] sm:px-10 md:px-12 md:py-11 lg:px-16">
             {/* Halo trong thẻ */}
             <div
               aria-hidden
@@ -606,31 +610,35 @@ export default function HomePage() {
                 />
               </div>
 
-              {/* Danh sách chạy theo đường chỉ vàng */}
-              <div className="relative mx-auto mt-8 max-w-xl pl-7 sm:mt-9 md:pl-9">
-                <span
-                  aria-hidden
-                  className="absolute bottom-2 left-[3px] top-2 w-px bg-gradient-to-b from-candle-gold/5 via-candle-gold/40 to-candle-gold/5"
-                />
-                <ul className="space-y-4 sm:space-y-5">
-                  {IF_YOU_ARE.map((line) => (
-                    <li key={line} className="group relative">
-                      <span
-                        aria-hidden
-                        className="absolute -left-7 top-[0.55em] h-[7px] w-[7px] rotate-45 border border-candle-gold/80 bg-void shadow-[0_0_12px_rgba(212,168,67,0.55)] transition-all duration-300 group-hover:bg-candle-gold/25 group-hover:shadow-[0_0_18px_rgba(212,168,67,0.9)] md:-left-9"
-                      />
-                      <p className="font-display text-[17px] leading-[1.5] text-mist/90 transition-colors duration-300 text-balance group-hover:text-mist sm:text-xl md:text-[23px]">
-                        {line}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
+              {/* Danh sách chạy theo đường chỉ vàng — 2 cột từ lg để không kéo dài thẻ */}
+              <div className="mx-auto mt-7 grid max-w-2xl grid-cols-1 gap-x-10 gap-y-5 sm:mt-8 lg:mt-9 lg:max-w-3xl lg:grid-cols-2 lg:gap-x-12 lg:gap-y-0">
+                {[IF_YOU_ARE.slice(0, 5), IF_YOU_ARE.slice(5)].map((column, ci) => (
+                  <div key={ci} className="relative pl-7 md:pl-8">
+                    <span
+                      aria-hidden
+                      className="absolute bottom-2 left-[3px] top-2 w-px bg-gradient-to-b from-candle-gold/5 via-candle-gold/40 to-candle-gold/5"
+                    />
+                    <ul className="space-y-3.5 sm:space-y-4">
+                      {column.map((line) => (
+                        <li key={line} className="group relative">
+                          <span
+                            aria-hidden
+                            className="absolute -left-7 top-[0.55em] h-[7px] w-[7px] rotate-45 border border-candle-gold/80 bg-void shadow-[0_0_12px_rgba(212,168,67,0.55)] transition-all duration-300 group-hover:bg-candle-gold/25 group-hover:shadow-[0_0_18px_rgba(212,168,67,0.9)] md:-left-8"
+                          />
+                          <p className="font-display text-[16px] leading-[1.45] text-mist/90 transition-colors duration-300 text-balance group-hover:text-mist sm:text-[17px] md:text-lg">
+                            {line}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
 
               {/* Dấu ngăn */}
               <div
                 aria-hidden
-                className="mx-auto mt-9 flex max-w-sm items-center gap-3 sm:mt-10"
+                className="mx-auto mt-7 flex max-w-sm items-center gap-3 sm:mt-8"
               >
                 <span className="h-px flex-1 bg-gradient-to-r from-transparent to-arcane/40" />
                 <Icon
@@ -642,13 +650,13 @@ export default function HomePage() {
 
               {/* Kết đoạn */}
               <div className="mt-6 text-center sm:mt-7">
-                <h2 className="font-display text-[26px] leading-[1.15] drop-shadow-[0_0_30px_rgba(212,168,67,0.25)] sm:text-3xl md:text-[42px] text-balance">
+                <h2 className="font-display text-[24px] leading-[1.15] drop-shadow-[0_0_30px_rgba(212,168,67,0.25)] sm:text-3xl md:text-[38px] text-balance">
                   <span className="bg-gradient-to-r from-mist via-[#f2dba0] to-candle-gold bg-clip-text text-transparent">
                     Thì bạn đang ở đúng chỗ.
                   </span>
                 </h2>
-                <p className="mx-auto mt-3 max-w-md font-body text-[15px] italic leading-relaxed text-lilac/80 sm:text-base md:text-lg text-balance">
-                  Chỉ cần ngồi xuống, kể thật lòng — phần còn lại, mình cùng nhìn.
+                <p className="mx-auto mt-3 max-w-lg font-body text-[15px] italic leading-relaxed text-lilac/80 sm:text-base md:text-[17px] text-balance">
+                  Chỉ cần trao cho My quyền được trò chuyện với bạn, My sẽ kéo bạn ra khỏi nút thắt bị kẹt đó.
                 </p>
               </div>
             </div>
@@ -688,28 +696,77 @@ export default function HomePage() {
 
       {/* ─── Phan Thần Hiểu My là ai? ─── */}
       <Reveal className="py-16 md:py-24" delay={150}>
-        <div className="max-w-2xl mx-auto px-4 text-center">
-          <p className="font-body text-candle-gold/80 text-xs tracking-widest uppercase mb-2">
-            Reader · Healer · Coaching
-          </p>
-          <h2 className="font-display text-2xl md:text-4xl text-mist mb-4 leading-tight">
-            Phan Thần Hiểu My là ai?
-          </h2>
-          <div className="mx-auto max-w-xl space-y-3 text-left font-body text-lilac leading-relaxed">
-            <p>
-              My là người lắng nghe bằng Tarot, Tea Leaf và Huyền Học. Hơn 10 năm qua,
-              My đồng hành cùng hàng trăm người đang đứng giữa những ngã rẽ — không
-              phải để phán xét số phận, mà để cùng họ nhìn sâu vào lòng mình và tìm
-              lại sự bình yên đã lạc mất.
+        <div className="max-w-5xl mx-auto px-4">
+          {/* Header */}
+          <div className="text-center">
+            <p className="font-body text-candle-gold/80 text-xs tracking-widest uppercase mb-2">
+              Reader · Healer · Coaching
             </p>
-            <p>
-              My không hứa những lời tiên tri tuyệt đối. My chỉ ở đây, chậm rãi và
-              thành thật, để bạn có một nơi đủ an toàn mà nói ra những điều khó nói
-              nhất.
+            <h2 className="font-display text-2xl md:text-4xl text-mist leading-tight">
+              Phan Thần Hiểu My là ai?
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl font-display text-lg italic leading-relaxed text-mist/90 md:text-xl">
+              “Mình từng nghĩ mình là người thất bại. Nhưng rồi mình nhận ra, tất cả
+              cú sốc đó chỉ là cách vũ trụ đập tan cái tôi cũ, để mình bắt đầu hành
+              trình chữa lành.”
             </p>
           </div>
 
-          <div className="mx-auto mt-6 grid max-w-xl grid-cols-3 gap-2 text-center sm:gap-4">
+          {/* Story card */}
+          <div className="relative mt-10 overflow-hidden rounded-[28px] border border-velvet/60 bg-gradient-to-b from-velvet/50 via-void/60 to-velvet/30 px-6 py-8 shadow-[0_40px_100px_-70px_rgba(0,0,0,1)] sm:px-9 md:px-10 md:py-10 lg:px-12">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -top-24 left-1/2 h-48 w-[26rem] -translate-x-1/2 rounded-full bg-arcane/15 blur-[70px]"
+            />
+            <span
+              aria-hidden
+              className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-candle-gold/45 to-transparent"
+            />
+
+            <div className="relative text-left font-body text-[15px] leading-relaxed text-lilac/85 md:text-base lg:columns-2 lg:gap-10 [&>p]:mb-4 [&>p]:break-inside-avoid [&>p:last-child]:mb-0">
+              <p>
+                Chào bạn, mình là một cô gái từng va vấp rất nhiều trong cả kinh doanh
+                lẫn tình cảm. Mình bắt đầu sống riêng từ rất sớm và tưởng như mình phải
+                chiến đấu một mình mãi mãi. Nhưng rồi vũ trụ đã đưa mình đến hành trình
+                chữa lành — và mình ở đây, để chia sẻ lại những điều mình học được, với
+                hy vọng bạn sẽ không thấy cô đơn như mình từng.
+              </p>
+              <p>
+                Mình không phải một Coach nổi tiếng với chứng chỉ này, bằng cấp kia,
+                càng không phải bác sĩ tâm lý. Mình chỉ là người đã từng cho đi rất
+                nhiều mà không hạnh phúc, từng yêu hết mình rồi đau, từng bị phản bội,
+                lừa dối đến mức trầm cảm và phải ở ẩn một thời gian.
+              </p>
+              <p>
+                Mình từng béo, từng xấu, từng bị bạo lực học đường, từng bị tẩy chay,
+                kỳ thị vì sự khác biệt. Có thời điểm mình thất bại đến mức kiệt sức, hết
+                pin cả năm trời, không muốn tiếp xúc với thế giới. Mình đã đi qua đủ mọi
+                cảm xúc: tổn thương, bị hiểu lầm, bị nghi ngờ bản thân, những đêm khóc
+                ướt gối…
+              </p>
+              <p>
+                Từ cô gái từng nghi ngờ giá trị bản thân, suýt lạc lối, mình chọn học
+                cách chữa lành, đi tìm học những khoá học về Glow up bản thân, yêu bản
+                thân nhiều hơn, và xuất hiện lại bằng sự tử tế, tấm lòng nhân ái, thiện
+                lương — để sống tiếp một cuộc đời rực rỡ với những trải nghiệm thú vị và
+                lan toả năng lượng tích cực đến những người khác.
+              </p>
+              <p>
+                Healing with My là nơi mình gom tất cả những điều đó lại: kiến thức tâm
+                lý ứng dụng vào việc tư vấn chữa lành cho mọi người; dùng Tarot, Tâm
+                Linh, khoa học và huyền học để khám phá bản thân và dự đoán tương lai,
+                giúp các bạn có niềm tin hơn vào cuộc sống; và ứng dụng Phật pháp để bạn
+                tìm được bình an trong tâm trí.
+              </p>
+            </div>
+
+            <blockquote className="relative mt-8 border-l-2 border-candle-gold/50 pl-4 font-display text-lg leading-relaxed text-mist md:text-xl">
+              Và nếu bạn cũng đang ở giai đoạn như mình ngày xưa, thì bạn không cần phải
+              đi một mình nữa — My ở đây, cùng bạn.
+            </blockquote>
+          </div>
+
+          <div className="mx-auto mt-6 grid max-w-2xl grid-cols-3 gap-2 text-center sm:gap-4">
             <div className="rounded-xl border border-velvet/60 bg-velvet/30 px-2 py-3">
               <p className="font-display text-xl sm:text-2xl text-candle-gold">
                 <CountUp end={10} suffix="+" />
@@ -740,7 +797,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="mt-5">
+          <div className="mt-5 text-center">
             <Link
               to="/about"
               className="font-body text-candle-gold hover:text-mist underline underline-offset-4 decoration-arcane/30 transition-all"

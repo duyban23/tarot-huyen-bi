@@ -1,9 +1,12 @@
+import { useEffect, useState } from "react";
 import AstroWheel from "../components/AstroWheel";
 import BrandLogo from "../components/BrandLogo";
-import MoodPicker from "../components/MoodPicker";
 import QuickReading from "../components/QuickReading";
+import ServiceCatalog from "../components/ServiceCatalog";
 import SparkleButton from "../components/SparkleButton";
 import { Icon } from "../components/icons";
+import { getServices } from "../api/client";
+import type { Service } from "../api/types";
 
 const FEES = [
   { label: "Xem gấp sau 12h đêm", value: "+50k" },
@@ -14,9 +17,32 @@ const FEES = [
 /**
  * Hai món "xem cùng My" nằm trong <QuickReading /> — form + kết quả hiện ngay
  * tại /services, không phải mở trang khác.
+ *
+ * Bảng giá chi tiết (trước đây ở bước đầu của /booking) giờ nằm ở đây, ngay
+ * dưới khối xem nhanh. Chọn một dòng là sang /booking?service=<tên> để chọn
+ * ngày giờ; /booking không còn bước chọn dịch vụ nữa.
  */
 
 export default function ServicesPage() {
+  const [services, setServices] = useState<Service[]>([]);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    getServices()
+      .then((list) => {
+        if (alive) setServices(list);
+      })
+      .catch(() => {
+        // Bảng giá trong code vẫn dùng được: các dòng vẫn link sang /booking
+        // bằng tên trong CATEGORIES, chỉ là không có giá mới nhất từ DB.
+        if (alive) setLoadError("Không tải được giá mới nhất — đang hiện bảng giá gốc.");
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   return (
     <main className="min-h-screen pt-24 pb-16">
       <div className="max-w-3xl mx-auto px-4">
@@ -77,17 +103,25 @@ export default function ServicesPage() {
           </div>
         </section>
 
-        {/* ── Hoặc chọn theo nỗi lòng ── */}
-        <section className="mt-8">
+        {/* ── Đặt lịch chi tiết (bảng giá đầy đủ) ── */}
+        <section id="dat-lich" className="mt-10 scroll-mt-24">
           <div className="text-center mb-3">
+            <p className="font-body text-candle-gold/80 text-xs tracking-widest uppercase mb-1">
+              Đặt lịch
+            </p>
             <h2 className="font-display text-lg md:text-xl text-mist">
-              Hoặc chọn theo nỗi lòng
+              Đặt lịch chi tiết
             </h2>
             <p className="font-body text-lilac/70 text-sm mt-1">
-              Chạm một nỗi lòng — My gợi ý trải bài phù hợp.
+              Chạm một nhóm để mở bảng giá — chọn trải bài xong là sang bước chọn ngày giờ.
             </p>
           </div>
-          <MoodPicker />
+          {loadError && (
+            <p className="mb-2 text-center font-body text-candle-gold/80 text-sm italic">
+              {loadError}
+            </p>
+          )}
+          <ServiceCatalog mode="book" services={services} />
         </section>
 
         {/* Vạch ngăn: tách vùng chọn dịch vụ với phần lưu ý phía dưới */}
@@ -116,14 +150,14 @@ export default function ServicesPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <SparkleButton
               as="link"
-              href="/booking"
+              href="#dat-lich"
               className="w-full sm:w-auto px-8 py-3 rounded-xl font-display text-sm tracking-widest uppercase bg-arcane text-mist hover:bg-arcane/80 transition-all btn-glow"
             >
               <Icon
                 name="sparkles"
                 className="inline-block w-4 h-4 -mt-0.5 mr-1.5 drop-shadow-[0_0_6px_rgba(212,168,67,0.6)]"
               />
-              Đặt lịch ngay
+              Chọn dịch vụ
             </SparkleButton>
             <SparkleButton
               as="link"

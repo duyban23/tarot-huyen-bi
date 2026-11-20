@@ -66,7 +66,7 @@ export default function Footer() {
       <div className="mx-auto w-full max-w-5xl px-4 py-5 md:py-6">
         <div className="flex flex-col items-center gap-5 text-center md:flex-row md:flex-wrap md:items-start md:justify-center md:gap-x-10 md:gap-y-4 md:text-left lg:flex-nowrap lg:justify-between lg:gap-x-8">
           {/* Brand */}
-          <div className="md:max-w-[260px] lg:max-w-[320px]">
+          <div className="md:max-w-[300px] lg:max-w-[360px]">
             <Link
               to="/"
               aria-label="Healing With My — về trang chủ"
@@ -82,8 +82,13 @@ export default function Footer() {
                 </span>
               </span>
             </Link>
-            <p className="mx-auto mt-2.5 max-w-xs font-body text-sm leading-relaxed text-lilac/80 md:mx-0">
-              Có những điều chẳng biết tỏ cùng ai — ở đây, bạn luôn có một nơi để trút lòng và được vỗ về bằng Tarot, Tea Leaf.
+            <p className="mx-auto mt-2.5 max-w-sm font-body text-sm leading-relaxed text-lilac/80 md:mx-0">
+              Cảm ơn bạn đã cho My và đội ngũ được ảnh hưởng lên cuộc sống của bạn,
+              giúp bạn thay đổi để tiến đến hạnh phúc viên mãn.
+            </p>
+            <p className="mx-auto mt-1.5 max-w-sm font-body text-sm italic leading-relaxed text-lilac/70 md:mx-0">
+              Biết ơn vì các bạn đã ở đây, đã chọn Healing with My để đồng hành cùng
+              bạn trên hành trình Menifest tất cả những gì mình muốn.
             </p>
           </div>
 

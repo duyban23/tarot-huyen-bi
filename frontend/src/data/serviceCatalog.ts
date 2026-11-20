@@ -1,5 +1,5 @@
 /**
- * Bảng giá dùng chung cho `/services` và bước chọn dịch vụ ở `/booking`.
+ * Bảng giá dùng chung cho `/services` (và dữ liệu tĩnh cho các chỗ khác).
  *
  * `name` của mỗi mục phải khớp **từng chữ** với tên service trong DB
  * (backend/app/seed.py) để `/booking?service=<tên>` preselect được.

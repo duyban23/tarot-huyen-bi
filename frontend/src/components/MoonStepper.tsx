@@ -43,21 +43,33 @@ function MoonIcon({ phase }: { phase: number }) {
   );
 }
 
-export default function MoonStepper({ current }: { current: number }) {
+export default function MoonStepper({
+  current,
+  steps = STEPS,
+}: {
+  current: number;
+  steps?: Step[];
+}) {
   const prevRef = useRef(current);
   const barRef = useRef<HTMLDivElement>(null);
+  const total = Math.max(steps.length, 1);
+  // Bước 1 đã tô 1/total thanh tiến trình — để trống ở bước đầu trông như lỗi.
+  const progress = Math.min((current + 1) / total, 1);
 
   useEffect(() => {
     if (prevRef.current !== current && barRef.current) {
       anime({
         targets: barRef.current,
-        scaleX: [prevRef.current / (STEPS.length - 1), current / (STEPS.length - 1)],
+        scaleX: [
+          Math.min((prevRef.current + 1) / total, 1),
+          Math.min((current + 1) / total, 1),
+        ],
         duration: 500,
         easing: "easeOutCubic",
       });
       prevRef.current = current;
     }
-  }, [current]);
+  }, [current, total]);
 
   return (
     <nav className="w-full max-w-lg mx-auto mb-8 md:mb-10" aria-label="Đặt lịch tiến trình">
@@ -68,19 +80,20 @@ export default function MoonStepper({ current }: { current: number }) {
           className="absolute inset-y-0 left-0 bg-arcane rounded-full origin-left"
           style={{
             width: "100%",
-            transform: `scaleX(${current / (STEPS.length - 1)})`,
+            transform: `scaleX(${progress})`,
           }}
         />
       </div>
 
       {/* Steps */}
       <div className="flex justify-between">
-        {STEPS.map((step, i) => {
+        {steps.map((step, i) => {
           const isActive = i <= current;
           const isCurrent = i === current;
           return (
-            <div key={i} className="flex flex-col items-center gap-1.5">
+            <div key={step.label} className="flex flex-col items-center gap-1.5">
               <div
+                aria-current={isCurrent ? "step" : undefined}
                 className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${
                   isActive
                     ? "border-arcane bg-arcane/20 text-arcane"
@@ -92,7 +105,9 @@ export default function MoonStepper({ current }: { current: number }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 ) : (
-                  <MoonIcon phase={i} />
+                  <MoonIcon
+                    phase={Math.round((i / Math.max(steps.length - 1, 1)) * 3)}
+                  />
                 )}
               </div>
               <span

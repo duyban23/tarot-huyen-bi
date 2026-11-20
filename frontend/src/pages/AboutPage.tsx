@@ -6,19 +6,19 @@ import { Icon } from "../components/icons";
 
 const VALUES = [
   {
-    icon: "moon",
-    title: "Nói thật, không dọa",
-    desc: "Không lời chung chung, không hù dọa. Chỉ có sự thật dịu dàng — đủ rõ để bạn tự quyết định.",
+    icon: "crystal",
+    title: "Thấu hiểu bản thân",
+    desc: "Bản đồ sao, tử vi hay một lá bài — tất cả chỉ là tấm gương để bạn nhìn rõ mình hơn: hiểu vì sao mình đau, và chữa lành những vết xước tâm lý đã lâu không ai chạm tới.",
   },
   {
-    icon: "heart",
-    title: "Được lắng nghe",
-    desc: "Mỗi buổi xem là một cuộc trò chuyện cởi mở. Cứ kể hết — My ở đây để hiểu, không phải để đánh giá.",
+    icon: "sunrise",
+    title: "Hướng đến hạnh phúc viên mãn",
+    desc: "Không phải một cuộc đời hoàn hảo, mà là cuộc đời bạn thấy đáng sống — yêu mà không sợ mất, chọn mà không sợ sai, và mỗi sáng thức dậy đều biết mình đang đi về đâu.",
   },
   {
-    icon: "sparkles",
-    title: "Nhẹ lòng hơn khi ra về",
-    desc: "Bạn rời đi với lòng rõ ràng và vững vàng hơn — đủ tự tin bước tiếp mà không cần dựa vào ai.",
+    icon: "yinyang",
+    title: "Bình an & thăng bằng",
+    desc: "Để cảm xúc không còn cuốn bạn đi, để bạn đứng vững giữa sóng gió — và nhận ra mình vốn đã đủ đầy, đáng được yêu thương, đáng có một chỗ đứng trong cuộc đời này.",
   },
 ];
 
@@ -199,10 +199,10 @@ export default function AboutPage() {
         {/* Values */}
         <section className="mb-14">
           <h2 className="font-display text-xl md:text-2xl text-mist text-center mb-2">
-            Điều bạn sẽ cảm nhận ở đây
+            Điều My muốn cùng bạn đi tới
           </h2>
           <p className="font-body text-lilac/60 italic text-center mb-8">
-            Không phải lời khoe khoang — chỉ là lời hứa dịu dàng dành cho bạn.
+            Không phải lời hứa xa vời — chỉ là những điều My tin bạn xứng đáng được sống.
           </p>
           <div className="grid gap-4 sm:grid-cols-3">
             {VALUES.map((v) => (

@@ -16,12 +16,22 @@ import RecruitPage from "./pages/RecruitPage";
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 
-/* ── Scroll to top on route change ── */
+/* ── Scroll to top on route change (or to the hash target) ── */
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
+    if (hash) {
+      // Anchor trong trang (vd /services#dat-lich). Chờ 1 nhịp để section render
+      // xong rồi mới cuộn — SPA không tự nhảy như <a href="#...">.
+      const id = decodeURIComponent(hash.slice(1));
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [pathname]);
+  }, [pathname, hash]);
   return null;
 }
 

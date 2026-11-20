@@ -12,32 +12,39 @@ import {
 } from "../data/serviceCatalog";
 
 type LinkMode = { mode: "link" };
+type BookMode = {
+  mode: "book";
+  services: Service[];
+};
 type PickMode = {
   mode: "pick";
   services: Service[];
   selectedId: number | null;
   onSelect: (service: Service) => void;
 };
-type Props = LinkMode | PickMode;
+type Props = LinkMode | BookMode | PickMode;
 
 type Row = { item: CatalogItem; service?: Service };
 
 type Group = { cat: CatalogCategory; rows: Row[] };
 
 /**
- * Bảng giá gọn dùng chung cho `/services` và bước chọn dịch vụ ở `/booking`.
+ * Bảng giá gọn dùng chung cho `/services` và `/booking`.
  *
  * Trước đây 2 trang render hết 6 nhóm × 35 dòng ngay khi vào trang — rất dài
  * trên điện thoại. Giờ mỗi nhóm là 1 hàng gập lại được, chạm mới mở ra; ô tìm
- * kiếm thì trải phẳng kết quả. Cùng một component cho cả 2 chế độ:
- *  - "link": mỗi dòng là link đi đặt lịch (/services)
- *  - "pick": mỗi dòng chọn luôn dịch vụ ở bước 1 của /booking
+ * kiếm thì trải phẳng kết quả. Cùng một component cho cả 3 chế độ:
+ *  - "book": bảng giá đầy đủ ở /services — dịch vụ có trong DB thì về
+ *    /booking?service=<tên>, mục tư vấn/khoá học vẫn là link riêng
+ *  - "link": như "book" nhưng không cần DB (trang tĩnh)
+ *  - "pick": chọn luôn dịch vụ (đã bỏ khỏi /booking, giữ cho chỗ khác nếu cần)
  */
 export default function ServiceCatalog(props: Props) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
 
-  const services = props.mode === "pick" ? props.services : [];
+  const services =
+    props.mode === "pick" || props.mode === "book" ? props.services : [];
 
   const byName = useMemo(() => {
     const m = new Map<string, Service>();
@@ -50,15 +57,15 @@ export default function ServiceCatalog(props: Props) {
       cat,
       rows: cat.items
         .map((item) => ({ item, service: byName.get(fold(item.name)) }))
-        // Chế độ chọn (ở /booking): chỉ hiện mục có service thật trong DB.
-        // Mục không khớp DB mà render thành <Link to="/booking?service=...">
-        // sẽ trỏ về đúng trang hiện tại → bấm không có gì xảy ra.
+        // Chế độ "pick": chỉ hiện mục có service thật trong DB. Mục không khớp
+        // DB mà render thành <Link to="/booking?service=..."> sẽ trỏ về đúng
+        // trang hiện tại → bấm không có gì xảy ra.
         .filter((row) => props.mode !== "pick" || row.service),
     }));
 
-    // /booking lấy dịch vụ từ DB: dịch vụ nào admin thêm tay mà bảng giá chưa
-    // có thì vẫn phải đặt lịch được → gom vào nhóm cuối.
-    if (props.mode === "pick" && props.services.length > 0) {
+    // /services + /booking lấy dịch vụ từ DB: dịch vụ nào admin thêm tay mà
+    // bảng giá chưa có thì vẫn phải đặt lịch được → gom vào nhóm cuối.
+    if (props.mode !== "link" && props.services.length > 0) {
       const known = new Set(CATEGORIES.flatMap((c) => c.items.map((i) => fold(i.name))));
       const seen = new Set<string>();
       const extra = props.services.filter((s) => {
@@ -129,7 +136,7 @@ export default function ServiceCatalog(props: Props) {
             </button>
           )}
         </div>
-        {(q || props.mode === "pick") && (
+        {(q || props.mode !== "link") && (
           <p className="text-center font-body text-lilac/50 text-sm mt-1.5" role="status">
             {q ? `${total} kết quả` : `${total} trải bài · chạm một nhóm để mở`}
           </p>
@@ -220,10 +227,9 @@ export default function ServiceCatalog(props: Props) {
 function ItemRow({ row, expanded, props }: { row: Row; expanded: boolean; props: Props }) {
   const { item, service } = row;
   const price = service ? `${service.price.toLocaleString("vi-VN")}₫` : item.price;
-  const sub =
-    props.mode === "pick" && service
-      ? `${service.duration_minutes} phút${item.detail ? ` · ${item.detail}` : ""}`
-      : item.detail;
+  const sub = service
+    ? `${service.duration_minutes} phút${item.detail ? ` · ${item.detail}` : ""}`
+    : item.detail;
 
   const body = (
     <>
@@ -258,9 +264,15 @@ function ItemRow({ row, expanded, props }: { row: Row; expanded: boolean; props:
   }
 
   if (props.mode !== "pick") {
+    // Dịch vụ có trong DB → sang /booking bằng đúng tên DB (bảng giá có thể
+    // ghi tên hơi khác). Mục tư vấn/khoá học vẫn về trang riêng.
+    const href =
+      service && !item.link
+        ? `/booking?service=${encodeURIComponent(service.name)}`
+        : itemHref(item);
     return (
       <Link
-        to={itemHref(item)}
+        to={href}
         title={itemCta(item)}
         tabIndex={expanded ? undefined : -1}
         className="tap-row group/item flex items-center gap-3 rounded-xl px-3 py-2.5 min-h-[52px] border border-transparent active:scale-[0.99]"
